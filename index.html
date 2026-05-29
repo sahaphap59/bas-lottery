@@ -51,7 +51,6 @@
       <div id="lottery-grid" class="grid grid-cols-1 gap-4 sm:grid-cols-2"></div>
       <div id="no-data" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300 mt-2 shadow-sm">
         <div class="text-5xl mb-3">🕵️‍♂️</div><h3 class="text-lg font-bold text-gray-700">ไม่พบเลขบนแผง</h3>
-        <p class="text-xs text-gray-500 mt-1">ลองค้นหาด้วยเลขอื่นดูนะครับ</p>
       </div>
     </main>
   </div>
@@ -65,7 +64,6 @@
       <div id="my-lottery-grid" class="grid grid-cols-1 gap-4 sm:grid-cols-2"></div>
       <div id="no-my-data" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300 mt-2 shadow-sm">
         <div class="text-5xl mb-3">📭</div><h3 class="text-lg font-bold text-gray-700">คลังสลากว่างเปล่า</h3>
-        <p class="text-xs text-gray-500 mt-1">คุณยังไม่มีประวัติการสั่งซื้อในงวดนี้</p>
       </div>
     </main>
   </div>
@@ -96,8 +94,8 @@
     let myTickets = [];
     let userProfile = null;
     let currentDraw = "";
+    let countdownInterval = null;
 
-    // 1. เริ่มต้นระบบ LINE LIFF & Auto-Release
     async function initLIFF() {
       try {
         await liff.init({ liffId: LIFF_ID });
@@ -108,27 +106,21 @@
         }
       } catch (err) { console.error('LIFF Init Error:', err); }
       
-      // ให้ระบบทำการตรวจสอบเลขที่หมดอายุการจอง (24 ชม.) อัตโนมัติทุกครั้งที่มีคนเปิดแอป
-      releaseExpiredReservations();
+      setInterval(releaseExpiredReservations, 5000); // เช็คเวลาจองหมดอายุทุกๆ 5 วินาที
     }
 
     function forceLineLogin() {
       if(!liff.isLoggedIn()) liff.login({ redirectUri: window.location.origin });
     }
 
-    // ฟังก์ชันเช็คการหมดอายุจอง (24 ชั่วโมง)
     function releaseExpiredReservations() {
         const now = Date.now();
         db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => {
             snap.forEach(doc => {
                 const data = doc.data();
                 if(data.expiresAt && now > data.expiresAt) {
-                    // ถ้าหมดเวลา ให้เปลี่ยนสถานะกลับเป็นสลากว่าง
                     db.collection('lotteries').doc(doc.id).update({
-                        status: 'available',
-                        name: '-',
-                        userId: null,
-                        expiresAt: null
+                        status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: ''
                     });
                 }
             });
@@ -165,10 +157,10 @@
         myTickets = [];
         s.forEach(doc => myTickets.push({ id: doc.id, ...doc.data() }));
         renderMyTickets();
+        startCountdownTimer();
       });
     }
 
-    // สร้างเทมเพลตสลากดีไซน์สวย (ใช้ซ้ำได้ทั้งหน้าร้านและหน้าคลัง)
     function buildTicketHTML(safeNum, qty) {
         const barColors = ['from-red-500 to-red-700', 'from-emerald-500 to-emerald-700', 'from-blue-500 to-blue-700', 'from-amber-400 to-orange-500', 'from-purple-500 to-purple-700'];
         const barClass = barColors[parseInt(safeNum.charAt(0)) % 5] || barColors[0];
@@ -218,6 +210,26 @@
       });
     }
 
+    // ฟังก์ชันสร้างและนับเวลาถอยหลัง Real-time
+    function startCountdownTimer() {
+        if(countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            const now = Date.now();
+            document.querySelectorAll('.timer-display').forEach(el => {
+                const expiresAt = parseInt(el.dataset.expire);
+                const diff = expiresAt - now;
+                if(diff <= 0) {
+                    el.innerText = "หมดเวลาจองแล้ว";
+                } else {
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    el.innerText = `⏱️ เหลือเวลาชำระ: ${hours} ชม. ${minutes} นาที ${seconds} วิ`;
+                }
+            });
+        }, 1000);
+    }
+
     function renderMyTickets() {
       const grid = document.getElementById('my-lottery-grid'); grid.innerHTML = '';
       if(myTickets.length === 0) { document.getElementById('no-my-data').classList.remove('hidden'); return; }
@@ -228,15 +240,21 @@
         const qty = parseInt(item.quantity) || 1; 
         
         let statusUI = '';
-        let actionBtn = '';
+        let actionArea = '';
+        let timerHTML = '';
         
         if(item.status === 'reserve' || item.status === 'จอง') {
-            statusUI = '<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black border border-amber-200">🟡 จองแล้ว (รอชำระ)</span>';
-            actionBtn = `<button onclick="notifyPayment('${item.id}', '${safeNum}')" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2.5 rounded-xl text-xs font-bold w-full mt-3 shadow-md transition">📸 แจ้งโอนเงิน / อัปสลิป</button>`;
+            statusUI = '<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black border border-amber-200">🟡 จองแล้ว</span>';
+            timerHTML = `<div class="timer-display text-xs text-rose-600 font-bold bg-rose-50 text-center py-1.5 rounded-lg border border-rose-100 mt-2" data-expire="${item.expiresAt}">⏱️ กำลังคำนวณเวลา...</div>`;
+            actionArea = `
+                <div class="grid grid-cols-2 gap-2 mt-3">
+                    <button onclick="notifyPayment('${item.id}', '${safeNum}')" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl text-xs font-black shadow-sm transition">📸 อัปโหลดสลิปเงิน</button>
+                    <button onclick="cancelReservation('${item.id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 p-2.5 rounded-xl text-xs font-black transition">❌ ยกเลิกการจอง</button>
+                </div>`;
         } else if(item.status === 'pending' || item.status === 'รอตรวจสอบ' || item.status === 'รอตรวจสอบสลิป') {
             statusUI = '<span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black border border-blue-200">⏳ รอตรวจสอบสลิป</span>';
         } else {
-            statusUI = '<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-200 shadow-sm">🟢 อนุมัติสำเร็จ</span>';
+            statusUI = '<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-200 shadow-sm">🟢 ชำระสำเร็จ</span>';
         }
 
         const card = `
@@ -248,16 +266,51 @@
             ${buildTicketHTML(safeNum, qty)}
             <div class="p-4 bg-white border-t border-gray-100">
               <div class="flex justify-between items-center text-sm font-bold text-gray-700">
-                <span>สรุปยอดชำระ (${qty} ใบ)</span><span class="text-red-600 font-black text-lg">฿${(qty*100).toLocaleString()}</span>
+                <span>ยอดชำระ (${qty} ใบ)</span><span class="text-red-600 font-black text-lg">฿${(qty*100).toLocaleString()}</span>
               </div>
-              ${actionBtn}
+              ${timerHTML}
+              ${actionArea}
             </div>
           </div>`;
         grid.insertAdjacentHTML('beforeend', card);
       });
     }
 
-    // ฟังก์ชัน Popup สำหรับ Checkout 2 รูปแบบ
+    // ฟังก์ชันยกเลิกการจองเองของลูกค้า
+    function cancelReservation(docId) {
+        Swal.fire({
+            text: 'คุณต้องการยกเลิกการจองสลากใบนี้ และปล่อยคืนสู่แผงใช่หรือไม่?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ใช่, ยกเลิกเลย',
+            cancelButtonText: 'เก็บไว้ก่อน',
+            confirmButtonColor: '#ef4444'
+        }).then(r => {
+            if(r.isConfirmed) {
+                db.collection('lotteries').doc(docId).update({
+                    status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: ''
+                }).then(() => {
+                    Swal.fire('ยกเลิกสำเร็จ', 'สลากถูกดึงกลับแผงหน้าแรกแล้วครับ', 'success');
+                });
+            }
+        });
+    }
+
+    // แปลงรูปภาพสลิปเป็น Base64 แล้วเซฟลงฐานข้อมูลโดยตรง (เปิดคลังภาพมือถืออัตโนมัติ)
+    function handleFileSelection(docId, fileInputId) {
+        return new Promise((resolve) => {
+            const fileInput = document.getElementById(fileInputId);
+            if(fileInput.files.length === 0) { resolve(null); return; }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                resolve(reader.result); // คืนค่าเป็น Base64 String
+            }
+            reader.readAsDataURL(file);
+        });
+    }
+
     function openCheckout(docId, num, qty) {
       if (!liff.isLoggedIn()) { forceLineLogin(); return; }
       
@@ -269,42 +322,44 @@
             <div class="text-sm font-bold text-slate-500">ชุด ${qty} ใบ • ยอดชำระ <span class="text-red-600 font-black text-lg">฿${(qty*100).toLocaleString()}</span></div>
           </div>
           
-          <div class="text-left text-xs font-bold text-slate-700 mb-1">👤 ชื่อผู้จอง (อิงจาก LINE)</div>
-          <input type="text" disabled value="${userProfile.displayName}" class="w-full bg-slate-100 border border-slate-200 p-3 rounded-lg mb-3 text-slate-500 font-bold text-sm">
-          
           <div class="text-left text-xs font-bold text-slate-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div>
           <input type="tel" id="checkoutPhone" placeholder="08X-XXX-XXXX" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500 outline-none font-bold text-sm mb-3">
           
-          <div class="text-left text-xs font-bold text-slate-700 mb-1">💳 รูปแบบการทำรายการ</div>
+          <div class="text-left text-xs font-bold text-slate-700 mb-1">💳 เลือกรูปแบบการซื้อ</div>
           <select id="checkoutMode" onchange="toggleSlipInput()" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500 outline-none font-bold text-sm text-slate-700">
             <option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 24 ชม.)</option>
-            <option value="pay_now">📸 โอนเงินเลย (แนบสลิป/แจ้งโอน)</option>
+            <option value="pay_now">📸 โอนเงินเลย (อัปโหลดรูปหลักฐานสลิป)</option>
           </select>
           
           <div id="slipArea" class="hidden mt-3 text-left">
-            <div class="text-xs font-bold text-slate-700 mb-1">🔗 แนบลิงก์รูปสลิป / แจ้งโอน <span class="text-red-500">*</span></div>
-            <input type="text" id="checkoutSlip" placeholder="วางลิงก์รูปสลิป หรือพิมพ์ 'ส่งสลิปในแชทแล้ว'" class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500 outline-none text-sm font-medium">
+            <div class="text-xs font-bold text-slate-700 mb-1">📸 อัปโหลดรูปสลิปโอนเงิน <span class="text-red-500">*</span></div>
+            <input type="file" id="checkoutSlipFile" accept="image/*" class="w-full text-xs text-slate-600 border border-slate-300 p-2.5 rounded-lg bg-white outline-none">
           </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'ยืนยันรายการ',
+        confirmButtonText: 'ยืนยันทำรายการ',
         cancelButtonText: 'ยกเลิก',
         confirmButtonColor: '#1e293b',
-        preConfirm: () => {
+        preConfirm: async () => {
           const phone = document.getElementById('checkoutPhone').value;
           const mode = document.getElementById('checkoutMode').value;
-          const slip = document.getElementById('checkoutSlip').value;
           
           if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; }
-          if (mode === 'pay_now' && !slip) { Swal.showValidationMessage('กรุณาแนบลิงก์สลิป หรือแจ้งรายละเอียดครับ'); return false; }
           
-          return { phone, mode, slip };
+          let slipBase64 = "";
+          if (mode === 'pay_now') {
+              const fileInput = document.getElementById('checkoutSlipFile');
+              if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกหรือถ่ายรูปสลิปโอนเงินด้วยครับ'); return false; }
+              Swal.showLoading(); // แสดงสถานะโหลดเพราะกำลังแปลงรูปภาพ
+              slipBase64 = await handleFileSelection(docId, 'checkoutSlipFile');
+          }
+          
+          return { phone, mode, slipBase64 };
         }
       }).then((result) => {
         if (result.isConfirmed) {
-          const { phone, mode, slip } = result.value;
+          const { phone, mode, slipBase64 } = result.value;
           
-          // กำหนดข้อมูลอัปเดตพื้นฐาน
           const updates = {
             name: userProfile.displayName,
             userId: userProfile.userId,
@@ -312,65 +367,59 @@
             updatedAt: Date.now()
           };
 
-          // แยกสถานะตาม Mode
-          let successMsg = "";
-          let lineMsg = "";
-          
           if (mode === 'reserve') {
               updates.status = 'จอง';
-              updates.expiresAt = Date.now() + (24 * 60 * 60 * 1000); // +24 ชั่วโมง
-              successMsg = 'จองสำเร็จ! เลขถูกเก็บเข้าคลังสลากของคุณแล้ว (มีอายุ 24 ชม.)';
-              lineMsg = `สนใจสั่งจองสลากเลข_${num}_ครับ`;
+              updates.expiresAt = Date.now() + (24 * 60 * 60 * 1000); // จับเวลาถอยหลัง 24 ชม.
           } else {
               updates.status = 'รอตรวจสอบสลิป';
-              updates.slip = slip;
-              successMsg = 'บันทึกออเดอร์สำเร็จ! แอดมินจะรีบตรวจสอบสลิปให้ครับ';
-              lineMsg = `สั่งซื้อสลากเลข_${num}_พร้อมแจ้งโอนเงินแล้วครับ`;
+              updates.slip = slipBase64; // ยัดรูป Base64 ลงในฟิลด์สลิปโดยตรง
           }
 
           db.collection('lotteries').doc(docId).update(updates).then(() => {
-            Swal.fire({title: 'สำเร็จ!', text: successMsg, icon: 'success', confirmButtonColor: '#10b981'}).then(() => {
-                window.location.href = `https://line.me/R/ti/p/@415mknnt?text=${lineMsg}`;
+            Swal.fire({
+                title: 'ทำรายการสำเร็จ!',
+                text: mode === 'reserve' ? 'สลากถูกจัดเก็บเข้าคลังของฉันเรียบร้อยแล้ว' : 'ระบบได้รับสลิปแล้ว กำลังรอแอดมินตรวจสอบความถูกต้องครับ',
+                icon: 'success',
+                confirmButtonColor: '#10b981'
+            }).then(() => {
+                switchTab('mytickets'); // ย้ายไปหน้าคลังทันทีโดยไม่ออกจากเว็บ
             });
           });
         }
       });
     }
 
-    // เปิดปิดช่องใส่สลิปตอน Checkout
     window.toggleSlipInput = function() {
         const mode = document.getElementById('checkoutMode').value;
         document.getElementById('slipArea').style.display = (mode === 'pay_now') ? 'block' : 'none';
     };
 
-    // ปุ่มแจ้งโอนเงินในหน้าคลังสลาก
+    // ปุ่มแจ้งโอนเงินในหน้าคลังสลาก โดยเลือกรูปจากคลังภาพโดยตรง
     function notifyPayment(docId, num) {
         Swal.fire({
-            title: 'แจ้งชำระเงิน',
+            title: 'อัปโหลดสลิปโอนเงิน',
             html: `
                 <div class="text-sm font-bold text-slate-500 mb-4">สลากหมายเลข <span class="text-red-600 text-lg">${num}</span></div>
-                <input type="text" id="slipUrlInput" class="w-full border border-slate-300 p-3 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium" placeholder="วางลิงก์รูปสลิป หรือพิมพ์ 'ส่งสลิปในแชทแล้ว'">
+                <input type="file" id="directSlipFile" accept="image/*" class="w-full text-xs text-slate-600 border border-slate-300 p-2.5 rounded-lg bg-white outline-none">
             `,
             showCancelButton: true,
-            confirmButtonText: 'อัปโหลดหลักฐาน',
+            confirmButtonText: 'ส่งหลักฐานรูปสลิป',
             cancelButtonText: 'ยกเลิก',
             confirmButtonColor: '#10b981',
-            preConfirm: () => {
-                const slipVal = document.getElementById('slipUrlInput').value;
-                if(!slipVal) { Swal.showValidationMessage('กรุณาระบุข้อมูลครับ'); return false; }
-                return slipVal;
+            preConfirm: async () => {
+                const fileInput = document.getElementById('directSlipFile');
+                if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; }
+                Swal.showLoading();
+                return await handleFileSelection(docId, 'directSlipFile');
             }
         }).then((result) => {
             if(result.isConfirmed) {
-                // อัปเดตสถานะเป็นรอตรวจสอบ ปลดล็อกการหมดอายุจอง
                 db.collection('lotteries').doc(docId).update({
                     status: 'รอตรวจสอบสลิป',
-                    slip: result.value,
-                    expiresAt: null // เอาวันหมดอายุออกเพราะจ่ายแล้ว
+                    slip: result.value, // บันทึกรูปสลิป Base64 คลังรูปภาพ
+                    expiresAt: null
                 }).then(() => {
-                    Swal.fire({title: 'ส่งข้อมูลสำเร็จ', text: 'สถานะเปลี่ยนเป็นรอตรวจสอบ แอดมินจะรีบดำเนินการครับ', icon: 'success', confirmButtonColor: '#10b981'}).then(() => {
-                        window.location.href = `https://line.me/R/ti/p/@415mknnt?text=ส่งสลิปสำหรับเลข_${num}_แล้วครับ`;
-                    });
+                    Swal.fire('ส่งหลักฐานสำเร็จ', 'ระบบบันทึกรูปภาพสลิปเรียบร้อยแล้ว แอดมินจะรีบทำการตรวจสอบครับ', 'success');
                 });
             }
         });
