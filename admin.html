@@ -57,10 +57,17 @@
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-3">
-        <div class="bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 flex items-center gap-2">
-          <span class="text-xs font-bold text-slate-400">📅 งวดประจำ:</span>
-          <select id="sheet-selector" onchange="onSheetChange()" class="bg-transparent text-amber-300 font-bold text-sm outline-none cursor-pointer"></select>
+        <div class="bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 flex flex-col justify-center gap-1">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-400">📅 งวดที่เลือกดู:</span>
+            <select id="sheet-selector" onchange="onSheetChange()" class="bg-transparent text-amber-300 font-bold text-sm outline-none cursor-pointer"></select>
+          </div>
+          <div class="flex items-center justify-between border-t border-slate-700 pt-1 mt-0.5">
+            <span id="active-storefront-label" class="text-[10px] text-emerald-400 font-bold">🟢 หน้าร้าน: กำลังโหลด...</span>
+            <button onclick="setActiveStorefrontDraw()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] px-2 py-0.5 rounded shadow-sm font-bold ml-3 transition">📌 บังคับโชว์หน้าร้าน</button>
+          </div>
         </div>
+        
         <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🏪 ไปหน้าร้าน</button>
         <button onclick="addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
         <button onclick="triggerMigrationPopup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-sm">📥 ดูดข้อมูลจาก Sheets</button>
@@ -167,7 +174,7 @@
   <script>
     // -------------------------------------------------------------
     // 👉 1. นำ URL Web App ของคุณ (ที่ลงท้ายด้วย /exec) มาใส่ตรงนี้
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/ใส่_URL_ของคุณตรงนี้/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec"; 
     // -------------------------------------------------------------
 
     const firebaseConfig = {
@@ -188,16 +195,52 @@
       if (document.getElementById('adminPin').value === '123456') { 
         document.getElementById('adminAuthOverlay').style.display = 'none';
         loadInitialData();
+        listenToStorefrontSettings(); // ดึงสถานะงวดปัจจุบัน
       } else { Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('adminPin').value = ''; }
     }
     document.getElementById('adminPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAdminLogin(); });
+
+    // ฟังก์ชันตั้งค่างวดที่จะโชว์หน้าร้าน
+    function setActiveStorefrontDraw() {
+        if(!currentSelectedSheet) return;
+        Swal.fire({
+            title: 'ตั้งงวดนี้ขายหน้าร้าน?',
+            text: `ต้องการให้ลูกค้าเห็นสลากของ "${currentSelectedSheet}" ใช่หรือไม่?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ตั้งเป็นงวดปัจจุบัน',
+            confirmButtonColor: '#10b981'
+        }).then(r => {
+            if(r.isConfirmed) {
+                db.collection('settings').doc('storefront').set({ activeDraw: currentSelectedSheet }, { merge: true })
+                  .then(() => Swal.fire({toast:true, position: 'top-end', title: 'ตั้งงวดหน้าร้านสำเร็จ', icon: 'success', timer: 2000, showConfirmButton:false}));
+            }
+        });
+    }
+
+    function listenToStorefrontSettings() {
+        db.collection('settings').doc('storefront').onSnapshot(doc => {
+            const activeDraw = doc.exists ? doc.data().activeDraw : "ยังไม่ได้ตั้งค่า";
+            document.getElementById('active-storefront-label').innerText = `🟢 หน้าร้าน: ${activeDraw}`;
+        });
+    }
 
     function loadInitialData() {
       db.collection('draws').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
         const sel = document.getElementById('sheet-selector'); sel.innerHTML = "";
         if(snapshot.empty) { db.collection('draws').add({ name: "งวดปัจจุบัน", createdAt: new Date() }); return; }
         snapshot.forEach(doc => { const opt = document.createElement('option'); opt.value = doc.data().name; opt.innerText = doc.data().name; sel.appendChild(opt); });
-        currentSelectedSheet = sel.value; loadLotteryDataFromServer(currentSelectedSheet);
+        
+        // ลองดึงว่าหน้าร้านตั้งค่าอะไรไว้เป็น default ถ้าไม่มีก็เอาอันล่าสุด
+        db.collection('settings').doc('storefront').get().then(doc => {
+            if(doc.exists && doc.data().activeDraw) {
+                currentSelectedSheet = doc.data().activeDraw;
+                sel.value = currentSelectedSheet;
+            } else {
+                currentSelectedSheet = sel.value;
+            }
+            loadLotteryDataFromServer(currentSelectedSheet);
+        });
       });
     }
 
@@ -308,7 +351,6 @@
         reader.readAsDataURL(this.files[0]);
     });
 
-    // --- อัปเดตส่งข้อมูลเคลียร์ไป Sheets ---
     function clearTicket(id) {
       Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => {
         if(r.isConfirmed) {
@@ -330,7 +372,6 @@
       });
     }
 
-    // --- อัปเดตส่งข้อมูลบันทึกไป Sheets ---
     function submitForm(e) {
       e.preventDefault(); const id = document.getElementById('formRowIndex').value; const num = document.getElementById('formNumberInput').value.trim().padStart(6, '0'); const qty = document.getElementById('formQty').value;
       let name = document.getElementById('formBuyerName').value.trim(); let statusUI = document.getElementById('formStatus').value;
@@ -340,7 +381,6 @@
 
       const payload = { number: num, quantity: qty, amount: qty * 100, name: name, status: finalStatus, slip: base64SlipString, email: document.getElementById('formEmail').value.trim(), note: document.getElementById('formNote').value.trim(), draw: currentSelectedSheet };
 
-      // ส่งไปอัปเดตบน Sheets
       if (GAS_WEB_APP_URL.includes('/exec')) {
         fetch(GAS_WEB_APP_URL, {
           method: 'POST',
@@ -352,7 +392,6 @@
       else { const customId = currentSelectedSheet.replace(/\s+/g, '') + "_" + num; db.collection('lotteries').doc(customId).set(payload, { merge: true }).then(() => closeModal()); }
     }
 
-    // ฟังก์ชันดูดข้อมูลฉบับสมบูรณ์ (Pro Version)
     function triggerMigrationPopup() {
       google.script.run.withSuccessHandler(res => {
         if(res && res.success) {

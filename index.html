@@ -35,13 +35,15 @@
     <div class="max-w-md mx-auto flex justify-between items-center px-4 py-3">
       <div class="text-lg font-black tracking-tighter">BAS LOTTERY</div>
       <div id="user-info" class="flex items-center gap-2">
-        <button id="login-btn" onclick="forceLineLogin()" class="text-[10px] bg-white/20 text-white rounded-full px-3 py-1.5 font-bold tracking-wider">⚡ ล็อกอินผ่าน LINE</button>
+        <button id="login-btn" onclick="forceLineLogin()" class="text-[10px] bg-white/20 text-white rounded-full px-3 py-1.5 font-bold tracking-wider hover:bg-white/30 transition">⚡ ล็อกอินผ่าน LINE</button>
       </div>
     </div>
   </header>
 
   <div id="home-section" class="block">
     <div class="search-container max-w-md mx-auto shadow-md">
+      <div id="storefront-draw-name" class="text-white/90 text-[13px] font-bold text-center mb-2.5 tracking-wide drop-shadow-sm">🎟️ งวดปัจจุบัน: กำลังโหลดข้อมูล...</div>
+      
       <div class="relative">
         <input type="number" id="search-input" oninput="filterData()" maxlength="6" placeholder="ค้นหาเลข 6 หลัก หรือเลขท้าย" class="w-full bg-white text-gray-800 py-3 rounded-xl outline-none shadow-inner search-input focus:ring-4 focus:ring-white/30 transition">
       </div>
@@ -95,22 +97,53 @@
     let userProfile = null;
     let currentDraw = "";
     let countdownInterval = null;
+    let shopUnsub = null; // ตัวเก็บ Listener หน้าร้าน
 
     async function initLIFF() {
       try {
         await liff.init({ liffId: LIFF_ID });
         if (liff.isLoggedIn()) {
           userProfile = await liff.getProfile();
-          document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover">`;
+          // เปลี่ยนรูปให้คลิกดูโปรไฟล์ได้
+          document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="showUserProfile()" class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover cursor-pointer hover:opacity-80 transition">`;
           loadMyTickets();
         }
       } catch (err) { console.error('LIFF Init Error:', err); }
       
-      setInterval(releaseExpiredReservations, 5000); // เช็คเวลาจองหมดอายุทุกๆ 5 วินาที
+      setInterval(releaseExpiredReservations, 5000); 
     }
 
     function forceLineLogin() {
       if(!liff.isLoggedIn()) liff.login({ redirectUri: window.location.origin });
+    }
+    
+    // ฟังก์ชันเปิดดูเมนู "ฉัน" (Profile)
+    function showUserProfile() {
+        if(!userProfile) return;
+        
+        let phoneStr = "ยังไม่มีประวัติให้ติดต่อ";
+        // หาตั๋วล่าสุดที่มีเบอร์โทร
+        const ticketWithPhone = myTickets.find(t => t.email && t.email.trim() !== "");
+        if(ticketWithPhone) phoneStr = ticketWithPhone.email;
+
+        Swal.fire({
+            html: `
+                <div class="flex flex-col items-center">
+                    <img src="${userProfile.pictureUrl}" class="w-24 h-24 rounded-full border-4 border-slate-100 shadow-md mb-4">
+                    <h2 class="text-xl font-black text-slate-800">${userProfile.displayName}</h2>
+                    <p class="text-sm text-slate-500 font-bold mt-1">📞 ${phoneStr}</p>
+                    <hr class="w-full my-4 border-slate-200">
+                    <div class="flex gap-4 w-full justify-center">
+                        <div class="bg-red-50 p-4 rounded-xl w-3/4 border border-red-100 shadow-sm">
+                            <div class="text-xs text-red-400 font-bold mb-1">สลากในคลังของคุณทั้งหมด</div>
+                            <div class="text-3xl font-black text-red-600">${myTickets.length} <span class="text-sm">ใบ</span></div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            confirmButtonText: 'ปิดเมนู',
+            confirmButtonColor: '#1e293b'
+        });
     }
 
     function releaseExpiredReservations() {
@@ -138,16 +171,28 @@
       }
     }
 
+    // แก้ไขโหลดข้อมูลให้อิงตามที่แอดมินเลือกบังคับโชว์
     function loadShopLotteries() {
-      db.collection('draws').orderBy('createdAt', 'desc').limit(1).onSnapshot(snap => {
-        if(snap.empty) return;
-        currentDraw = snap.docs[0].data().name;
+      db.collection('settings').doc('storefront').onSnapshot(snap => {
+        if(!snap.exists || !snap.data().activeDraw) {
+            document.getElementById('storefront-draw-name').innerText = '🎟️ ระบบยังไม่ได้ตั้งค่างวดขาย';
+            return;
+        }
         
-        db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => {
-            availableTickets = [];
-            s.forEach(doc => availableTickets.push({ id: doc.id, ...doc.data() }));
-            filterData();
-        });
+        currentDraw = snap.data().activeDraw;
+        document.getElementById('storefront-draw-name').innerText = '🎟️ ประจำงวด: ' + currentDraw;
+        
+        if(shopUnsub) shopUnsub(); // ยกเลิกการฟังข้อมูลตัวเก่า
+        
+        // ดึงข้อมูลงวดที่ระบุเฉพาะอันที่ available 
+        shopUnsub = db.collection('lotteries')
+            .where('draw', '==', currentDraw)
+            .where('status', '==', 'available')
+            .onSnapshot(s => {
+                availableTickets = [];
+                s.forEach(doc => availableTickets.push({ id: doc.id, ...doc.data() }));
+                filterData();
+            });
       });
     }
 
@@ -156,6 +201,7 @@
       db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => {
         myTickets = [];
         s.forEach(doc => myTickets.push({ id: doc.id, ...doc.data() }));
+        // ถ้าสถานะเป็น sold (ชำระแล้ว) มันก็จะไม่โดนตั้ง expiresAt ทำให้ไม่โดนลบอัตโนมัติ 
         renderMyTickets();
         startCountdownTimer();
       });
@@ -210,7 +256,6 @@
       });
     }
 
-    // ฟังก์ชันสร้างและนับเวลาถอยหลัง Real-time
     function startCountdownTimer() {
         if(countdownInterval) clearInterval(countdownInterval);
         countdownInterval = setInterval(() => {
@@ -276,7 +321,6 @@
       });
     }
 
-    // ฟังก์ชันยกเลิกการจองเองของลูกค้า
     function cancelReservation(docId) {
         Swal.fire({
             text: 'คุณต้องการยกเลิกการจองสลากใบนี้ และปล่อยคืนสู่แผงใช่หรือไม่?',
@@ -296,7 +340,6 @@
         });
     }
 
-    // แปลงรูปภาพสลิปเป็น Base64 แล้วเซฟลงฐานข้อมูลโดยตรง (เปิดคลังภาพมือถืออัตโนมัติ)
     function handleFileSelection(docId, fileInputId) {
         return new Promise((resolve) => {
             const fileInput = document.getElementById(fileInputId);
@@ -305,7 +348,7 @@
             const file = fileInput.files[0];
             const reader = new FileReader();
             reader.onloadend = function() {
-                resolve(reader.result); // คืนค่าเป็น Base64 String
+                resolve(reader.result); 
             }
             reader.readAsDataURL(file);
         });
@@ -350,7 +393,7 @@
           if (mode === 'pay_now') {
               const fileInput = document.getElementById('checkoutSlipFile');
               if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกหรือถ่ายรูปสลิปโอนเงินด้วยครับ'); return false; }
-              Swal.showLoading(); // แสดงสถานะโหลดเพราะกำลังแปลงรูปภาพ
+              Swal.showLoading(); 
               slipBase64 = await handleFileSelection(docId, 'checkoutSlipFile');
           }
           
@@ -369,10 +412,10 @@
 
           if (mode === 'reserve') {
               updates.status = 'จอง';
-              updates.expiresAt = Date.now() + (24 * 60 * 60 * 1000); // จับเวลาถอยหลัง 24 ชม.
+              updates.expiresAt = Date.now() + (24 * 60 * 60 * 1000); 
           } else {
               updates.status = 'รอตรวจสอบสลิป';
-              updates.slip = slipBase64; // ยัดรูป Base64 ลงในฟิลด์สลิปโดยตรง
+              updates.slip = slipBase64; 
           }
 
           db.collection('lotteries').doc(docId).update(updates).then(() => {
@@ -382,7 +425,7 @@
                 icon: 'success',
                 confirmButtonColor: '#10b981'
             }).then(() => {
-                switchTab('mytickets'); // ย้ายไปหน้าคลังทันทีโดยไม่ออกจากเว็บ
+                switchTab('mytickets'); 
             });
           });
         }
@@ -394,7 +437,6 @@
         document.getElementById('slipArea').style.display = (mode === 'pay_now') ? 'block' : 'none';
     };
 
-    // ปุ่มแจ้งโอนเงินในหน้าคลังสลาก โดยเลือกรูปจากคลังภาพโดยตรง
     function notifyPayment(docId, num) {
         Swal.fire({
             title: 'อัปโหลดสลิปโอนเงิน',
@@ -416,7 +458,7 @@
             if(result.isConfirmed) {
                 db.collection('lotteries').doc(docId).update({
                     status: 'รอตรวจสอบสลิป',
-                    slip: result.value, // บันทึกรูปสลิป Base64 คลังรูปภาพ
+                    slip: result.value, 
                     expiresAt: null
                 }).then(() => {
                     Swal.fire('ส่งหลักฐานสำเร็จ', 'ระบบบันทึกรูปภาพสลิปเรียบร้อยแล้ว แอดมินจะรีบทำการตรวจสอบครับ', 'success');
