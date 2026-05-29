@@ -63,6 +63,7 @@
         </div>
         <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🏪 ไปหน้าร้าน</button>
         <button onclick="addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
+        <button onclick="triggerMigrationPopup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-sm">📥 ดูดข้อมูลจาก Sheets</button>
         <button onclick="openModal()" class="bg-amber-400 text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition">➕ ลงทะเบียนสลาก</button>
       </div>
     </div>
@@ -164,6 +165,11 @@
   </div>
 
   <script>
+    // -------------------------------------------------------------
+    // 👉 1. นำ URL Web App ของคุณ (ที่ลงท้ายด้วย /exec) มาใส่ตรงนี้
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/ใส่_URL_ของคุณตรงนี้/exec"; 
+    // -------------------------------------------------------------
+
     const firebaseConfig = {
       apiKey: "AIzaSyCjlBUSa8LEL4j7ORix2p9piAnBU8hvvCY",
       authDomain: "bas-lottery.firebaseapp.com",
@@ -176,7 +182,7 @@
     const db = firebase.firestore();
 
     let allTicketsList = []; let currentTab = 'all'; let currentSelectedSheet = ""; let unsubListener = null;
-    let base64SlipString = ""; // ตัวแปรเก็บรูปภาพสลิปที่อัปโหลดใหม่
+    let base64SlipString = ""; 
 
     function checkAdminLogin() {
       if (document.getElementById('adminPin').value === '123456') { 
@@ -237,14 +243,13 @@
       list.forEach((item) => {
         hasRows = true; const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
         const isFree = item.name === "-" || item.name === "";
-        const safeNumStr = String(item.number || "000000");
+        const safeNumStr = String(item.number || "000000").padStart(6, '0');
         const barColors = ['bg-t-red', 'bg-t-green', 'bg-t-blue', 'bg-t-yellow', 'bg-t-purple'];
         const barColorClass = barColors[parseInt(safeNumStr.charAt(0)) % 5] || 'bg-t-red';
         const qty = parseInt(item.quantity) || 1; const amount = qty * 100;
 
         const ticketHtml = `<div class="real-ticket mx-auto my-1.5"><div class="rt-color-bar ${barColorClass} flex flex-col items-center justify-center text-center p-0.5"><span class="text-xs font-black leading-none">${qty}</span><span class="text-[8px] font-medium my-0.5">ชุด</span><span class="text-sm font-black leading-none">${qty*6}</span><span class="text-[8px] font-medium leading-none">ล้าน</span></div><div class="rt-body"><div class="rt-header"><span class="rt-gov">สลากกินแบ่งรัฐบาล</span><span class="text-[8px] text-slate-400">#FB</span></div><div class="rt-digits-container"><div class="rt-digits">${safeNumStr}</div></div><div class="rt-footer"><div class="rt-barcode"></div><div class="rt-price">100 บาท</div></div></div></div>`;
 
-        // ปุ่มแสดงหลักฐานสลิป (ดึงรูป Base64 ออกมาโชว์ในป๊อปอัพโดยตรง)
         let slipBadge = '<span class="text-slate-300">-</span>';
         if(item.slip && item.slip !== "") {
             slipBadge = `<button onclick="viewSlipPopup('${item.slip}')" class="text-sky-600 font-bold hover:underline">📸 ดูสลิปโอนเงิน</button>`;
@@ -282,7 +287,7 @@
     function editRow(item) {
       openModal(); document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์";
       document.getElementById('formRowIndex').value = item.id; 
-      document.getElementById('formNumberInput').value = item.number; 
+      document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); 
       document.getElementById('formQty').value = item.quantity; 
       document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; 
       document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'ยังไม่ชำระ' : item.status; 
@@ -296,7 +301,6 @@
       calculateAmount();
     }
 
-    // ฟังก์ชันช่วยแอดมินแปลงรูปภาพสลิปในหน้าต่างแก้ไขหลังบ้าน
     document.getElementById('adminSlipFile').addEventListener('change', function() {
         if(this.files.length === 0) return;
         const reader = new FileReader();
@@ -304,9 +308,19 @@
         reader.readAsDataURL(this.files[0]);
     });
 
+    // --- อัปเดตส่งข้อมูลเคลียร์ไป Sheets ---
     function clearTicket(id) {
       Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => {
-        if(r.isConfirmed) db.collection('lotteries').doc(id).update({ name: "-", status: "available", slip: "", note: "", email: "", expiresAt: null }); 
+        if(r.isConfirmed) {
+           const ticket = allTicketsList.find(t => t.id === id);
+           if(ticket && GAS_WEB_APP_URL.includes('/exec')) {
+               fetch(GAS_WEB_APP_URL, {
+                 method: 'POST',
+                 body: JSON.stringify({ action: 'update', number: ticket.number, draw: currentSelectedSheet, name: "-", status: "available", quantity: ticket.quantity, amount: ticket.amount, slip: "", note: "", email: "" })
+               }).catch(e => console.log(e));
+           }
+           db.collection('lotteries').doc(id).update({ name: "-", status: "available", slip: "", note: "", email: "", expiresAt: null }); 
+        }
       });
     }
 
@@ -316,8 +330,9 @@
       });
     }
 
+    // --- อัปเดตส่งข้อมูลบันทึกไป Sheets ---
     function submitForm(e) {
-      e.preventDefault(); const id = document.getElementById('formRowIndex').value; const num = document.getElementById('formNumberInput').value; const qty = document.getElementById('formQty').value;
+      e.preventDefault(); const id = document.getElementById('formRowIndex').value; const num = document.getElementById('formNumberInput').value.trim().padStart(6, '0'); const qty = document.getElementById('formQty').value;
       let name = document.getElementById('formBuyerName').value.trim(); let statusUI = document.getElementById('formStatus').value;
       
       let finalStatus = "available";
@@ -325,8 +340,101 @@
 
       const payload = { number: num, quantity: qty, amount: qty * 100, name: name, status: finalStatus, slip: base64SlipString, email: document.getElementById('formEmail').value.trim(), note: document.getElementById('formNote').value.trim(), draw: currentSelectedSheet };
 
+      // ส่งไปอัปเดตบน Sheets
+      if (GAS_WEB_APP_URL.includes('/exec')) {
+        fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'update', ...payload })
+        }).catch(err => console.error("Sheets Sync Error:", err));
+      }
+
       if(id) { db.collection('lotteries').doc(id).update(payload).then(() => closeModal()); } 
       else { const customId = currentSelectedSheet.replace(/\s+/g, '') + "_" + num; db.collection('lotteries').doc(customId).set(payload, { merge: true }).then(() => closeModal()); }
+    }
+
+    // ฟังก์ชันดูดข้อมูลฉบับสมบูรณ์ (Pro Version)
+    function triggerMigrationPopup() {
+      google.script.run.withSuccessHandler(res => {
+        if(res && res.success) {
+          let optsHTML = "";
+          res.sheets.forEach(sh => { optsHTML += `<option value="${sh}">${sh}</option>`; });
+          
+          Swal.fire({
+            title: 'เลือกงวดบน Google Sheets',
+            html: `
+              <select id="mig-sheet-src" class="border border-slate-300 p-2.5 rounded-lg w-full text-sm font-bold bg-slate-50 mb-4 outline-none">${optsHTML}</select>
+              <div class="text-left bg-slate-100 p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                <p class="text-xs font-black text-slate-700 mb-2 border-b border-slate-200 pb-2">⚙️ เลือกรูปแบบการดึงข้อมูล:</p>
+                <div class="flex flex-col gap-3 mt-2">
+                  <label class="flex items-start gap-2 text-sm cursor-pointer hover:bg-white p-2 rounded-lg transition border border-transparent hover:border-slate-200">
+                    <input type="radio" name="syncMode" value="addOnly" checked class="mt-1 accent-emerald-600"> 
+                    <span class="leading-tight"><b class="text-emerald-700">➕ เพิ่มเฉพาะข้อมูลใหม่ (แนะนำ)</b><br><span class="text-[11px] text-slate-500 font-medium">เทียบเลขสลากเดิม ป้องกันข้อมูลซ้ำซ้อน</span></span>
+                  </label>
+                  <label class="flex items-start gap-2 text-sm cursor-pointer hover:bg-white p-2 rounded-lg transition border border-transparent hover:border-slate-200">
+                    <input type="radio" name="syncMode" value="replace" class="mt-1 accent-rose-600"> 
+                    <span class="leading-tight"><b class="text-rose-600">🔄 ล้างข้อมูลหน้าเว็บ แล้วดึงใหม่ทั้งหมด</b><br><span class="text-[11px] text-slate-500 font-medium">ลบสลากงวดนี้บนเว็บทิ้ง แล้วดึงข้อมูลใหม่</span></span>
+                  </label>
+                </div>
+              </div>
+            `,
+            showCancelButton: true, confirmButtonText: '⚡ ดำเนินการ', confirmButtonColor: '#10b981'
+          }).then(choice => {
+            if(choice.isConfirmed) {
+              const selectedSheetName = document.getElementById('mig-sheet-src').value;
+              const syncMode = document.querySelector('input[name="syncMode"]:checked').value;
+              Swal.fire({ title: 'กำลังโหลดข้อมูลจาก Sheets...', text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+              
+              google.script.run.withSuccessHandler(async (migRes) => {
+                if(migRes && migRes.success) {
+                  const sheetRows = migRes.rows;
+                  if(sheetRows.length === 0) { Swal.fire('คำแนะนำ', 'แผ่นงานนี้ไม่มีรายการสลาก', 'info'); return; }
+                  Swal.fire({ title: 'กำลังเขียนข้อมูลลง Firebase...', text: 'ประมวลผลป้องกันข้อมูลซ้ำซ้อน', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                  try {
+                    const snapshot = await db.collection('lotteries').where('draw', '==', currentSelectedSheet).get();
+                    const fbIds = []; const fbNumbers = new Set();
+                    snapshot.forEach(doc => { fbIds.push(doc.id); fbNumbers.add(String(doc.data().number).trim().padStart(6, '0')); });
+                    
+                    let batch = db.batch(); let counter = 0;
+                    
+                    if (syncMode === 'replace') {
+                      for (let i = 0; i < fbIds.length; i++) {
+                        batch.delete(db.collection('lotteries').doc(fbIds[i]));
+                        counter++; if (counter >= 400) { await batch.commit(); batch = db.batch(); counter = 0; }
+                      }
+                      if (counter > 0) { await batch.commit(); batch = db.batch(); counter = 0; }
+                      
+                      for (let i = 0; i < sheetRows.length; i++) {
+                        let r = sheetRows[i]; let cleanData = { draw: currentSelectedSheet };
+                        Object.keys(r).forEach(k => { if(r[k] !== undefined) cleanData[k] = r[k]; });
+                        if(cleanData.number) cleanData.number = String(cleanData.number).trim().padStart(6, '0');
+                        batch.set(db.collection('lotteries').doc(), cleanData);
+                        counter++; if (counter >= 400) { await batch.commit(); batch = db.batch(); counter = 0; }
+                      }
+                      if (counter > 0) { await batch.commit(); }
+                      Swal.fire('แทนที่สำเร็จ!', `นำเข้าสลากใหม่จำนวน ${sheetRows.length} ใบ เรียบร้อยแล้ว`, 'success');
+                      
+                    } else {
+                      const newRows = sheetRows.filter(r => !fbNumbers.has(String(r.number).trim().padStart(6, '0')));
+                      if (newRows.length === 0) { Swal.fire('ข้อมูลเป็นปัจจุบันแล้ว', 'ไม่มีเลขสลากใหม่ที่ต้องอัปเดตครับ', 'info'); return; }
+                      
+                      for (let i = 0; i < newRows.length; i++) {
+                        let r = newRows[i]; let cleanData = { draw: currentSelectedSheet };
+                        Object.keys(r).forEach(k => { if(r[k] !== undefined) cleanData[k] = r[k]; });
+                        if(cleanData.number) cleanData.number = String(cleanData.number).trim().padStart(6, '0');
+                        batch.set(db.collection('lotteries').doc(), cleanData);
+                        counter++; if (counter >= 400) { await batch.commit(); batch = db.batch(); counter = 0; }
+                      }
+                      if (counter > 0) { await batch.commit(); }
+                      Swal.fire('อัปเดตสำเร็จ!', `นำเข้าระบบเฉพาะสลากที่เพิ่มมาใหม่ ${newRows.length} ใบ`, 'success');
+                    }
+                  } catch (e) { Swal.fire('ข้อผิดพลาดฐานข้อมูล', e.message, 'error'); }
+                } else { Swal.fire('ผิดพลาดจาก Sheets', migRes.error || 'ไม่สามารถดึงข้อมูลได้', 'error'); }
+              }).extractDataForMigration(selectedSheetName);
+            }
+          });
+        }
+      }).getSheetsList();
     }
   </script>
 </body>
