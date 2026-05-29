@@ -3,73 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แผงแอดมิน - BAS LOTTERY</title>
+  <title>BAS LOTTERY ONLINE Premium</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=IBM+Plex+Sans+Thai:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+    .premium-nav { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); border-bottom: 3px solid #fbbf24; }
+    .real-ticket { position: relative; width: 240px; height: 104px; background: #fffdf5; border-radius: 4px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; overflow: hidden; border: 1px solid #cbd5e1; }
+    .rt-color-bar { width: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); border-right: 2px dashed rgba(0,0,0,0.15); }
+    .rt-body { flex: 1; padding: 6px 10px; display: flex; flex-direction: column; justify-content: space-between; position: relative; background-image: linear-gradient(45deg, rgba(0,0,0,0.02) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.02) 75%, rgba(0,0,0,0.02)), linear-gradient(45deg, rgba(0,0,0,0.02) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.02) 75%, rgba(0,0,0,0.02)); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+    .rt-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .rt-gov { font-size: 10px; font-weight: 800; color: #475569; letter-spacing: 0.5px; }
+    .rt-digits-container { background: rgba(255,255,255,0.8); border-radius: 4px; padding: 2px 0; margin: 2px 0; }
+    .rt-digits { font-family: 'IBM Plex Sans Thai', monospace; font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: 4px; text-align: center; line-height: 1; }
+    .rt-footer { display: flex; justify-content: space-between; align-items: flex-end; }
+    .rt-barcode { width: 70px; height: 12px; background: repeating-linear-gradient(to right, #334155, #334155 2px, transparent 2px, transparent 4px, #334155 4px, #334155 5px, transparent 5px, transparent 7px); opacity: 0.7; }
+    .rt-price { font-size: 12px; font-weight: 900; color: #e11d48; background: #ffe4e6; padding: 2px 6px; border-radius: 4px; border: 1px solid #fda4af; box-shadow: 1px 1px 0 rgba(0,0,0,0.05); }
+    .bg-t-red { background: linear-gradient(180deg, #ef4444, #b91c1c); } 
+    .bg-t-green { background: linear-gradient(180deg, #10b981, #047857); }
+    .bg-t-blue { background: linear-gradient(180deg, #3b82f6, #1d4ed8); } 
+    .bg-t-yellow { background: linear-gradient(180deg, #f59e0b, #b45309); }
+    .bg-t-purple { background: linear-gradient(180deg, #8b5cf6, #5b21b6); }
+    .dash-box { background: white; border-radius: 12px; border: 1px solid #e2e8f0; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .dash-title { font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+    .dash-val { font-family: 'IBM Plex Sans Thai', sans-serif; font-size: 32px; font-weight: 900; margin-top: 6px; letter-spacing: -0.5px;}
+    .tab-btn { padding: 10px 18px; font-weight: 700; font-size: 13px; transition: 0.2s; border-radius: 8px; }
+    .tab-active { background-color: #0f172a; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  </style>
 </head>
-<body class="bg-slate-100 font-sans">
-  <nav class="bg-slate-900 text-white p-4 shadow-xl">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <h1 class="font-black text-xl text-amber-400">BAS ADMIN <span class="text-white text-xs">FIREBASE</span></h1>
-      <div class="flex gap-2">
-        <button onclick="goToShop()" class="bg-rose-500 hover:bg-rose-600 px-6 py-2 rounded-lg font-bold text-sm transition shadow-md">🏪 ไปหน้าร้าน</button>
+<body>
+
+  <div id="adminAuthOverlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full mx-4 text-center border-t-4 border-amber-400">
+      <div class="bg-amber-100 text-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔒</div>
+      <h2 class="text-2xl font-black text-slate-800 mb-2">เข้าสู่ระบบแอดมิน</h2>
+      <p class="text-sm text-slate-500 mb-6">กรุณายืนยันตัวตนเพื่อเข้าถึงแผงควบคุม</p>
+      <input type="password" id="adminPin" placeholder="รหัสผ่าน..." class="w-full border border-slate-300 p-3 rounded-xl mb-4 text-center text-xl font-bold tracking-widest focus:ring-2 focus:ring-amber-400 outline-none">
+      <button onclick="checkAdminLogin()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold p-3.5 rounded-xl shadow-lg transition">ปลดล็อกระบบ</button>
+    </div>
+  </div>
+
+  <div class="premium-nav py-6 px-6 text-white shadow-md mb-8">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div class="flex items-center gap-4">
+        <div class="bg-amber-400 text-slate-900 font-black p-3 rounded-xl text-2xl shadow-inner">BAS</div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-amber-400 tracking-tight uppercase">BAS LOTTERY ONLINE</h1>
+          <p class="text-slate-300 text-sm font-light mt-1">แพลตฟอร์มหลังบ้านบริหารจัดการสลากดิจิทัล</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-400">📅 งวดประจำ:</span>
+          <select id="sheet-selector" onchange="onSheetChange()" class="bg-transparent text-amber-300 font-bold text-sm focus:outline-none cursor-pointer outline-none"></select>
+        </div>
+        
+        <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-sm">🏪 ไปหน้าร้าน</button>
+        <button onclick="addNewMonthPopup()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-sm">📅 เปิดงวดใหม่</button>
+        <button onclick="openModal()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-sm">➕ ลงทะเบียนสลาก</button>
       </div>
     </div>
-  </nav>
+  </div>
 
-  <div id="app" class="p-6 max-w-7xl mx-auto">
-    <div class="bg-white p-4 rounded-xl shadow-sm mb-6 flex items-center justify-between border-l-4 border-amber-400">
-      <div>
-        <span class="text-gray-500 text-xs font-bold uppercase">งวดที่กำลังจัดการ:</span>
-        <select id="drawSelect" onchange="loadTickets()" class="ml-2 font-black text-lg outline-none text-slate-800 bg-transparent"></select>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="createDraw()" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-lg hover:bg-indigo-100 transition">+ ตั้งงวดใหม่</button>
-        <button onclick="openAddTicketModal()" class="text-sm font-bold text-amber-700 bg-amber-100 px-4 py-2 rounded-lg hover:bg-amber-200 transition">➕ ลงทะเบียนสลากใหม่</button>
-        <button onclick="importFromSheets()" class="text-sm font-bold text-emerald-700 bg-emerald-100 px-4 py-2 rounded-lg hover:bg-emerald-200 transition">📥 ดูดข้อมูลจาก Sheets</button>
-      </div>
+  <div class="max-w-7xl mx-auto px-4">
+    <div id="loading" class="text-center py-20 hidden">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-300 border-t-amber-500 mb-4"></div>
+      <p class="text-slate-500 font-bold text-sm mt-2" id="loading-text">กำลังเชื่อมต่อฐานข้อมูลหลัก...</p>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white p-5 rounded-xl border-t-4 border-emerald-500 shadow-sm">
-        <p class="text-xs text-gray-400 font-bold uppercase">สลากบนแผงรวม</p>
-        <h2 id="count-available" class="text-3xl font-black text-slate-700">0</h2>
+    <div id="content" class="block">
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="dash-box p-5 bg-white border-t-4 border-t-indigo-500">
+          <div class="dash-title text-indigo-600">👥 ออเดอร์ทั้งหมด</div>
+          <h3 class="dash-val text-slate-800" id="sum-buyers">0 ท่าน</h3>
+        </div>
+        <div class="dash-box p-5 bg-white border-t-4 border-t-pink-500">
+          <div class="dash-title text-pink-600">🎟️ จำนวนใบรวม</div>
+          <h3 class="dash-val text-slate-800" id="sum-qty">0 ใบ</h3>
+        </div>
+        <div class="dash-box p-5 bg-amber-50 border-t-4 border-t-amber-500">
+          <div class="dash-title text-amber-700">💰 ยอดเงินรวมทั้งหมด</div>
+          <h3 class="dash-val text-amber-600" id="sum-total">฿0</h3>
+        </div>
+        <div class="dash-box p-5 bg-emerald-50 border-t-4 border-t-emerald-500">
+          <div class="dash-title text-emerald-700">🟢 ยอดเงินชำระแล้ว</div>
+          <h3 class="dash-val text-emerald-600" id="sum-paid">฿0</h3>
+        </div>
+        <div class="dash-box p-5 bg-rose-50 border-t-4 border-t-rose-500">
+          <div class="dash-title text-rose-700">⚠️ ยอดเงินยังไม่ชำระ</div>
+          <h3 class="dash-val text-rose-600" id="sum-unpaid">฿0</h3>
+        </div>
       </div>
-      <div class="bg-white p-5 rounded-xl border-t-4 border-rose-500 shadow-sm">
-        <p class="text-xs text-gray-400 font-bold uppercase">ค้างชำระ / รอตรวจ</p>
-        <h2 id="count-sold" class="text-3xl font-black text-slate-700">0</h2>
-      </div>
-      <div class="bg-white p-5 rounded-xl border-t-4 border-indigo-500 shadow-sm">
-        <p class="text-xs text-gray-400 font-bold uppercase">รายการสั่งซื้อทั้งหมด</p>
-        <h2 id="count-total" class="text-3xl font-black text-slate-700">0</h2>
-      </div>
-      <div class="bg-white p-5 rounded-xl border-t-4 border-amber-500 shadow-sm">
-        <p class="text-xs text-gray-400 font-bold uppercase">มูลค่ารวมงวดนี้</p>
-        <h2 id="sum-amount" class="text-3xl font-black text-amber-600">฿0</h2>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-12">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="flex flex-wrap p-1.5 bg-slate-200/70 rounded-xl w-full md:w-auto gap-1">
+            <button onclick="switchTab('all')" id="tab-all" class="tab-btn tab-active">🌐 ทั้งหมด</button>
+            <button onclick="switchTab('empty')" id="tab-empty" class="tab-btn text-slate-600 hover:bg-white">🎟️ ลอตเตอรี่ที่ยังไม่มีผู้ซื้อ</button>
+            <button onclick="switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white">🟢 ชำระแล้ว</button>
+            <button onclick="switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white">🔴 ค้างชำระ / จอง</button>
+          </div>
+          <input type="text" id="search-input" oninput="filterData()" placeholder="🔍 ค้นหาเลขสลาก หรือ ชื่อผู้ซื้อ..." class="w-full md:w-72 px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none text-sm">
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left whitespace-nowrap">
+            <thead>
+              <tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                <th class="py-4 px-4 text-center">No.</th>
+                <th class="py-4 px-4 text-center">สลากดิจิทัล</th>
+                <th class="py-4 px-6">ชื่อกรรมสิทธิ์ผู้ซื้อ</th>
+                <th class="py-4 px-4 text-center">จำนวน</th>
+                <th class="py-4 px-6 text-right">ยอดชำระ</th>
+                <th class="py-4 px-4 text-center">สถานะ</th>
+                <th class="py-4 px-4 text-center">หลักฐาน</th>
+                <th class="py-4 px-4 text-center">แผงควบคุม</th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-slate-100 text-sm bg-white"></tbody>
+          </table>
+          <div id="no-data" class="hidden text-center py-20 text-slate-400">
+            <p class="font-bold text-lg">✨ ไม่พบข้อมูลสลากในหมวดหมู่นี้</p>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="bg-white rounded-xl shadow-md overflow-hidden">
-      <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-        <h3 class="font-bold text-slate-700">รายการสลากในระบบ</h3>
-        <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 ค้นหาเลข..." class="border border-slate-300 p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-400 w-64">
+  <div id="formModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center border-b-4 border-amber-400">
+        <h2 class="text-lg font-bold text-amber-400" id="modalTitle">ลงทะเบียนสลาก</h2>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl font-bold leading-none">&times;</button>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left">
-          <thead class="bg-slate-100 border-b">
-            <tr class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              <th class="p-4">เลขสลากดิจิทัล</th>
-              <th class="p-4 text-center">จำนวน</th>
-              <th class="p-4">ชื่อผู้ซื้อ</th>
-              <th class="p-4 text-center">สถานะ</th>
-              <th class="p-4 text-center">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="ticket-table" class="divide-y divide-slate-100 text-sm"></tbody>
-        </table>
-      </div>
+      <form id="lotteryForm" onsubmit="submitForm(event)" class="p-6 space-y-5">
+        <input type="hidden" id="formRowIndex" name="rowIndex">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">หมายเลขสลาก (6 หลัก) <span class="text-rose-500">*</span></label>
+            <input type="text" name="number" id="formNumberInput" maxlength="6" required class="w-full border border-slate-300 p-3 rounded-lg text-xl font-mono font-black tracking-widest text-center focus:ring-2 focus:ring-amber-400 outline-none bg-slate-50">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">จำนวนใบ (ใบละ 100 บาท) <span class="text-rose-500">*</span></label>
+            <input type="number" name="quantity" id="formQty" required min="1" value="1" oninput="calculateAmount()" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-amber-400 outline-none">
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อผู้สั่งซื้อ (เว้นว่างไว้หากต้องการเปิดขายบนแผง)</label>
+          <input type="text" name="name" id="formBuyerName" placeholder="กรอกชื่อลูกค้าที่นี่..." class="w-full border border-slate-300 p-3 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-amber-400 outline-none">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">สถานะดีล</label>
+            <select name="status" id="formStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="ยังไม่ชำระ">🔴 ยังไม่ชำระ</option>
+              <option value="ชำระแล้ว">🟢 ชำระแล้ว</option>
+              <option value="จอง">🟡 จองล็อกเลข</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ยอดเงินคำนวณสุทธิ (บาท) 🔒</label>
+            <input type="text" id="formAmount" readonly tabindex="-1" value="100" class="w-full bg-slate-100 border border-slate-200 p-3 rounded-lg text-lg font-black text-rose-600 text-right outline-none cursor-not-allowed pointer-events-none">
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">📸 สลิปหลักฐานชำระโอน</label>
+          <input type="text" id="slipFileInput" placeholder="วางลิงก์รูปภาพสลิปที่นี่..." class="w-full text-xs text-slate-600 border border-slate-300 p-2.5 rounded-lg bg-white outline-none focus:ring-2 focus:ring-amber-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรลูกค้า</label>
+            <input type="text" name="email" id="formEmail" placeholder="ข้อมูลติดต่อ" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">บันทึกเพิ่มเติม</label>
+            <input type="text" name="note" id="formNote" placeholder="ระบุหมายเหตุ" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none">
+          </div>
+        </div>
+
+        <div class="flex justify-end items-center pt-4 border-t border-slate-200 mt-2">
+          <div class="flex gap-2">
+            <button type="button" onclick="closeModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-lg text-sm transition">ปิด</button>
+            <button type="submit" id="submitBtn" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-sm shadow-md transition">💾 บันทึกเข้าระบบ</button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -85,152 +213,248 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let allTickets = [];
+    let allTicketsList = []; 
+    let currentTab = 'all'; 
+    let currentSelectedSheet = "";
+    let unsubListener = null;
 
-    function goToShop() {
-      const shopUrl = window.location.origin; 
-      window.open(shopUrl, '_blank');
+    function checkAdminLogin() {
+      const pin = document.getElementById('adminPin').value;
+      if (pin === '123456') { 
+        document.getElementById('adminAuthOverlay').style.display = 'none';
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'เข้าสู่ระบบสำเร็จ', showConfirmButton: false, timer: 2000 });
+        loadInitialData();
+      } else {
+        Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error');
+        document.getElementById('adminPin').value = '';
+      }
     }
+    
+    document.getElementById('adminPin').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') { checkAdminLogin(); }
+    });
 
-    function loadDraws() {
-      db.collection('draws').orderBy('createdAt', 'desc').onSnapshot(snap => {
-        const sel = document.getElementById('drawSelect');
-        sel.innerHTML = snap.docs.map(doc => `<option value="${doc.data().name}">${doc.data().name}</option>`).join('');
-        if(sel.value) loadTickets();
+    function loadInitialData() {
+      db.collection('draws').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+        const sel = document.getElementById('sheet-selector');
+        sel.innerHTML = "";
+        
+        if(snapshot.empty) {
+          db.collection('draws').add({ name: "งวดปัจจุบัน", createdAt: new Date() });
+          return;
+        }
+        
+        snapshot.forEach(doc => {
+          const opt = document.createElement('option');
+          opt.value = doc.data().name;
+          opt.innerText = doc.data().name;
+          sel.appendChild(opt);
+        });
+        
+        currentSelectedSheet = sel.value;
+        loadLotteryDataFromServer(currentSelectedSheet);
       });
     }
 
-    function loadTickets() {
-      const draw = document.getElementById('drawSelect').value;
-      db.collection('lotteries').where('draw', '==', draw).onSnapshot(snap => {
-        allTickets = [];
-        snap.forEach(doc => allTickets.push({ id: doc.id, ...doc.data() }));
-        renderTable();
-      });
+    function onSheetChange() { 
+      currentSelectedSheet = document.getElementById('sheet-selector').value; 
+      document.getElementById('search-input').value = ""; 
+      loadLotteryDataFromServer(currentSelectedSheet); 
     }
 
-    function renderTable() {
-      const search = document.getElementById('searchInput').value;
-      const filtered = allTickets.filter(t => t.number.includes(search));
+    function loadLotteryDataFromServer(drawName) {
+      if(unsubListener) unsubListener();
       
-      let html = '';
-      let stats = { available: 0, sold: 0, total: 0, amount: 0 };
+      unsubListener = db.collection('lotteries').where('draw', '==', drawName)
+        .onSnapshot(snapshot => {
+          allTicketsList = [];
+          let totalBuyers = 0, totalQty = 0, sumTotal = 0, sumPaid = 0, sumUnpaid = 0;
 
-      filtered.forEach(t => {
-        stats.total++;
-        if (t.status === 'available') stats.available++;
-        else {
-          stats.sold++;
-          stats.amount += (t.amount || (t.quantity * 100));
-        }
+          snapshot.forEach(doc => {
+            const item = doc.data();
+            const ticket = { id: doc.id, ...item };
+            
+            // แปลงสถานะเก่าให้ตรงกับ UI ใหม่
+            if (item.status === 'available') ticket.status = 'ยังไม่ชำระ';
+            if (item.status === 'sold') ticket.status = 'ชำระแล้ว';
+            if (item.status === 'reserve') ticket.status = 'จอง';
 
-        let badge = t.status === 'available' ? 
-          '<span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-md font-bold text-xs border border-slate-200">✨ ว่างแผง</span>' : 
-          '<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-md font-bold text-xs border border-amber-200">🟡 รอตรวจสอบ</span>';
+            allTicketsList.push(ticket);
 
-        html += `<tr class="hover:bg-slate-50 transition">
-          <td class="p-4 font-mono font-black text-xl text-slate-800 tracking-widest">${t.number}</td>
-          <td class="p-4 font-bold text-slate-600 text-center">${t.quantity}</td>
-          <td class="p-4 font-bold text-slate-700">${t.name}</td>
-          <td class="p-4 text-center">${badge}</td>
-          <td class="p-4 text-center">
-            <button onclick="deleteTicket('${t.id}')" class="bg-rose-50 text-rose-500 border border-rose-200 px-3 py-1.5 rounded-lg hover:bg-rose-100 font-bold text-xs transition">🗑️ ลบ</button>
-          </td>
-        </tr>`;
-      });
+            const qty = parseInt(ticket.quantity) || 1;
+            const price = qty * 100;
+            totalQty += qty;
 
-      document.getElementById('ticket-table').innerHTML = html;
-      document.getElementById('count-available').innerText = stats.available;
-      document.getElementById('count-sold').innerText = stats.sold;
-      document.getElementById('count-total').innerText = stats.total;
-      document.getElementById('sum-amount').innerText = '฿' + stats.amount.toLocaleString();
-    }
-
-    function openAddTicketModal() {
-      Swal.fire({
-        title: 'ลงทะเบียนสลากใหม่',
-        html: `
-          <input id="swal-num" type="number" placeholder="เลข 6 หลัก" class="swal2-input text-center tracking-widest font-mono font-bold" maxlength="6">
-          <input id="swal-qty" type="number" placeholder="จำนวนชุด (ใบ)" class="swal2-input text-center font-bold" value="1">
-        `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: '💾 บันทึกเข้าระบบ',
-        confirmButtonColor: '#1e293b',
-        preConfirm: () => {
-          const num = document.getElementById('swal-num').value;
-          const qty = parseInt(document.getElementById('swal-qty').value) || 1;
-          if (!num || num.length !== 6) { Swal.showValidationMessage('กรุณากรอกเลขให้ครบ 6 หลัก'); return false; }
-          return { num, qty };
-        }
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const currentDraw = document.getElementById('drawSelect').value;
-          const customId = currentDraw.replace(/\s+/g, '') + "_" + result.value.num;
-          
-          db.collection('lotteries').doc(customId).set({
-            number: result.value.num,
-            quantity: result.value.qty,
-            amount: result.value.qty * 100,
-            name: "-",
-            status: "available",
-            draw: currentDraw,
-            createdAt: new Date()
-          }, { merge: true }).then(() => {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'เพิ่มสลากลงแผงแล้ว', showConfirmButton: false, timer: 1500 });
+            if (ticket.name && ticket.name !== '-' && ticket.name !== '') {
+              totalBuyers++;
+              sumTotal += price;
+              if (ticket.status === 'ชำระแล้ว') sumPaid += price;
+              else sumUnpaid += price;
+            }
           });
+
+          document.getElementById('sum-buyers').innerText = totalBuyers + ' ท่าน';
+          document.getElementById('sum-qty').innerText = totalQty.toLocaleString('th-TH') + ' ใบ';
+          document.getElementById('sum-total').innerText = '฿' + sumTotal.toLocaleString('th-TH');
+          document.getElementById('sum-paid').innerText = '฿' + sumPaid.toLocaleString('th-TH');
+          document.getElementById('sum-unpaid').innerText = '฿' + sumUnpaid.toLocaleString('th-TH');
+
+          renderTable(document.getElementById('search-input').value.trim());
+        });
+    }
+
+    function renderTable(filterText = '') {
+      const body = document.getElementById('table-body'); 
+      body.innerHTML = ''; 
+      let list = allTicketsList;
+
+      if(currentTab === 'empty') list = list.filter(x => x.name === "-" || x.name === "");
+      else if(currentTab === 'paid') list = list.filter(x => x.status === "ชำระแล้ว");
+      else if(currentTab === 'unpaid') list = list.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== "");
+
+      if (filterText) {
+        const text = filterText.toLowerCase();
+        list = list.filter(item => String(item.number || "").includes(text) || String(item.name || "").toLowerCase().includes(text));
+      }
+
+      let hasRows = false; let displayCounter = 1;
+      
+      list.forEach((item) => {
+        hasRows = true; 
+        const tr = document.createElement('tr'); 
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+        
+        const isFree = item.name === "-" || item.name === "";
+        const safeNumStr = String(item.number || "000000");
+        const barColors = ['bg-t-red', 'bg-t-green', 'bg-t-blue', 'bg-t-yellow', 'bg-t-purple'];
+        const barColorClass = barColors[parseInt(safeNumStr.charAt(0)) % 5] || 'bg-t-red';
+        const qty = parseInt(item.quantity) || 1; 
+        const millionPrize = qty * 6;
+        const amount = qty * 100;
+
+        // ดึงดีไซน์สลากพรีเมียมตัวออริจินอลของคุณกลับมา!
+        const ticketHtml = `
+          <div class="real-ticket mx-auto my-1.5">
+            <div class="rt-color-bar ${barColorClass} flex flex-col items-center justify-center text-center p-0.5">
+              <span class="text-xs font-black leading-none">${qty}</span>
+              <span class="text-[8px] font-medium my-0.5">ชุด</span>
+              <span class="text-sm font-black leading-none">${millionPrize}</span>
+              <span class="text-[8px] font-medium leading-none">ล้าน</span>
+            </div>
+            <div class="rt-body">
+              <div class="rt-header"><span class="rt-gov">สลากกินแบ่งรัฐบาล</span><span class="text-[8px] text-slate-400">#FB</span></div>
+              <div class="rt-digits-container"><div class="rt-digits">${safeNumStr}</div></div>
+              <div class="rt-footer"><div class="rt-barcode"></div><div class="rt-price">100 บาท</div></div>
+            </div>
+          </div>
+        `;
+
+        let slipBadge = String(item.slip || "").startsWith('http') ? `<a href="${item.slip}" target="_blank" class="text-sky-600 hover:text-sky-800 font-bold text-xs underline">🔗 ดูสลิป</a>` : '<span class="text-slate-300">-</span>';
+        let statusBadge = isFree ? `<span class="bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-md font-bold text-xs">✨ ว่างแผง</span>` : `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1 rounded-md font-bold text-xs">${item.status}</span>`;
+        if(!isFree && item.status === "ชำระแล้ว") statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-md font-bold text-xs">🟢 ชำระแล้ว</span>`;
+
+        const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
+        let action = isFree 
+          ? `<div class="flex justify-center"><button onclick='editRow(${itemJson})' class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-black px-4 py-1.5 rounded-lg text-xs shadow-sm transition">🛒 กดสั่งซื้อให้ลูกค้า</button></div>`
+          : `<div class="flex gap-1.5 items-center justify-center"><button onclick='editRow(${itemJson})' class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">📝 แก้ไข</button><button onclick="clearTicket('${item.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs transition">🔄 คืนค่าว่าง</button><button onclick="deleteRow('${item.id}')" class="text-slate-300 hover:text-rose-500 transition px-1">🗑️</button></div>`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 text-center text-slate-400 font-mono text-xs">${displayCounter++}</td>
+          <td class="py-1 px-2 text-center">${ticketHtml}</td>
+          <td class="py-3 px-6 font-bold text-slate-800 text-sm">${isFree ? '<span class="text-slate-400 font-normal italic">ยังไม่มีผู้ถือครองสลาก</span>' : item.name}</td>
+          <td class="py-3 px-4 text-center font-bold text-slate-600">${item.quantity}</td>
+          <td class="py-3 px-6 text-right font-black text-rose-600 text-base">฿${amount.toLocaleString('th-TH')}</td>
+          <td class="py-3 px-4 text-center">${statusBadge}</td>
+          <td class="py-3 px-4 text-center">${slipBadge}</td>
+          <td class="py-3 px-4 text-center">${action}</td>
+        `;
+        body.appendChild(tr);
+      });
+      document.getElementById('no-data').className = hasRows ? "hidden" : "block";
+    }
+
+    function switchTab(t) { currentTab = t; ['all','empty','paid','unpaid'].forEach(k => { document.getElementById('tab-'+k).className = (k===t) ? "tab-btn tab-active" : "tab-btn text-slate-600 hover:bg-slate-200"; }); document.getElementById('search-input').value = ""; renderTable(); }
+    function filterData() { renderTable(document.getElementById('search-input').value.trim()); }
+    function calculateAmount() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString('th-TH'); }
+
+    function openModal() { 
+      document.getElementById('formModal').classList.remove('hidden'); 
+      document.getElementById('lotteryForm').reset(); 
+      document.getElementById('formRowIndex').value = ""; 
+      document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลากเข้าระบบ"; 
+      calculateAmount(); 
+    }
+    
+    function closeModal() { document.getElementById('formModal').classList.add('hidden'); }
+
+    function editRow(item) {
+      openModal(); 
+      document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์";
+      document.getElementById('formRowIndex').value = item.id; 
+      document.getElementById('slipFileInput').value = item.slip || ""; 
+      document.getElementById('formNumberInput').value = item.number; 
+      document.getElementById('formQty').value = item.quantity; 
+      document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; 
+      document.getElementById('formStatus').value = item.status; 
+      document.getElementById('formEmail').value = item.email || ''; 
+      document.getElementById('formNote').value = item.note || '';
+      calculateAmount();
+    }
+
+    function clearTicket(id) {
+      Swal.fire({ text: "ต้องการยกเลิกการซื้อและคืนสถานะเลขนี้เป็น 'ว่าง' ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "ใช่, คืนเป็นเลขว่าง", cancelButtonText: "ปิด", confirmButtonColor: '#e11d48' }).then(r => {
+        if(r.isConfirmed) { 
+          db.collection('lotteries').doc(id).update({ name: "-", status: "available", slip: "", note: "", email: "" }); 
         }
       });
     }
 
-    function deleteTicket(id) {
-      Swal.fire({ title: 'ลบสลากนี้ออกจากระบบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'ลบทิ้ง' }).then(r => {
+    function deleteRow(id) {
+      Swal.fire({ text: "ลบเลขสลากรายการนี้ออกจากฐานข้อมูลแบบถาวร?", icon: "error", showCancelButton: true, confirmButtonText: "ลบทิ้ง", confirmButtonColor: '#ef4444' }).then(r => {
         if(r.isConfirmed) db.collection('lotteries').doc(id).delete();
       });
     }
 
-    function createDraw() {
-      Swal.fire({ title: 'ตั้งชื่องวดใหม่', input: 'text', inputPlaceholder: 'เช่น งวด 1 กรกฎาคม 2569' }).then(r => {
+    function addNewMonthPopup() {
+      Swal.fire({ title: "สร้างแผ่นงานงวดใหม่", input: "text", inputPlaceholder: "งวด 1 กรกฎาคม 2569", showCancelButton: true, confirmButtonText: "สร้าง", confirmButtonColor: '#1e293b' }).then(r => {
         if(r.value) db.collection('draws').add({ name: r.value.trim(), createdAt: new Date() });
       });
     }
-    
-    function importFromSheets() {
-      if (typeof google === 'undefined') {
-        Swal.fire('การดูดข้อมูลต้องทำผ่าน GAS', 'กรุณาเข้าลิงก์ Google Script อันเดิม (Web App) เพื่อกดปุ่มนี้ครับ', 'warning');
-        return;
-      }
-      google.script.run.withSuccessHandler(res => {
-        let options = res.sheets.map(s => `<option value="${s}">${s}</option>`).join('');
-        Swal.fire({
-          title: 'เลือกงวดใน Sheets',
-          html: `<select id="swal-sheet" class="w-full p-3 border rounded-xl font-bold">${options}</select>`,
-          showCancelButton: true,
-          confirmButtonText: '⚡ เริ่มดูดข้อมูล'
-        }).then(result => {
-          if(result.isConfirmed) {
-            const sheetName = document.getElementById('swal-sheet').value;
-            const currentDraw = document.getElementById('drawSelect').value;
-            Swal.fire({ title: 'กำลังดึงข้อมูลและกรองเลขซ้ำ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            
-            google.script.run.withSuccessHandler(data => {
-              const batch = db.batch();
-              data.rows.forEach(row => {
-                const customId = currentDraw.replace(/\s+/g, '') + "_" + row.number;
-                const docRef = db.collection('lotteries').doc(customId);
-                batch.set(docRef, { ...row, draw: currentDraw }, { merge: true });
-              });
-              
-              batch.commit().then(() => {
-                Swal.fire('อัปเดตเรียบร้อย!', 'ข้อมูลถูกนำเข้า Firebase แล้ว', 'success');
-              });
-            }).extractDataForMigration(sheetName);
-          }
-        });
-      }).getSheetsList();
-    }
 
-    loadDraws();
+    function submitForm(e) {
+      e.preventDefault(); 
+      const id = document.getElementById('formRowIndex').value;
+      const num = document.getElementById('formNumberInput').value;
+      const qty = document.getElementById('formQty').value;
+      let name = document.getElementById('formBuyerName').value.trim();
+      let statusUI = document.getElementById('formStatus').value;
+      
+      let finalStatus = "available";
+      if(name === "") name = "-";
+      else {
+        if(statusUI === "ชำระแล้ว") finalStatus = "sold";
+        else finalStatus = "reserve";
+      }
+
+      const payload = {
+        number: num,
+        quantity: qty,
+        amount: qty * 100,
+        name: name,
+        status: finalStatus,
+        slip: document.getElementById('slipFileInput').value.trim(),
+        email: document.getElementById('formEmail').value.trim(),
+        note: document.getElementById('formNote').value.trim(),
+        draw: currentSelectedSheet
+      };
+
+      if(id) {
+        db.collection('lotteries').doc(id).update(payload).then(() => closeModal());
+      } else {
+        const customId = currentSelectedSheet.replace(/\s+/g, '') + "_" + num;
+        db.collection('lotteries').doc(customId).set(payload, { merge: true }).then(() => closeModal());
+      }
+    }
   </script>
 </body>
 </html>

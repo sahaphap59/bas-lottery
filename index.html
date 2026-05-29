@@ -3,38 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>BAS LOTTERY - หน้าร้าน</title>
+  <title>หน้าร้าน - BAS ลอตเตอรี่</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700;900&display=swap" rel="stylesheet">
+
   <style>
-    body { font-family: 'Prompt', sans-serif; }
-    .ticket-card { background: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.05) 1px, transparent 0); background-size: 8px 8px; }
+    body { font-family: 'Prompt', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+    .app-header { background: #da251d; color: white; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .search-container { background: #b91c1c; padding: 12px 16px; border-radius: 0 0 16px 16px; }
+    .search-input { text-align: center; font-size: 24px; letter-spacing: 8px; font-weight: 700; }
+    .search-input::placeholder { font-size: 16px; letter-spacing: normal; font-weight: 400; color: #9ca3af; }
+    .lottery-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s; overflow: hidden; }
+    .ticket-paper { background-color: #fffdf5; position: relative; }
+    .ticket-paper::after { content: ""; position: absolute; inset: 0; opacity: 0.04; pointer-events: none; background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 1px, transparent 12px); }
+    .ticket-paper::before { content: ""; position: absolute; inset: 0; opacity: 0.08; pointer-events: none; background-image: radial-gradient(#000 0.5px, transparent 0.5px); background-size: 10px 10px; }
+    .lottery-details { padding: 12px; display: flex; justify-content: space-between; align-items: center; background: white; }
+    .btn-buy { background: #da251d; color: white; border-radius: 8px; padding: 6px 18px; font-weight: 600; font-size: 14px; box-shadow: 0 2px 4px rgba(218, 37, 29, 0.3); }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px 0; color: #9ca3af; transition: 0.2s; cursor: pointer; }
+    .nav-item.active { color: #da251d; }
   </style>
 </head>
-<body class="bg-slate-100 pb-24">
+<body class="pb-24">
 
-  <header class="bg-[#da251d] text-white p-4 sticky top-0 z-50 shadow-lg">
-    <div class="max-w-md mx-auto flex justify-between items-center">
-      <h1 class="font-black text-xl tracking-tighter">BAS LOTTERY</h1>
+  <header class="app-header">
+    <div class="max-w-md mx-auto flex justify-between items-center px-4 py-3">
+      <div class="text-lg font-bold">BAS LOTTERY</div>
       <div id="user-info" class="flex items-center gap-2">
-        <button id="login-btn" onclick="lineLogin()" class="text-[10px] bg-white/20 px-4 py-2 rounded-full font-bold uppercase tracking-wider shadow-sm">👤 ล็อกอินเข้าสู่ระบบ</button>
+        <button id="login-btn" onclick="forceLineLogin()" class="text-[10px] bg-white/20 text-white rounded-full px-3 py-1.5 font-bold tracking-wider">⚡ เข้าสู่ระบบ</button>
       </div>
     </div>
   </header>
 
-  <div class="bg-[#b91c1c] p-6 max-w-md mx-auto rounded-b-[30px] shadow-inner mb-6">
-    <input type="number" id="searchInput" oninput="renderShop()" placeholder="🔍 ค้นหาเลขเด็ด 6 หลัก" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-[0.2em] outline-none shadow-xl focus:ring-4 focus:ring-white/30 transition text-slate-800">
-    <p id="draw-label" class="text-center text-[11px] font-bold text-white/80 mt-3 uppercase tracking-widest">กำลังเชื่อมต่อข้อมูลแผง...</p>
+  <div id="home-section" class="block">
+    <div class="search-container max-w-md mx-auto">
+      <div class="relative">
+        <input type="number" id="search-input" oninput="filterData()" maxlength="6" placeholder="ค้นหาเลข 6 หลัก หรือเลขท้าย" class="w-full bg-white text-gray-800 py-3 rounded-xl outline-none shadow-inner search-input">
+      </div>
+      <p class="text-white/80 text-xs text-center mt-2 font-medium" id="draw-label">พบสลากว่างบนแผง <span id="ticket-count" class="font-bold text-white">0</span> ใบ</p>
+    </div>
+
+    <main class="max-w-md mx-auto px-4 mt-4">
+      <div id="lottery-grid" class="grid grid-cols-1 gap-4 sm:grid-cols-2"></div>
+      <div id="no-data" class="hidden text-center py-16 bg-white rounded-xl border border-dashed border-gray-300 mt-2">
+        <div class="text-4xl mb-2">🕵️‍♂️</div>
+        <h3 class="text-base font-bold text-gray-700">แผงว่างเปล่า</h3>
+      </div>
+    </main>
   </div>
 
-  <main class="max-w-md mx-auto px-4">
-    <div id="lottery-grid" class="grid grid-cols-1 gap-4">
-      <div class="text-center py-20 text-slate-400 font-bold">กำลังโหลดสลาก...</div>
+  <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe z-40 max-w-md left-1/2 transform -translate-x-1/2">
+    <div class="flex justify-between items-center px-1">
+      <div class="nav-item active"><span class="text-xl mb-1">🏠</span><span class="text-[10px] font-bold">หน้าแรก</span></div>
+      <a href="https://www.glo.or.th/mission/reward-payment/check-reward" target="_blank" class="nav-item hover:text-red-600"><span class="text-xl mb-1">🏆</span><span class="text-[10px] font-bold">ตรวจรางวัล</span></a>
+      <a href="https://line.me/R/ti/p/@415mknnt?oat_content=url&ts=05290059" target="_blank" class="nav-item hover:text-red-600"><span class="text-xl mb-1">💬</span><span class="text-[10px] font-bold">ติดต่อเรา</span></a>
+      <div class="nav-item" onclick="forceLineLogin()"><span class="text-xl mb-1">👤</span><span class="text-[10px] font-bold">ฉัน</span></div>
     </div>
-  </main>
+  </div>
 
   <script>
     const firebaseConfig = {
@@ -47,42 +76,34 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    
-    const LIFF_ID = "2010226176-jm6lSL41"; 
+    const LIFF_ID = "2010226176-jm6lSL41";
 
     let availableTickets = [];
+    let userProfile = null;
 
     async function initLIFF() {
       try {
         await liff.init({ liffId: LIFF_ID });
         if (liff.isLoggedIn()) {
-          const profile = await liff.getProfile();
+          userProfile = await liff.getProfile();
           document.getElementById('user-info').innerHTML = `
-            <img src="${profile.pictureUrl}" class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover">
-            <span class="text-[11px] font-bold text-white">${profile.displayName}</span>
+            <img src="${userProfile.pictureUrl}" class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover">
           `;
         }
-      } catch (e) { 
-        console.error("LIFF Init Failed", e); 
-      }
+      } catch (err) { console.error('LIFF Init Error:', err); }
     }
 
-    function lineLogin() {
-      if (!liff.isLoggedIn()) {
+    function forceLineLogin() {
+      if(!liff.isLoggedIn()) {
         const cleanUrl = window.location.origin; 
         liff.login({ redirectUri: cleanUrl });
       }
     }
 
-    function loadShop() {
+    function loadShopLotteries() {
       db.collection('draws').orderBy('createdAt', 'desc').limit(1).onSnapshot(snap => {
-        if(snap.empty) {
-          document.getElementById('lottery-grid').innerHTML = '<div class="text-center py-20 text-slate-400 font-bold">ยังไม่ได้ตั้งงวดสลากในระบบหลังบ้าน</div>';
-          return;
-        }
-        
+        if(snap.empty) return;
         const draw = snap.docs[0].data().name;
-        document.getElementById('draw-label').innerText = `🎟️ ประจำงวด: ${draw}`;
         
         db.collection('lotteries')
           .where('draw', '==', draw)
@@ -90,46 +111,66 @@
           .onSnapshot(s => {
             availableTickets = [];
             s.forEach(doc => availableTickets.push({ id: doc.id, ...doc.data() }));
-            renderShop();
+            filterData();
           });
       });
     }
 
-    function renderShop() {
-      const search = document.getElementById('searchInput').value;
+    function filterData() {
+      const search = document.getElementById('search-input').value.trim();
       let list = availableTickets;
-      if (search) {
-        list = list.filter(t => t.number.includes(search));
-      }
+      if (search) list = list.filter(item => String(item.number).includes(search));
+      
+      document.getElementById('ticket-count').innerText = list.length;
+      const grid = document.getElementById('lottery-grid'); 
+      grid.innerHTML = '';
 
-      let html = '';
-      list.forEach(t => {
-        html += `
-        <div class="bg-white rounded-2xl p-4 flex justify-between items-center shadow-sm ticket-card border border-slate-200">
-          <div class="flex flex-col">
-            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">สลากดิจิทัล</span>
-            <span class="text-4xl font-black tracking-widest text-slate-800 drop-shadow-sm">${t.number}</span>
-          </div>
-          <div class="text-right flex flex-col items-end">
-            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md mb-2">ชุด ${t.quantity} ใบ</span>
-            <button onclick="buy('${t.number}')" class="bg-[#da251d] hover:bg-[#b91c1c] text-white px-6 py-2 rounded-xl font-black text-sm shadow-md transition active:scale-95">🛒 ฿100</button>
-          </div>
-        </div>`;
-      });
-
-      document.getElementById('lottery-grid').innerHTML = html || '<div class="text-center py-20 text-slate-400 font-bold text-lg">✨ ไม่พบเลขที่ต้องการบนแผง ✨</div>';
-    }
-
-    function buy(num) {
-      if (!liff.isLoggedIn()) {
-        lineLogin();
+      if(list.length === 0) {
+        document.getElementById('no-data').classList.remove('hidden');
         return;
       }
-      window.location.href = `https://line.me/R/ti/p/@415mknnt?text=สนใจสั่งซื้อสลากเลข_${num}`;
+      document.getElementById('no-data').classList.add('hidden');
+
+      list.forEach((item) => {
+        const safeNum = String(item.number); 
+        const barColors = ['from-red-500 to-red-700', 'from-green-500 to-green-700', 'from-blue-500 to-blue-700', 'from-yellow-400 to-orange-500', 'from-purple-500 to-purple-700'];
+        const barColorClass = barColors[parseInt(safeNum.charAt(0)) % 5] || barColors[0];
+        const qty = parseInt(item.quantity) || 1; 
+        const millionPrize = qty * 6;
+        const amount = qty * 100;
+
+        // ดึงดีไซน์สวยๆ ของหน้าร้านเดิมกลับมาเป๊ะๆ
+        const card = `
+          <div class="lottery-card">
+            <div class="flex border-b border-dashed border-gray-300 ticket-paper">
+              <div class="w-12 bg-gradient-to-b ${barColorClass} flex flex-col items-center justify-center text-white border-r border-black/5 shadow-inner z-10 shrink-0 text-center p-0.5">
+                <span class="text-xs font-black leading-none">${qty}</span><span class="text-[8px] font-medium my-0.5">ชุด</span>
+                <span class="text-sm font-black leading-none">${millionPrize}</span><span class="text-[8px] font-medium leading-none">ล้าน</span>
+              </div>
+              <div class="flex-1 p-2.5 z-10">
+                <div class="flex justify-between items-start mb-0.5"><span class="text-[10px] font-bold text-gray-700 tracking-wide">สลากกินแบ่งรัฐบาล</span></div>
+                <div class="text-center py-1"><div class="font-mono text-3xl font-black text-gray-900 tracking-[0.2em] drop-shadow-sm">${safeNum}</div></div>
+                <div class="flex justify-between items-end mt-1"><div class="h-3 w-14 opacity-70" style="background: repeating-linear-gradient(to right, #1f2937, #1f2937 1.5px, transparent 1.5px, transparent 3px, #1f2937 3px, #1f2937 4px, transparent 4px, transparent 6px);"></div><div class="text-[9px] font-bold text-red-600 bg-red-50 border border-red-200 px-1.5 rounded">100 บาท</div></div>
+              </div>
+            </div>
+            <div class="lottery-details">
+              <div><p class="text-[10px] text-gray-500 font-medium">ชุด ${qty} ใบ</p><p class="text-sm font-bold text-red-600">฿${amount.toLocaleString()}</p></div>
+              <button onclick="buyTicket('${safeNum}')" class="btn-buy flex items-center gap-1.5"><span class="text-sm">🛒</span> เลือกเลขนี้</button>
+            </div>
+          </div>`;
+        grid.insertAdjacentHTML('beforeend', card);
+      });
     }
 
-    initLIFF();
-    loadShop();
+    function buyTicket(num) {
+      if (!liff.isLoggedIn()) { forceLineLogin(); return; }
+      window.location.href = `https://line.me/R/ti/p/@415mknnt?text=สั่งซื้อสลากเลข_${num}`;
+    }
+
+    window.onload = function() {
+      initLIFF();
+      loadShopLotteries();
+    };
   </script>
 </body>
 </html>
