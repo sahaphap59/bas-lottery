@@ -102,12 +102,21 @@
     async function initLIFF() {
       try {
         await liff.init({ liffId: LIFF_ID });
+        
         if (liff.isLoggedIn()) {
+          // ถ้าล็อกอินแล้ว ดึงข้อมูลโปรไฟล์มาแสดงเลย
           userProfile = await liff.getProfile();
           document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="showUserProfile()" class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover cursor-pointer hover:opacity-80 transition">`;
           loadMyTickets();
+        } else {
+          // [อัปเดตใหม่] ตรวจสอบว่าเปิดในแอป LINE หรือไม่ ถ้าใช่ให้ Auto-Login ทันที!
+          if (liff.isInClient()) {
+            liff.login();
+          }
         }
-      } catch (err) { console.error('LIFF Init Error:', err); }
+      } catch (err) { 
+        console.error('LIFF Init Error:', err); 
+      }
       
       setInterval(releaseExpiredReservations, 5000); 
     }
