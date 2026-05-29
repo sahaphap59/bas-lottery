@@ -97,14 +97,13 @@
     let userProfile = null;
     let currentDraw = "";
     let countdownInterval = null;
-    let shopUnsub = null; // ตัวเก็บ Listener หน้าร้าน
+    let shopUnsub = null; 
 
     async function initLIFF() {
       try {
         await liff.init({ liffId: LIFF_ID });
         if (liff.isLoggedIn()) {
           userProfile = await liff.getProfile();
-          // เปลี่ยนรูปให้คลิกดูโปรไฟล์ได้
           document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="showUserProfile()" class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover cursor-pointer hover:opacity-80 transition">`;
           loadMyTickets();
         }
@@ -117,12 +116,10 @@
       if(!liff.isLoggedIn()) liff.login({ redirectUri: window.location.origin });
     }
     
-    // ฟังก์ชันเปิดดูเมนู "ฉัน" (Profile)
     function showUserProfile() {
         if(!userProfile) return;
         
         let phoneStr = "ยังไม่มีประวัติให้ติดต่อ";
-        // หาตั๋วล่าสุดที่มีเบอร์โทร
         const ticketWithPhone = myTickets.find(t => t.email && t.email.trim() !== "");
         if(ticketWithPhone) phoneStr = ticketWithPhone.email;
 
@@ -171,7 +168,6 @@
       }
     }
 
-    // แก้ไขโหลดข้อมูลให้อิงตามที่แอดมินเลือกบังคับโชว์
     function loadShopLotteries() {
       db.collection('settings').doc('storefront').onSnapshot(snap => {
         if(!snap.exists || !snap.data().activeDraw) {
@@ -182,9 +178,8 @@
         currentDraw = snap.data().activeDraw;
         document.getElementById('storefront-draw-name').innerText = '🎟️ ประจำงวด: ' + currentDraw;
         
-        if(shopUnsub) shopUnsub(); // ยกเลิกการฟังข้อมูลตัวเก่า
+        if(shopUnsub) shopUnsub(); 
         
-        // ดึงข้อมูลงวดที่ระบุเฉพาะอันที่ available 
         shopUnsub = db.collection('lotteries')
             .where('draw', '==', currentDraw)
             .where('status', '==', 'available')
@@ -196,12 +191,18 @@
       });
     }
 
+    // --- อัปเดต: ดักกรองไม่ให้เอาสถานะ available มาโชว์ในคลังลูกค้า ---
     function loadMyTickets() {
       if(!userProfile) return;
       db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => {
         myTickets = [];
-        s.forEach(doc => myTickets.push({ id: doc.id, ...doc.data() }));
-        // ถ้าสถานะเป็น sold (ชำระแล้ว) มันก็จะไม่โดนตั้ง expiresAt ทำให้ไม่โดนลบอัตโนมัติ 
+        s.forEach(doc => {
+            const data = doc.data();
+            // กรองสถานะที่ถูกส่งคืนแผงออกไป
+            if(data.status !== 'available') {
+                myTickets.push({ id: doc.id, ...data });
+            }
+        });
         renderMyTickets();
         startCountdownTimer();
       });

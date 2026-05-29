@@ -195,12 +195,11 @@
       if (document.getElementById('adminPin').value === '123456') { 
         document.getElementById('adminAuthOverlay').style.display = 'none';
         loadInitialData();
-        listenToStorefrontSettings(); // ดึงสถานะงวดปัจจุบัน
+        listenToStorefrontSettings();
       } else { Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('adminPin').value = ''; }
     }
     document.getElementById('adminPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAdminLogin(); });
 
-    // ฟังก์ชันตั้งค่างวดที่จะโชว์หน้าร้าน
     function setActiveStorefrontDraw() {
         if(!currentSelectedSheet) return;
         Swal.fire({
@@ -231,7 +230,6 @@
         if(snapshot.empty) { db.collection('draws').add({ name: "งวดปัจจุบัน", createdAt: new Date() }); return; }
         snapshot.forEach(doc => { const opt = document.createElement('option'); opt.value = doc.data().name; opt.innerText = doc.data().name; sel.appendChild(opt); });
         
-        // ลองดึงว่าหน้าร้านตั้งค่าอะไรไว้เป็น default ถ้าไม่มีก็เอาอันล่าสุด
         db.collection('settings').doc('storefront').get().then(doc => {
             if(doc.exists && doc.data().activeDraw) {
                 currentSelectedSheet = doc.data().activeDraw;
@@ -351,17 +349,19 @@
         reader.readAsDataURL(this.files[0]);
     });
 
+    // --- อัปเดตการเคลียร์: ตัด userId ลูกค้าออกด้วย ---
     function clearTicket(id) {
       Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => {
         if(r.isConfirmed) {
            const ticket = allTicketsList.find(t => t.id === id);
-           if(ticket && GAS_WEB_APP_URL.includes('/exec')) {
+           if(ticket && typeof GAS_WEB_APP_URL !== 'undefined' && GAS_WEB_APP_URL.includes('/exec')) {
                fetch(GAS_WEB_APP_URL, {
                  method: 'POST',
                  body: JSON.stringify({ action: 'update', number: ticket.number, draw: currentSelectedSheet, name: "-", status: "available", quantity: ticket.quantity, amount: ticket.amount, slip: "", note: "", email: "" })
                }).catch(e => console.log(e));
            }
-           db.collection('lotteries').doc(id).update({ name: "-", status: "available", slip: "", note: "", email: "", expiresAt: null }); 
+           // สั่งล้าง userId ทิ้ง เพื่อไม่ให้โชว์ในคลังลูกค้า
+           db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null }); 
         }
       });
     }
@@ -372,6 +372,7 @@
       });
     }
 
+    // --- อัปเดตการบันทึก: ถ้าตั้งว่างแผง ให้ตัด userId ทิ้งด้วย ---
     function submitForm(e) {
       e.preventDefault(); const id = document.getElementById('formRowIndex').value; const num = document.getElementById('formNumberInput').value.trim().padStart(6, '0'); const qty = document.getElementById('formQty').value;
       let name = document.getElementById('formBuyerName').value.trim(); let statusUI = document.getElementById('formStatus').value;
@@ -381,7 +382,13 @@
 
       const payload = { number: num, quantity: qty, amount: qty * 100, name: name, status: finalStatus, slip: base64SlipString, email: document.getElementById('formEmail').value.trim(), note: document.getElementById('formNote').value.trim(), draw: currentSelectedSheet };
 
-      if (GAS_WEB_APP_URL.includes('/exec')) {
+      // ถ้าแอดมินปรับเป็นสถานะว่างแผง ให้ลบ userId ของลูกค้าออกไปเลย
+      if (finalStatus === "available") {
+          payload.userId = null;
+          payload.expiresAt = null;
+      }
+
+      if (typeof GAS_WEB_APP_URL !== 'undefined' && GAS_WEB_APP_URL.includes('/exec')) {
         fetch(GAS_WEB_APP_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'update', ...payload })
