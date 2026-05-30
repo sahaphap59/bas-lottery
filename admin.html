@@ -72,7 +72,6 @@
         <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🏪 ไปหน้าร้าน</button>
         <button onclick="addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
         <button onclick="openWinningModal()" class="gold-gradient text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md hover:opacity-90">🏆 บันทึกผลรางวัล</button>
-        <button onclick="triggerMigrationPopup()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-sm">📥 ดูดข้อมูล</button>
         <button onclick="openModal()" class="bg-slate-700 border border-slate-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">➕ ลงทะเบียนสลาก</button>
       </div>
     </div>
@@ -96,8 +95,9 @@
             <button onclick="switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white">🟢 ชำระแล้ว</button>
             <button onclick="switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white">🔴 ค้างชำระ/จอง</button>
             <button onclick="switchTab('winners')" id="tab-winners" class="tab-btn text-slate-900 bg-amber-300/80 hover:bg-amber-300 font-black shadow-sm">🎉 คนที่ถูกรางวัล</button>
+            <button onclick="switchTab('crm')" id="tab-crm" class="tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2">👥 ฐานข้อมูลลูกค้า</button>
           </div>
-          <input type="text" id="search-input" oninput="filterData()" placeholder="🔍 ค้นหาเลขสลาก หรือ ชื่อผู้ซื้อ..." class="w-full md:w-72 px-4 py-2.5 rounded-lg border border-slate-300 outline-none text-sm">
+          <input type="text" id="search-input" oninput="filterData()" placeholder="🔍 ค้นหาเลขสลาก หรือ ชื่อผู้ซื้อ..." class="w-full md:w-72 px-4 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500">
         </div>
 
         <div class="overflow-x-auto">
@@ -115,7 +115,7 @@
             </thead>
             <tbody id="table-body" class="divide-y divide-slate-100 text-sm bg-white"></tbody>
           </table>
-          <div id="no-data" class="hidden text-center py-20 text-slate-400"><p class="font-bold text-lg">✨ ไม่พบข้อมูลสลากในหมวดหมู่นี้</p></div>
+          <div id="no-data" class="hidden text-center py-20 text-slate-400"><p class="font-bold text-lg">✨ ไม่พบข้อมูลในหมวดหมู่นี้</p></div>
         </div>
       </div>
     </div>
@@ -137,10 +137,6 @@
         <div class="grid grid-cols-2 gap-4">
           <div><label class="block text-xs font-bold text-slate-700 mb-1">สถานะดีล</label><select name="status" id="formStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none"><option value="ยังไม่ชำระ">🔴 ยังไม่ชำระ / จอง</option><option value="ชำระแล้ว">🟢 ชำระสำเร็จ</option></select></div>
           <div><label class="block text-xs font-bold text-slate-700 mb-1">ยอดเงินสุทธิ</label><input type="text" id="formAmount" readonly class="w-full bg-slate-100 border border-slate-200 p-3 rounded-lg text-lg font-black text-rose-600 text-right outline-none"></div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">📸 เปลี่ยนรูปหลักฐานสลิป</label>
-          <input type="file" id="adminSlipFile" accept="image/*" class="w-full text-xs text-slate-600 border border-slate-300 p-2.5 rounded-lg bg-white outline-none">
         </div>
         <div class="flex justify-end pt-4 border-t border-slate-200">
           <button type="button" onclick="closeModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button>
@@ -193,7 +189,7 @@
     const db = firebase.firestore();
 
     let allTicketsList = []; let currentTab = 'all'; let currentSelectedSheet = ""; let unsubListener = null;
-    let base64SlipString = ""; let currentWinData = null;
+    let currentWinData = null;
 
     function checkAdminLogin() {
       if (document.getElementById('adminPin').value === '123456') { 
@@ -221,23 +217,22 @@
         db.collection('settings').doc('storefront').get().then(doc => {
             if(doc.exists && doc.data().activeDraw) { currentSelectedSheet = doc.data().activeDraw; sel.value = currentSelectedSheet; } 
             else { currentSelectedSheet = sel.value; }
-            onSheetChange(); // Load Win Data & Tickets
+            onSheetChange(); 
         });
       });
     }
 
     function onSheetChange() { 
       currentSelectedSheet = document.getElementById('sheet-selector').value; 
+      if (currentTab === 'crm') switchTab('all'); // ถ้าอยู่หน้า crm ให้สลับกลับมาดูหวย
       document.getElementById('search-input').value = ""; 
       
-      // ดึงข้อมูลผลรางวัลก่อน
       db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => {
           currentWinData = doc.exists ? doc.data() : null;
           loadLotteryDataFromServer(currentSelectedSheet);
       });
     }
 
-    // --- ฟังก์ชันคำนวณเงินรางวัล ---
     function checkWinningPrize(ticketNumber, qty, winData) {
         if (!winData) return { won: false, total: 0, labels: [] };
         let totalPrize = 0; let labels = []; let numStr = String(ticketNumber).padStart(6, '0');
@@ -249,19 +244,12 @@
             if (n === p1 + 1 || n === p1 - 1) { totalPrize += 100000; labels.push("รางวัลข้างเคียง"); }
         }
         if (winData.last2 && numStr.slice(-2) === winData.last2) { totalPrize += 2000; labels.push("เลขท้าย 2 ตัว"); }
-        if (winData.front3 && winData.front3.includes(numStr.slice(0, 3))) {
-            let count = winData.front3.filter(x => x === numStr.slice(0, 3)).length;
-            totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขหน้า 3 ตัว");
-        }
-        if (winData.last3 && winData.last3.includes(numStr.slice(-3))) {
-            let count = winData.last3.filter(x => x === numStr.slice(-3)).length;
-            totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขท้าย 3 ตัว");
-        }
+        if (winData.front3 && winData.front3.includes(numStr.slice(0, 3))) { let count = winData.front3.filter(x => x === numStr.slice(0, 3)).length; totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขหน้า 3 ตัว"); }
+        if (winData.last3 && winData.last3.includes(numStr.slice(-3))) { let count = winData.last3.filter(x => x === numStr.slice(-3)).length; totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขท้าย 3 ตัว"); }
         if (winData.prize2 && winData.prize2.includes(numStr)) { totalPrize += 200000; labels.push("รางวัลที่ 2"); }
         if (winData.prize3 && winData.prize3.includes(numStr)) { totalPrize += 80000; labels.push("รางวัลที่ 3"); }
         if (winData.prize4 && winData.prize4.includes(numStr)) { totalPrize += 40000; labels.push("รางวัลที่ 4"); }
         if (winData.prize5 && winData.prize5.includes(numStr)) { totalPrize += 20000; labels.push("รางวัลที่ 5"); }
-
         return { won: totalPrize > 0, total: totalPrize * qty, labels: [...new Set(labels)] };
     }
 
@@ -272,15 +260,13 @@
           snapshot.forEach(doc => {
             const item = doc.data(); const ticket = { id: doc.id, ...item };
             if (item.status === 'available') ticket.status = 'ยังไม่ชำระ';
-            if (item.status === 'sold' || item.status === 'ชำระแล้ว') ticket.status = 'ชำระแล้ว';
+            if (item.status === 'sold' || item.status === 'ชำระแล้ว' || item.status === 'success') ticket.status = 'ชำระแล้ว';
             if (item.status === 'reserve' || item.status === 'จอง') ticket.status = 'จอง';
-            if (item.status === 'รอตรวจสอบสลิป') ticket.status = 'รอตรวจสอบสลิป';
+            if (item.status === 'รอตรวจสอบสลิป' || item.status === 'pending') ticket.status = 'รอตรวจสอบสลิป';
             
-            // ผูกข้อมูลผลรางวัลเข้าใน Ticket เลยเพื่อให้เรียกใช้ง่าย
-            const prizeInfo = checkWinningPrize(ticket.number, ticket.quantity, currentWinData);
-            ticket.prizeInfo = prizeInfo;
-
+            ticket.prizeInfo = checkWinningPrize(ticket.number, ticket.quantity, currentWinData);
             allTicketsList.push(ticket);
+            
             const qty = parseInt(ticket.quantity) || 1; const price = qty * 100; totalQty += qty;
             if (ticket.name && ticket.name !== '-' && ticket.name !== '') {
               totalBuyers++; sumTotal += price;
@@ -292,7 +278,7 @@
           document.getElementById('sum-total').innerText = '฿' + sumTotal.toLocaleString('th-TH');
           document.getElementById('sum-paid').innerText = '฿' + sumPaid.toLocaleString('th-TH');
           document.getElementById('sum-unpaid').innerText = '฿' + sumUnpaid.toLocaleString('th-TH');
-          renderTable(document.getElementById('search-input').value.trim());
+          if(currentTab !== 'crm') renderTable(document.getElementById('search-input').value.trim());
         });
     }
 
@@ -320,7 +306,6 @@
         if(!isFree && item.status === "ชำระแล้ว") statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-md font-bold text-xs">🟢 ชำระแล้ว</span>`;
         if(item.status === 'รอตรวจสอบสลิป') statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 px-3 py-1 rounded-md font-black text-xs animate-pulse">⏳ รอตรวจสอบสลิป</span>`;
 
-        // แสดงสัญลักษณ์ถูกรางวัลและเงินรางวัลที่ต้องจ่าย
         if(item.prizeInfo && item.prizeInfo.won && item.status === "ชำระแล้ว") {
             statusBadge += `<br><div class="mt-2 inline-block gold-gradient text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`;
         }
@@ -336,6 +321,7 @@
 
     function switchTab(t) { 
         currentTab = t; 
+        
         ['all','empty','paid','unpaid','winners'].forEach(k => { 
             const btn = document.getElementById('tab-'+k);
             if(k === 'winners') {
@@ -344,10 +330,80 @@
                 btn.className = (k===t) ? "tab-btn tab-active" : "tab-btn text-slate-600 hover:bg-slate-200"; 
             }
         }); 
-        document.getElementById('search-input').value = ""; renderTable(); 
+        
+        document.getElementById('tab-crm').className = (t === 'crm') ? "tab-btn text-white bg-indigo-600 font-bold ml-2 shadow-inner" : "tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2";
+
+        if(t === 'crm') {
+            loadCustomerCRM();
+        } else {
+            // Restore Lottery Headers
+            document.querySelector('thead tr').innerHTML = `
+              <th class="py-4 px-4 text-center">No.</th>
+              <th class="py-4 px-4 text-center">สลากดิจิทัล</th>
+              <th class="py-4 px-6">ชื่อกรรมสิทธิ์ผู้ซื้อ</th>
+              <th class="py-4 px-4 text-center">จำนวน</th>
+              <th class="py-4 px-6 text-right">ยอดชำระ</th>
+              <th class="py-4 px-4 text-center">สถานะ</th>
+              <th class="py-4 px-4 text-center">แผงควบคุม</th>
+            `;
+            document.getElementById('search-input').placeholder = "🔍 ค้นหาเลขสลาก หรือ ชื่อผู้ซื้อ...";
+            document.getElementById('search-input').value = ""; 
+            renderTable(); 
+        }
     }
     
-    function filterData() { renderTable(document.getElementById('search-input').value.trim()); }
+    function filterData() { 
+        if (currentTab === 'crm') {
+             // Basic CRM Search
+             const text = document.getElementById('search-input').value.trim().toLowerCase();
+             const rows = document.querySelectorAll('#table-body tr');
+             rows.forEach(row => {
+                 if(row.innerText.toLowerCase().includes(text)) row.style.display = '';
+                 else row.style.display = 'none';
+             });
+        } else {
+            renderTable(document.getElementById('search-input').value.trim()); 
+        }
+    }
+
+    function loadCustomerCRM() {
+      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร...";
+      document.getElementById('search-input').value = "";
+      
+      const body = document.getElementById('table-body');
+      body.innerHTML = '<tr><td colspan="5" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>';
+      document.getElementById('no-data').classList.add('hidden');
+
+      document.querySelector('thead tr').innerHTML = `
+        <th class="py-4 px-4 text-center">โปรไฟล์</th>
+        <th class="py-4 px-6">ชื่อ (LINE)</th>
+        <th class="py-4 px-4">เบอร์ติดต่อ</th>
+        <th class="py-4 px-6">ที่อยู่จัดส่ง</th>
+        <th class="py-4 px-4 text-center">อัปเดตล่าสุด</th>
+      `;
+
+      db.collection('users').get().then(snap => {
+        body.innerHTML = '';
+        if(snap.empty) { body.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-rose-500">ยังไม่มีข้อมูลลูกค้าในระบบ</td></tr>'; return; }
+        
+        snap.forEach(doc => {
+          const user = doc.data();
+          const dateStr = user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('th-TH') : '-';
+          const img = user.pictureUrl ? `<img src="${user.pictureUrl}" class="w-10 h-10 rounded-full mx-auto shadow-sm object-cover">` : '<div class="w-10 h-10 rounded-full bg-gray-200 mx-auto flex items-center justify-center text-xl">👤</div>';
+          
+          body.insertAdjacentHTML('beforeend', `
+            <tr class="hover:bg-slate-50 border-b border-slate-100 text-sm">
+              <td class="py-3 px-4 text-center">${img}</td>
+              <td class="py-3 px-6 font-bold text-slate-800">${user.displayName || 'ไม่ระบุ'}</td>
+              <td class="py-3 px-4 text-indigo-600 font-bold">${user.phone || 'ยังไม่กรอก'}</td>
+              <td class="py-3 px-6 text-slate-500 text-xs max-w-xs truncate" title="${user.address || ''}">${user.address || 'ยังไม่ระบุ'}</td>
+              <td class="py-3 px-4 text-center text-slate-400 text-xs">${dateStr}</td>
+            </tr>
+          `);
+        });
+      });
+    }
+
     function calculateAmount() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); }
     function openModal() { document.getElementById('formModal').classList.remove('hidden'); document.getElementById('lotteryForm').reset(); document.getElementById('formRowIndex').value = ""; document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; calculateAmount(); }
     function closeModal() { document.getElementById('formModal').classList.add('hidden'); }
