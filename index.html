@@ -140,8 +140,9 @@
 
     let availableTickets = []; let myTickets = []; let userProfile = null;
     let currentDraw = ""; let countdownInterval = null; let shopUnsub = null; 
+    let myTicketsUnsub = null; // ป้องกันการดึงข้อมูลซ้ำซ้อน
     let globalSavedPhone = ""; let globalSavedAddress = "";
-    let currentWinData = null; // เก็บผลรางวัลของงวดนี้
+    let currentWinData = null;
 
     async function initLIFF() {
       try {
@@ -150,6 +151,7 @@
           userProfile = await liff.getProfile();
           document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="switchTab('profile')" class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover cursor-pointer hover:opacity-80 transition">`;
           fetchUserProfileData();
+          loadMyTickets(); // 🔴 แก้ไขแล้ว: ดึงข้อมูลสลากเข้าคลังทันทีที่ล็อกอินสำเร็จ
         } else { if (liff.isInClient()) liff.login(); }
       } catch (err) { console.error('LIFF Init Error:', err); }
       setInterval(releaseExpiredReservations, 5000); 
@@ -178,8 +180,7 @@
         document.getElementById('stat-total-tickets').innerText = total; document.getElementById('stat-pending').innerText = pending; document.getElementById('stat-success').innerText = success;
     }
 
-    /* ... ฟังก์ชัน UI แก้ไขโปรไฟล์เดิม ... */
-    function editProfileField(field) { /* โค้ดเดิมยาวๆ ถูกใช้งานปกติ */
+    function editProfileField(field) {
         if(!userProfile) return;
         let title = field === 'phone' ? '📱 เบอร์โทรศัพท์' : '🚚 ที่อยู่จัดส่ง';
         let currentValue = field === 'phone' ? globalSavedPhone : globalSavedAddress;
@@ -199,6 +200,7 @@
             }
         }).then((res) => { if(res.isConfirmed) Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false }); });
     }
+
     function showShopBankInfo() { Swal.fire({ title: '🏦 บัญชีร้านค้า', html: `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left shadow-inner mt-2"><p class="text-sm font-medium text-slate-600 mb-1">ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="text-sm font-medium text-slate-600 mb-1">ชื่อบัญชี: <span class="font-bold text-slate-900">สหภาพ เนาว์แสง</span></p><p class="text-sm font-medium text-slate-600 mt-3">เลขที่บัญชี:</p><div class="bg-white border border-emerald-100 rounded-lg p-2 text-center mt-1"><span class="font-mono font-black text-2xl text-slate-800 tracking-widest select-all">0138284018</span></div></div>`, confirmButtonText: 'ปิดหน้าต่าง', confirmButtonColor: '#1e293b' }); }
 
     function switchTab(tab) {
@@ -219,10 +221,12 @@
         currentDraw = snap.data().activeDraw;
         document.getElementById('storefront-draw-name').innerText = '🎟️ ประจำงวด: ' + currentDraw;
         
-        // ดึงผลรางวัลของงวดนี้เตรียมไว้
         db.collection('winning_results').doc(currentDraw).onSnapshot(doc => {
             currentWinData = doc.exists ? doc.data() : null;
-            if(userProfile) loadMyTickets(); // อัปเดตคลังใหม่เผื่อมีการเปลี่ยนแปลงผล
+            if(userProfile) {
+                renderMyTickets();
+                checkAndShowWinnerPopup(); 
+            }
         });
 
         if(shopUnsub) shopUnsub(); 
@@ -232,7 +236,6 @@
       });
     }
 
-    // --- ฟังก์ชันเช็คเงินรางวัลแบบละเอียด ---
     function checkWinningPrize(ticketNumber, qty, winData) {
         if (!winData) return { won: false, total: 0, labels: [] };
         let totalPrize = 0; let labels = []; let numStr = String(ticketNumber).padStart(6, '0');
@@ -260,9 +263,59 @@
         return { won: totalPrize > 0, total: totalPrize * qty, labels: [...new Set(labels)] };
     }
 
+    function checkAndShowWinnerPopup() {
+        if (!currentWinData || myTickets.length === 0) return;
+        let totalWinAmount = 0;
+        let winningTicketsHTML = '';
+        
+        myTickets.forEach(ticket => {
+            if(ticket.status === 'ชำระแล้ว' || ticket.status === 'sold' || ticket.status === 'success') {
+                const prizeInfo = checkWinningPrize(ticket.number, ticket.quantity, currentWinData);
+                if (prizeInfo.won) {
+                    totalWinAmount += prizeInfo.total;
+                    winningTicketsHTML += `
+                        <div class="bg-white/95 rounded-xl p-3 shadow-inner mb-2 border-b-4 border-amber-500">
+                            <p class="text-slate-600 font-bold text-sm">สลากหมายเลข</p>
+                            <p class="text-red-600 font-mono text-3xl font-black tracking-widest drop-shadow-sm">${String(ticket.number).padStart(6, '0')}</p>
+                            <p class="text-emerald-600 font-extrabold text-[15px] mt-1 flex items-center justify-center gap-1">✨ ${prizeInfo.labels.join(', ')} ✨</p>
+                            <p class="text-amber-600 font-black text-sm mt-0.5">รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
+                        </div>`;
+                }
+            }
+        });
+
+        if (totalWinAmount > 0 && !sessionStorage.getItem(`notified_win_${currentDraw}`)) {
+            let htmlContent = `
+                <div class="gold-gradient-bg p-6 rounded-2xl shadow-xl border-4 border-yellow-200 relative overflow-hidden shine-animation">
+                    <div class="text-7xl mb-2 animate-bounce drop-shadow-lg filter drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">🏆</div>
+                    <h3 class="text-3xl font-black mb-1 drop-shadow-md text-slate-900 tracking-wide">ยินดีด้วยเศรษฐีใหม่!</h3>
+                    <p class="text-amber-900 font-bold text-sm mb-4">คุณถูกรางวัลรับเงินก้อนโต</p>
+                    
+                    <div class="bg-slate-900 text-white p-3 rounded-xl mb-4 border-2 border-amber-400 shadow-inner">
+                        <p class="text-xs text-amber-300 font-bold mb-1">ยอดเงินรางวัลรวมของคุณ</p>
+                        <p class="text-4xl font-black tracking-wider text-amber-400">฿${totalWinAmount.toLocaleString()}</p>
+                    </div>
+                    ${winningTicketsHTML}
+                    <p class="text-sm font-bold text-slate-800 mt-4 bg-white/70 p-2 rounded-lg inline-block border border-amber-300">💬 กรุณาแคปหน้าจอนี้ติดต่อแอดมิน</p>
+                </div>`;
+
+            Swal.fire({
+                html: htmlContent,
+                background: 'transparent',
+                showConfirmButton: true,
+                confirmButtonText: '✨ รับทราบยอดเงิน ✨',
+                confirmButtonColor: '#1e293b',
+                width: '26rem',
+                padding: '0'
+            }).then(() => { sessionStorage.setItem(`notified_win_${currentDraw}`, 'true'); });
+        }
+    }
+
     function loadMyTickets() {
       if(!userProfile) return;
-      db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => {
+      if(myTicketsUnsub) myTicketsUnsub();
+      
+      myTicketsUnsub = db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => {
         myTickets = [];
         s.forEach(doc => {
             const data = doc.data();
@@ -271,72 +324,19 @@
         renderMyTickets();
         updateProfileStats();
         startCountdownTimer();
-        
-        // --- ระบบแจ้งเตือน Popup PRO สีทอง ---
-        if (currentWinData && myTickets.length > 0) {
-            let totalWinAmount = 0;
-            let winningTicketsHTML = '';
-            
-            myTickets.forEach(ticket => {
-                if(ticket.status === 'ชำระแล้ว' || ticket.status === 'sold' || ticket.status === 'success') {
-                    const prizeInfo = checkWinningPrize(ticket.number, ticket.quantity, currentWinData);
-                    if (prizeInfo.won) {
-                        totalWinAmount += prizeInfo.total;
-                        winningTicketsHTML += `
-                            <div class="bg-white/95 rounded-xl p-3 shadow-inner mb-2 border-b-4 border-amber-500">
-                                <p class="text-slate-600 font-bold text-sm">สลากหมายเลข</p>
-                                <p class="text-red-600 font-mono text-3xl font-black tracking-widest drop-shadow-sm">${String(ticket.number).padStart(6, '0')}</p>
-                                <p class="text-emerald-600 font-extrabold text-[15px] mt-1 flex items-center justify-center gap-1">✨ ${prizeInfo.labels.join(', ')} ✨</p>
-                                <p class="text-amber-600 font-black text-sm mt-0.5">รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
-                            </div>`;
-                    }
-                }
-            });
-
-            if (totalWinAmount > 0 && !sessionStorage.getItem(`notified_win_${currentDraw}`)) {
-                let htmlContent = `
-                    <div class="gold-gradient-bg p-6 rounded-2xl shadow-xl border-4 border-yellow-200 relative overflow-hidden shine-animation">
-                        <div class="text-7xl mb-2 animate-bounce drop-shadow-lg filter drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">🏆</div>
-                        <h3 class="text-3xl font-black mb-1 drop-shadow-md text-slate-900 tracking-wide">ยินดีด้วยเศรษฐีใหม่!</h3>
-                        <p class="text-amber-900 font-bold text-sm mb-4">คุณถูกรางวัลรับเงินก้อนโต</p>
-                        
-                        <div class="bg-slate-900 text-white p-3 rounded-xl mb-4 border-2 border-amber-400 shadow-inner">
-                            <p class="text-xs text-amber-300 font-bold mb-1">ยอดเงินรางวัลรวมของคุณ</p>
-                            <p class="text-4xl font-black tracking-wider text-amber-400">฿${totalWinAmount.toLocaleString()}</p>
-                        </div>
-                        ${winningTicketsHTML}
-                        <p class="text-sm font-bold text-slate-800 mt-4 bg-white/70 p-2 rounded-lg inline-block border border-amber-300">💬 กรุณาแคปหน้าจอนี้ติดต่อแอดมิน</p>
-                    </div>`;
-
-                Swal.fire({
-                    html: htmlContent,
-                    background: 'transparent',
-                    showConfirmButton: true,
-                    confirmButtonText: '✨ รับทราบยอดเงิน ✨',
-                    confirmButtonColor: '#1e293b',
-                    width: '26rem',
-                    padding: '0'
-                }).then(() => {
-                    sessionStorage.setItem(`notified_win_${currentDraw}`, 'true');
-                });
-            }
-        }
+        checkAndShowWinnerPopup();
       });
     }
 
     function buildTicketHTML(safeNum, qty, prizeInfo = null) {
-        // ถ้ามีข้อมูลว่าถูกรางวัล จะสลับไปใช้คลาสสีทอง (Golden Ticket)
         const isWinner = prizeInfo && prizeInfo.won;
         const mainBg = isWinner ? "gold-gradient-bg gold-ticket-glow shine-animation" : "bg-gradient-to-b";
-        
         const barColors = ['from-red-500 to-red-700', 'from-emerald-500 to-emerald-700', 'from-blue-500 to-blue-700', 'from-amber-400 to-orange-500', 'from-purple-500 to-purple-700'];
         const barClass = isWinner ? "from-yellow-500 to-amber-700 text-amber-50" : (barColors[parseInt(safeNum.charAt(0)) % 5] || barColors[0]);
         const millionPrize = qty * 6;
         
         let ribbon = "";
-        if (isWinner) {
-            ribbon = `<div class="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-yellow-300 z-20 animate-pulse transform rotate-12">🎉 ถูกรางวัล!</div>`;
-        }
+        if (isWinner) { ribbon = `<div class="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-yellow-300 z-20 animate-pulse transform rotate-12">🎉 ถูกรางวัล!</div>`; }
         
         return `
             <div class="flex border-b border-dashed border-gray-300 ticket-paper relative">
@@ -400,7 +400,6 @@
         
         let statusUI = ''; let actionArea = ''; let timerHTML = '';
         
-        // ตรวจสอบผลรางวัล (สำหรับคลังลูกค้า ต้องเช็คก่อน render)
         let prizeInfo = { won: false };
         if(currentWinData && (item.status === 'ชำระแล้ว' || item.status === 'sold' || item.status === 'success')) {
             prizeInfo = checkWinningPrize(safeNum, qty, currentWinData);
@@ -416,7 +415,6 @@
             statusUI = '<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-200 shadow-sm">🟢 ชำระสำเร็จ</span>';
         }
 
-        // แทรกกล่องข้อความสีทองถ้าถูกรางวัลใต้สลาก
         let prizeBoxHTML = '';
         if (prizeInfo.won) {
             prizeBoxHTML = `
