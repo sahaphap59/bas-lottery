@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ซื้อลอตเตอรี่ออนไลน์</title>
+  <title>BAS ลอตเตอรี่ออนไลน์</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -18,16 +18,9 @@
     .filter-btn { border: 1px solid #e12424; color: #e12424; background: white; padding: 6px 0; border-radius: 8px; font-weight: 600; font-size: 13px; text-align: center; transition: 0.2s; cursor: pointer; }
     .filter-btn.active { background: #e12424; color: white; }
     
-    /* สไตล์การ์ดหวยแบบใหม่ (แดง/ดำ) */
-    .pro-ticket-card { background: #1a1a1a; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
-    .pro-ticket-top { display: flex; height: 110px; background: white; margin: 2px 2px 0 2px; border-radius: 10px 10px 0 0; }
-    .pro-ticket-left { width: 35%; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px 0 0 0; padding: 5px; }
-    .pro-ticket-right { width: 65%; padding: 4px; position: relative; background-image: url('https://www.glo.or.th/asset/images/ticket/ticket-1.png'); background-size: cover; background-position: center; background-color: #fffdf5; background-blend-mode: overlay; }
-    .pro-ticket-right::before { content: ""; position: absolute; inset: 0; opacity: 0.1; background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 1px, transparent 12px); pointer-events: none; }
-    .pro-ticket-number-box { background: rgba(255, 255, 255, 0.95); text-align: center; border: 1px solid #ccc; border-radius: 4px; padding: 2px 0; margin-bottom: 2px; }
-    .pro-btn-cart { background: #333; color: white; font-size: 13px; font-weight: 600; text-align: center; padding: 8px; border-radius: 0 0 10px 10px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .pro-btn-cart:active { background: #111; }
-
+    /* สไตล์การ์ดหวยแบบใหม่ อิงจาก images.jpg */
+    .pro-ticket-card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    
     /* สไตล์ Tabs เมนูคำสั่งซื้อ */
     .order-tab { flex: 1; text-align: center; padding: 10px 0; font-size: 13px; font-weight: 600; color: #6b7280; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.2s; }
     .order-tab.active { color: #e12424; border-bottom-color: #e12424; }
@@ -43,8 +36,9 @@
   <header class="brand-header shadow-md">
     <div class="max-w-md mx-auto flex justify-between items-center px-4 py-3">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[#e12424] font-black text-xl leading-none pt-1">🦅</div>
-        <div class="text-xl font-black italic tracking-tight">ลอตเตอรี่ออนไลน์</div>
+        <!-- โลโก้ใหม่ที่ดูดีขึ้น -->
+        <div class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#e12424] text-xl shadow-inner border border-red-200">💎</div>
+        <div class="text-xl font-black italic tracking-tight drop-shadow-sm">BAS ลอตเตอรี่</div>
       </div>
       <div id="user-info">
         <button onclick="forceLineLogin()" class="text-xs bg-white text-[#e12424] rounded-full px-4 py-1.5 font-bold shadow-sm">เข้าสู่ระบบ</button>
@@ -75,7 +69,7 @@
       <div class="flex items-center justify-between mb-3 px-1">
         <h3 class="font-black text-gray-800 text-lg">สลากบนแผง</h3>
       </div>
-      <div id="lottery-grid" class="grid grid-cols-2 gap-3"></div>
+      <div id="lottery-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       <div id="no-data" class="hidden text-center py-12 bg-white rounded-2xl shadow-sm mt-2">
         <div class="text-4xl mb-2">🕵️‍♂️</div>
         <h3 class="text-gray-500 font-bold">ไม่พบเลขที่คุณค้นหา</h3>
@@ -156,11 +150,12 @@
     let myTickets = []; 
     let userProfile = null;
     let currentDraw = ""; 
-    let currentLotteryType = 'all'; // all, single, set
-    let currentOrderTab = 'unpaid'; // unpaid, pending, success
+    let currentLotteryType = 'all'; 
+    let currentOrderTab = 'unpaid'; 
     let globalSavedPhone = ""; 
     let globalSavedAddress = "";
     let currentWinData = null;
+    let globalSalesOpen = true; // เช็คสถานะเปิดแผง
 
     async function initLIFF() {
       try {
@@ -193,7 +188,6 @@
       window.scrollTo(0, 0);
     }
 
-    // --- ระบบค้นหาและสุ่มเลขหน้าแรก ---
     function setLotteryType(type) {
       currentLotteryType = type;
       document.getElementById('type-all').className = type === 'all' ? 'filter-btn active' : 'filter-btn';
@@ -204,49 +198,94 @@
 
     function randomizeNumber() {
       const randomNum = Math.floor(100000 + Math.random() * 900000);
-      document.getElementById('search-input').value = randomNum.toString().substring(0, 2); // สุ่มมาโชว์ 2 ตัวหน้าให้พอค้นหาเจอ
+      document.getElementById('search-input').value = randomNum.toString().substring(0, 2); 
       filterData();
     }
 
     function loadShopLotteries() {
+      // ดึงสถานะแผง และ ตรวจสอบว่าแผงปิด/เปิด
       db.collection('settings').doc('storefront').onSnapshot(snap => {
         if(!snap.exists || !snap.data().activeDraw) { document.getElementById('storefront-draw-name').innerText = 'ยังไม่ได้ตั้งค่า'; return; }
-        currentDraw = snap.data().activeDraw;
+        
+        const data = snap.data();
+        currentDraw = data.activeDraw;
+        globalSalesOpen = data.isSalesOpen !== false; // ค่า default คือ true
         document.getElementById('storefront-draw-name').innerText = currentDraw;
         
         db.collection('winning_results').doc(currentDraw).onSnapshot(doc => { 
             currentWinData = doc.exists ? doc.data() : null; 
             if(userProfile) checkAndShowWinnerPopup(); 
+            filterData(); // re-render กรณีต้องการโชว์ข้อมูลรางวัล/หรือซ่อนปุ่ม
         });
         
         db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => {
             availableTickets = []; s.forEach(doc => availableTickets.push({ id: doc.id, ...doc.data() })); filterData();
         });
       });
+
+      // ดึงข้อมูลโปรโมชั่น
+      db.collection('settings').doc('promotion').get().then(doc => {
+          if (doc.exists) {
+              const promo = doc.data();
+              if (promo.isActive && promo.imageUrl && !sessionStorage.getItem('promo_seen')) {
+                  Swal.fire({
+                      imageUrl: promo.imageUrl,
+                      imageAlt: 'Promotion',
+                      showCloseButton: true,
+                      showConfirmButton: false,
+                      background: 'transparent',
+                      padding: 0
+                  });
+                  sessionStorage.setItem('promo_seen', 'true');
+              }
+          }
+      });
     }
 
     function buildProTicketHTML(id, number, qty) {
       const numStr = String(number).padStart(6, '0');
       const amount = qty * 100;
+      
+      // ปุ่มตะกร้าเช็คสถานะร้าน
+      let buttonHTML = globalSalesOpen 
+          ? `<button onclick="openCheckout('${id}', '${numStr}', ${qty})" class="w-full bg-[#e12424] hover:bg-red-700 text-white font-bold p-2 text-[13px] rounded-b-md transition flex items-center justify-center gap-1 shadow-inner">🛒 หยิบใส่ตะกร้า (฿${amount})</button>`
+          : `<button class="w-full bg-gray-400 text-white font-bold p-2 text-[13px] rounded-b-md cursor-not-allowed">🚫 ปิดรับการซื้อสลากงวดนี้</button>`;
+
       return `
-        <div class="pro-ticket-card shadow-md">
-          <div class="pro-ticket-top">
-            <div class="pro-ticket-left">
-              <span class="text-[9px] font-medium text-gray-400 leading-tight">เลขชุด</span>
-              <span class="text-[22px] font-black leading-none mt-1">${qty}</span>
-              <span class="text-[9px] font-medium leading-none mb-1">ใบ</span>
-              <span class="text-[20px] font-black leading-none text-[#e12424]">${qty * 6}</span>
-              <span class="text-[9px] font-medium leading-none">ล้าน</span>
-            </div>
-            <div class="pro-ticket-right">
-              <div class="pro-ticket-number-box">
-                <span class="text-xl font-black text-gray-900 tracking-[0.15em] font-mono">${numStr}</span>
-              </div>
-            </div>
+        <div class="pro-ticket-card">
+          <!-- ดีไซน์สลากเสมือนจริง อิงจาก images.jpg -->
+          <div class="relative bg-[#fffdf5] flex w-full" style="height: 110px; background-image: url('https://www.glo.or.th/asset/images/ticket/ticket-1.png'); background-size: cover; background-blend-mode: overlay;">
+             <!-- Left Stub (ขั้วสลาก) -->
+             <div class="w-[30%] border-r border-dashed border-gray-400 flex flex-col justify-between items-center py-2 px-1 relative bg-white/40 backdrop-blur-[1px]">
+                <div class="text-[8px] text-[#e12424] font-bold rotate-[-90deg] absolute -left-[14px] top-9 whitespace-nowrap">สลากกินแบ่งรัฐบาล</div>
+                <div class="text-center mt-1">
+                   <div class="text-sm font-black text-gray-800">${qty} ใบ</div>
+                   <div class="text-[10px] font-bold text-gray-600">${qty*6} ล้าน</div>
+                </div>
+                <div class="text-center leading-none">
+                   <div class="text-[20px] font-black text-[#e12424]">80</div>
+                   <div class="text-[9px] font-bold text-gray-800">บาท</div>
+                </div>
+             </div>
+             <!-- Main Area (เนื้อสลาก) -->
+             <div class="w-[70%] p-1.5 relative flex flex-col justify-between bg-white/20">
+                <div class="flex justify-between items-start pt-1">
+                   <div class="flex items-center gap-1 pl-1">
+                      <div class="w-5 h-5 rounded-full border border-red-300 bg-red-50 flex items-center justify-center"><span class="text-[8px]">🦅</span></div>
+                      <div class="text-[7.5px] text-[#e12424] font-bold leading-tight">สลากกินแบ่งรัฐบาล<br><span class="text-[5.5px] text-gray-600">THAI GOVERNMENT LOTTERY</span></div>
+                   </div>
+                   <div class="text-[26px] font-mono tracking-widest font-black text-gray-900 leading-none drop-shadow-sm">${numStr}</div>
+                </div>
+                <div class="text-center bg-white/90 rounded py-0.5 mt-1 border border-blue-100 shadow-sm mx-1">
+                   <div class="text-[11px] font-black text-gray-800">${currentDraw}</div>
+                </div>
+                <div class="flex justify-between items-end pb-1 px-1">
+                   <div class="w-7 h-7 bg-white p-0.5 border border-gray-300 flex"><div class="w-full h-full bg-[repeating-linear-gradient(45deg,#fff,#fff_2px,#000_2px,#000_4px)] opacity-70"></div></div>
+                   <div class="w-24 h-4 bg-[repeating-linear-gradient(90deg,#333,#333_1.5px,transparent_1.5px,transparent_3px)] opacity-70"></div>
+                </div>
+             </div>
           </div>
-          <button onclick="openCheckout('${id}', '${numStr}', ${qty})" class="pro-btn-cart hover:bg-[#e12424] transition">
-            🛒 หยิบใส่ตะกร้า (฿${amount})
-          </button>
+          ${buttonHTML}
         </div>
       `;
     }
@@ -271,7 +310,6 @@
       });
     }
 
-    // --- ระบบคำสั่งซื้อ (Orders) ---
     function setOrderTab(tab) {
       currentOrderTab = tab;
       document.getElementById('tab-unpaid').className = tab === 'unpaid' ? 'order-tab active' : 'order-tab';
@@ -320,6 +358,8 @@
         }
         
         let prizeBoxHTML = '';
+        let isDrawAnnounced = currentWinData && currentWinData.prize1; // เช็คว่าประกาศผลรางวัลหรือยัง
+        
         if(currentWinData && (item.status === 'ชำระสำเร็จ' || item.status === 'sold' || item.status === 'success')){
              const prizeInfo = checkWinningPrize(item.number, item.quantity, currentWinData);
              if (prizeInfo.won) {
@@ -329,11 +369,17 @@
                     <p class="text-sm font-black text-amber-900">${prizeInfo.labels.join(', ')}</p>
                     <p class="text-[#e12424] font-black text-lg mt-1">ได้รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
                  </div>`;
+             } else if (isDrawAnnounced) {
+                 // ตรวจแล้ว และไม่ถูกรางวัล
+                 prizeBoxHTML = `
+                 <div class="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-2 text-center opacity-80">
+                    <p class="text-sm font-bold text-gray-500">❌ ไม่ถูกรางวัล</p>
+                 </div>`;
              }
         }
 
         const html = `
-          <div class="bg-white p-4 rounded-xl shadow-sm border ${prizeBoxHTML ? 'border-amber-400 gold-glow' : 'border-gray-200'}">
+          <div class="bg-white p-4 rounded-xl shadow-sm border ${prizeBoxHTML.includes('ยินดีด้วย') ? 'border-amber-400 gold-glow' : 'border-gray-200'}">
             <div class="flex justify-between items-start mb-3">
               <div>
                 <p class="text-sm font-bold text-gray-800">สลากเลข: <span class="text-xl text-[#e12424] font-mono tracking-widest font-black">${numStr}</span></p>

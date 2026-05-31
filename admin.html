@@ -70,6 +70,8 @@
         </div>
         
         <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🏪 ไปหน้าร้าน</button>
+        <button onclick="toggleSales()" id="btn-toggle-sales" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🛒 สถานะขาย: เปิด</button>
+        <button onclick="openPromoModal()" class="bg-fuchsia-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📣 โปรโมชั่น</button>
         <button onclick="addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
         <button onclick="openWinningModal()" class="gold-gradient text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md hover:opacity-90">🏆 บันทึกผลรางวัล</button>
         <button onclick="openModal()" class="bg-slate-700 border border-slate-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">➕ ลงทะเบียนสลาก</button>
@@ -121,6 +123,34 @@
     </div>
   </div>
 
+  <!-- Promotion Modal -->
+  <div id="promoModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
+      <div class="bg-fuchsia-600 text-white px-6 py-4 flex justify-between items-center">
+        <h2 class="text-lg font-bold flex items-center gap-2">📣 จัดการรูปโปรโมชั่น Pop-up</h2>
+        <button onclick="closePromoModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button>
+      </div>
+      <form id="promoForm" onsubmit="savePromotion(event)" class="p-6 space-y-5">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ลิงก์รูปภาพโปรโมชั่น (Image URL)</label>
+          <input type="url" id="promoImageUrl" placeholder="https://..." class="w-full border border-slate-300 p-3 rounded-lg text-sm font-semibold outline-none focus:border-fuchsia-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">สถานะโปรโมชั่น</label>
+          <select id="promoStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none">
+            <option value="true">🟢 เปิดใช้งาน (ลูกค้าจะเห็น Pop-up)</option>
+            <option value="false">🔴 ปิดใช้งาน</option>
+          </select>
+        </div>
+        <div class="flex justify-end pt-4 border-t border-slate-200">
+          <button type="button" onclick="closePromoModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button>
+          <button type="submit" class="px-6 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึกโปรโมชั่น</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Form Modal (Lottery) -->
   <div id="formModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
       <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center border-b-4 border-amber-400">
@@ -146,6 +176,7 @@
     </div>
   </div>
 
+  <!-- Winning Modal -->
   <div id="winningModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8 border-2 border-yellow-400">
       <div class="gold-gradient text-slate-900 px-6 py-4 flex justify-between items-center border-b border-yellow-500">
@@ -189,7 +220,7 @@
     const db = firebase.firestore();
 
     let allTicketsList = []; let currentTab = 'all'; let currentSelectedSheet = ""; let unsubListener = null;
-    let currentWinData = null;
+    let currentWinData = null; let isSalesOpen = true;
 
     function checkAdminLogin() {
       if (document.getElementById('adminPin').value === '123456') { 
@@ -206,7 +237,54 @@
         .then(r => { if(r.isConfirmed) { db.collection('settings').doc('storefront').set({ activeDraw: currentSelectedSheet }, { merge: true }).then(() => Swal.fire({toast:true, position: 'top-end', title: 'ตั้งงวดหน้าร้านสำเร็จ', icon: 'success', timer: 2000, showConfirmButton:false})); } });
     }
 
-    function listenToStorefrontSettings() { db.collection('settings').doc('storefront').onSnapshot(doc => { const activeDraw = doc.exists ? doc.data().activeDraw : "ยังไม่ได้ตั้งค่า"; document.getElementById('active-storefront-label').innerText = `🟢 หน้าร้าน: ${activeDraw}`; }); }
+    // ฟังก์ชันจัดการเปิดปิดแผงขาย
+    function toggleSales() {
+        const newStatus = !isSalesOpen;
+        db.collection('settings').doc('storefront').set({ isSalesOpen: newStatus }, { merge: true }).then(() => {
+            Swal.fire({ toast: true, position: 'top-end', title: newStatus ? 'เปิดแผงขายแล้ว' : 'ปิดรับการซื้อสลากแล้ว', icon: 'success', timer: 2000, showConfirmButton: false });
+        });
+    }
+
+    function listenToStorefrontSettings() { 
+        db.collection('settings').doc('storefront').onSnapshot(doc => { 
+            const data = doc.exists ? doc.data() : {};
+            const activeDraw = data.activeDraw || "ยังไม่ได้ตั้งค่า"; 
+            document.getElementById('active-storefront-label').innerText = `🟢 หน้าร้าน: ${activeDraw}`; 
+            
+            isSalesOpen = data.isSalesOpen !== false;
+            const btn = document.getElementById('btn-toggle-sales');
+            if (isSalesOpen) {
+                btn.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition";
+                btn.innerText = "🛒 สถานะขาย: เปิด";
+            } else {
+                btn.className = "bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition";
+                btn.innerText = "🚫 สถานะขาย: ปิด";
+            }
+        }); 
+    }
+
+    // ฟังก์ชันโปรโมชั่น
+    function openPromoModal() {
+        db.collection('settings').doc('promotion').get().then(doc => {
+            if(doc.exists) {
+                document.getElementById('promoImageUrl').value = doc.data().imageUrl || "";
+                document.getElementById('promoStatus').value = doc.data().isActive ? "true" : "false";
+            }
+            document.getElementById('promoModal').classList.remove('hidden');
+        });
+    }
+    function closePromoModal() { document.getElementById('promoModal').classList.add('hidden'); }
+    function savePromotion(e) {
+        e.preventDefault();
+        const payload = {
+            imageUrl: document.getElementById('promoImageUrl').value.trim(),
+            isActive: document.getElementById('promoStatus').value === "true"
+        };
+        db.collection('settings').doc('promotion').set(payload).then(() => {
+            Swal.fire({ title: 'บันทึกโปรโมชั่นสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' });
+            closePromoModal();
+        });
+    }
 
     function loadInitialData() {
       db.collection('draws').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
@@ -224,7 +302,7 @@
 
     function onSheetChange() { 
       currentSelectedSheet = document.getElementById('sheet-selector').value; 
-      if (currentTab === 'crm') switchTab('all'); // ถ้าอยู่หน้า crm ให้สลับกลับมาดูหวย
+      if (currentTab === 'crm') switchTab('all'); 
       document.getElementById('search-input').value = ""; 
       
       db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => {
@@ -336,7 +414,6 @@
         if(t === 'crm') {
             loadCustomerCRM();
         } else {
-            // Restore Lottery Headers
             document.querySelector('thead tr').innerHTML = `
               <th class="py-4 px-4 text-center">No.</th>
               <th class="py-4 px-4 text-center">สลากดิจิทัล</th>
@@ -354,7 +431,6 @@
     
     function filterData() { 
         if (currentTab === 'crm') {
-             // Basic CRM Search
              const text = document.getElementById('search-input').value.trim().toLowerCase();
              const rows = document.querySelectorAll('#table-body tr');
              rows.forEach(row => {
@@ -412,9 +488,6 @@
     function addNewMonthPopup() { Swal.fire({ title: "สร้างแผ่นงานงวดใหม่", input: "text", inputPlaceholder: "งวด 1 กรกฎาคม 2569", showCancelButton: true, confirmButtonColor: '#1e293b' }).then(r => { if(r.value) db.collection('draws').add({ name: r.value.trim(), createdAt: new Date() }); }); }
     function submitForm(e) { e.preventDefault(); const id = document.getElementById('formRowIndex').value; const num = document.getElementById('formNumberInput').value.trim().padStart(6, '0'); const qty = document.getElementById('formQty').value; let name = document.getElementById('formBuyerName').value.trim(); let statusUI = document.getElementById('formStatus').value; let finalStatus = "available"; if(name === "") name = "-"; else finalStatus = (statusUI === "ชำระแล้ว") ? "sold" : "reserve"; const payload = { number: num, quantity: qty, amount: qty * 100, name: name, status: finalStatus, draw: currentSelectedSheet }; if (finalStatus === "available") { payload.userId = null; payload.expiresAt = null; } if(id) { db.collection('lotteries').doc(id).update(payload).then(() => closeModal()); } else { const customId = currentSelectedSheet.replace(/\s+/g, '') + "_" + num; db.collection('lotteries').doc(customId).set(payload, { merge: true }).then(() => closeModal()); } }
 
-    /* =========================================
-       ระบบประกาศผลรางวัล
-       ========================================= */
     function openWinningModal() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดสลากก่อนครับ', 'warning');
         db.collection('winning_results').doc(currentSelectedSheet).get().then(doc => {
