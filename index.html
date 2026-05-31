@@ -37,16 +37,6 @@
     
     .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); border: 2px solid #F59E0B !important; }
     .real-barcode { font-family: 'Libre Barcode 39', cursive; font-size: 26px; line-height: 1; color: #1f2937; transform: scaleY(0.7); transform-origin: bottom; white-space: nowrap; }
-/* โค้ดสำหรับทำพื้นหลังสีทองเคลื่อนไหว (หน้าลูกค้า) */
-    @keyframes goldShine {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 200% 50%; }
-    }
-    .gold-gradient-anim {
-      background: linear-gradient(90deg, #fcf6ba, #bf953f, #fcf6ba, #b38728, #fcf6ba);
-      background-size: 200% auto;
-      animation: goldShine 3s linear infinite;
-    }
   </style>
 </head>
 <body class="pb-24">
@@ -394,17 +384,18 @@
              const prizeInfo = checkWinningPrize(item.number, item.quantity, currentWinData);
              if (prizeInfo.won) {
                  prizeBoxHTML = `
-                 <div class="gold-gradient-anim border-t-2 border-yellow-400 p-4 text-center rounded-b-xl relative overflow-hidden shadow-md">
-                    <p class="text-[13px] font-bold text-[#8a6300] mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
-                    <p class="text-lg font-black text-[#8a6300] drop-shadow-sm">${prizeInfo.labels.join(', ')}</p>
-                    <p class="text-[#d31a1a] font-black text-[24px] mt-2 drop-shadow-sm tracking-wide">ได้รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
+                 <div class="bg-gradient-to-b from-[#fffce8] to-[#ffed99] border-t-2 border-[#f5c200] p-4 text-center rounded-b-xl relative overflow-hidden">
+                    <p class="text-[13px] font-bold text-[#b38000] mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
+                    <p class="text-base font-black text-[#8a6300] drop-shadow-sm">${prizeInfo.labels.join(', ')}</p>
+                    <p class="text-[#d31a1a] font-black text-[22px] mt-1 drop-shadow-sm tracking-wide">ได้รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
                  </div>`;
              } else if (isDrawAnnounced) {
                  prizeBoxHTML = `
                  <div class="bg-gray-50 border-t border-gray-200 p-2.5 text-center rounded-b-xl">
-                    <p class="text-sm font-black text-red-500">❌ ไม่ถูกรางวัล</p>
+                    <p class="text-sm font-black text-gray-500">❌ ไม่ถูกรางวัล</p>
                  </div>`;
              }
+        }
 
         const ticketDesignHTML = buildProTicketHTML(item.id, item.number, item.quantity, 'order');
 
