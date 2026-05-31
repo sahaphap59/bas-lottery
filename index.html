@@ -20,15 +20,12 @@
     .filter-btn { border: 1px solid #d31a1a; color: #d31a1a; background: white; padding: 6px 0; border-radius: 8px; font-weight: 600; font-size: 13px; text-align: center; transition: 0.2s; cursor: pointer; }
     .filter-btn.active { background: #d31a1a; color: white; }
     
-    /* ดีไซน์สลากรูปแบบใหม่ */
     .pro-ticket-card { background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .ticket-body-wrap { display: flex; height: 88px; width: 100%; position: relative; }
     
-    /* แก้ไขสีแถบด้านซ้ายเป็น สีดำลางๆ */
     .ticket-stub { width: 30%; border-right: 1px dashed #cbd5e1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 4px 0; background: rgba(0,0,0,0.12); backdrop-filter: blur(1.5px); }
     .ticket-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #d31a1a; font-weight: 800; font-size: 6px; position: absolute; left: 2px; top: 5px; letter-spacing: 0.5px;}
     
-    /* พื้นที่ตรงกลาง (ตัวเลข) ให้เห็นลางๆ */
     .ticket-main { width: 70%; padding: 5px 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.7); backdrop-filter: blur(1px); }
     
     .btn-cart-texture { background-color: #d31a1a; background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px); }
@@ -39,8 +36,6 @@
     .nav-item.active { color: #d31a1a; }
     
     .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); border: 2px solid #F59E0B !important; }
-    
-    /* คลาสสำหรับบาร์โค้ดของจริง */
     .real-barcode { font-family: 'Libre Barcode 39', cursive; font-size: 26px; line-height: 1; color: #1f2937; transform: scaleY(0.7); transform-origin: bottom; white-space: nowrap; }
   </style>
 </head>
@@ -261,7 +256,6 @@
       });
     }
 
-    // ฟังก์ชันวาด UI สลาก 
     function buildProTicketHTML(id, number, qty, mode = 'store') {
       const numStr = String(number).padStart(6, '0');
       const amount = qty * 100;
@@ -292,15 +286,12 @@
              </div>
              
              <div class="ticket-main">
-                <div class="flex justify-between items-start shrink-0">
-                   <div class="flex items-center gap-1 shrink-0">
-                      <div class="w-[18px] h-[18px] rounded-full border border-red-200 bg-red-50 flex items-center justify-center text-[7px] shadow-sm shrink-0">🦅</div>
-                      <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.2] drop-shadow-sm">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-700 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
-                   </div>
-                   <div class="text-[20px] sm:text-[22px] font-mono tracking-widest font-black text-gray-900 leading-none pt-0.5 shrink-0">${numStr}</div>
+                <div class="flex justify-between items-start shrink-0 pr-2.5 pl-1 w-full">
+                   <div class="text-[5.5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
+                   <div class="text-[20px] sm:text-[22px] font-mono tracking-widest font-black text-gray-900 leading-none shrink-0">${numStr}</div>
                 </div>
                 
-                <div class="flex justify-center mt-0.5 shrink-0">
+                <div class="flex justify-center mt-0.5 shrink-0 w-full">
                    <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
                       <div class="text-[7.5px] font-bold text-gray-800 whitespace-nowrap">${currentDraw}</div>
                    </div>
