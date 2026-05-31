@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BAS LOTTERY ONLINE Premium</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=IBM+Plex+Sans+Thai:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=IBM+Plex+Sans+Thai:wght@600;700&family=Libre+Barcode+39&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -14,27 +14,22 @@
   <style>
     body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; color: #1e293b; }
     .premium-nav { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); border-bottom: 3px solid #fbbf24; }
-    .real-ticket { position: relative; width: 240px; height: 104px; background: #fffdf5; border-radius: 4px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; overflow: hidden; border: 1px solid #cbd5e1; }
-    .rt-color-bar { width: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); border-right: 2px dashed rgba(0,0,0,0.15); }
-    .rt-body { flex: 1; padding: 6px 10px; display: flex; flex-direction: column; justify-content: space-between; position: relative; background-size: 16px 16px; }
-    .rt-header { display: flex; justify-content: space-between; align-items: flex-start; }
-    .rt-gov { font-size: 10px; font-weight: 800; color: #475569; letter-spacing: 0.5px; }
-    .rt-digits-container { background: rgba(255,255,255,0.8); border-radius: 4px; padding: 2px 0; margin: 2px 0; }
-    .rt-digits { font-family: 'IBM Plex Sans Thai', monospace; font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: 4px; text-align: center; line-height: 1; }
-    .rt-footer { display: flex; justify-content: space-between; align-items: flex-end; }
-    .rt-barcode { width: 70px; height: 12px; background: repeating-linear-gradient(to right, #334155, #334155 2px, transparent 2px, transparent 4px); opacity: 0.7; }
-    .rt-price { font-size: 12px; font-weight: 900; color: #e11d48; background: #ffe4e6; padding: 2px 6px; border-radius: 4px; }
-    .bg-t-red { background: linear-gradient(180deg, #ef4444, #b91c1c); } 
-    .bg-t-green { background: linear-gradient(180deg, #10b981, #047857); }
-    .bg-t-blue { background: linear-gradient(180deg, #3b82f6, #1d4ed8); } 
-    .bg-t-yellow { background: linear-gradient(180deg, #f59e0b, #b45309); }
-    .bg-t-purple { background: linear-gradient(180deg, #8b5cf6, #5b21b6); }
+    
+    /* สไตล์สลากแบบใหม่ในหน้าแอดมิน */
+    .real-ticket { position: relative; width: 260px; height: 90px; background: #fffdf5; border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; overflow: hidden; border: 1px solid #cbd5e1; }
+    .rt-stub { width: 28%; border-right: 1.5px dashed #94a3b8; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; background: rgba(255,255,255,0.8); }
+    .rt-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #dc2626; font-weight: 800; font-size: 8px; position: absolute; left: 2px; }
+    .rt-main { width: 72%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.4); }
+    .rt-digits { font-family: 'IBM Plex Sans Thai', monospace; font-size: 24px; font-weight: 800; color: #0f172a; letter-spacing: 2px; text-align: right; line-height: 1; }
+    
     .dash-box { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .dash-title { font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
     .dash-val { font-family: 'IBM Plex Sans Thai', sans-serif; font-size: 32px; font-weight: 900; margin-top: 6px; }
     .tab-btn { padding: 10px 18px; font-weight: 700; font-size: 13px; transition: 0.2s; border-radius: 8px; }
     .tab-active { background-color: #0f172a; color: white; }
     .gold-gradient { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
+    
+    .real-barcode { font-family: 'Libre Barcode 39', cursive; font-size: 24px; line-height: 1; color: #1e293b; transform: scaleY(0.7); transform-origin: bottom; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -124,7 +119,6 @@
     </div>
   </div>
 
-  <!-- Design Management Modal (ตั้งค่ารูประบบ) -->
   <div id="designModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
       <div class="bg-teal-600 text-white px-6 py-4 flex justify-between items-center">
@@ -151,7 +145,6 @@
     </div>
   </div>
 
-  <!-- Promotion Modal -->
   <div id="promoModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
       <div class="bg-fuchsia-600 text-white px-6 py-4 flex justify-between items-center">
@@ -182,7 +175,6 @@
     </div>
   </div>
 
-  <!-- Form Modal (Lottery) -->
   <div id="formModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
       <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center border-b-4 border-amber-400">
@@ -208,7 +200,6 @@
     </div>
   </div>
 
-  <!-- Winning Modal -->
   <div id="winningModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8 border-2 border-yellow-400">
       <div class="gold-gradient text-slate-900 px-6 py-4 flex justify-between items-center border-b border-yellow-500">
@@ -255,6 +246,7 @@
     let currentWinData = null; let isSalesOpen = true; 
     let tempPromoImageBase64 = "";
     let tempLogoBase64 = ""; let tempTicketBgBase64 = "";
+    let globalTicketBg = ""; // ไว้เก็บภาพพื้นหลังสลาก
 
     function checkAdminLogin() {
       if (document.getElementById('adminPin').value === '123456') { 
@@ -265,7 +257,7 @@
     }
     document.getElementById('adminPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAdminLogin(); });
 
-    // ฟังก์ชันบีบอัดรูปภาพก่อนอัปโหลด (สำคัญมาก! ช่วยให้กดปุ่มบันทึกแล้วไม่ค้าง)
+    // ฟังก์ชันบีบอัดรูปภาพ
     function resizeImage(file, maxWidth, maxHeight, quality = 0.7) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -275,8 +267,7 @@
                 img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
+                    let width = img.width; let height = img.height;
                     if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
                     if (height > maxHeight) { width = Math.round((width * maxHeight) / height); height = maxHeight; }
                     canvas.width = width; canvas.height = height;
@@ -302,6 +293,13 @@
     }
 
     function listenToStorefrontSettings() { 
+        // ดึงภาพพื้นหลังด้วย
+        db.collection('settings').doc('design').onSnapshot(doc => {
+            if(doc.exists && doc.data().ticketBgUrl) { globalTicketBg = doc.data().ticketBgUrl; } 
+            else { globalTicketBg = ""; }
+            if(currentSelectedSheet) renderTable(document.getElementById('search-input').value.trim());
+        });
+
         db.collection('settings').doc('storefront').onSnapshot(doc => { 
             const data = doc.exists ? doc.data() : {};
             const activeDraw = data.activeDraw || "ยังไม่ได้ตั้งค่า"; 
@@ -319,7 +317,7 @@
         }); 
     }
 
-    // --- ระบบจัดการรูปภาพระบบ (Logo / Ticket Bg) ---
+    // --- ระบบจัดการรูประบบ ---
     function openDesignModal() {
         tempLogoBase64 = ""; tempTicketBgBase64 = "";
         document.getElementById('logoImageFile').value = ""; document.getElementById('ticketBgImageFile').value = "";
@@ -343,7 +341,6 @@
         const fileInput = type === 'logo' ? document.getElementById('logoImageFile') : document.getElementById('ticketBgImageFile');
         const previewImg = type === 'logo' ? document.getElementById('logoPreview') : document.getElementById('ticketPreview');
         if (fileInput.files && fileInput.files[0]) {
-            // โลโก้ ไม่ต้องบีบอัดเยอะ / พื้นหลังตั๋วลดขนาดหน่อยจะได้โหลดไว
             const base64 = await resizeImage(fileInput.files[0], 600, 600, 0.8);
             if(type === 'logo') tempLogoBase64 = base64; else tempTicketBgBase64 = base64;
             previewImg.src = base64;
@@ -384,7 +381,6 @@
     async function previewPromoImage() {
         const fileInput = document.getElementById('promoImageFile');
         if (fileInput.files && fileInput.files[0]) {
-            // บีบอัดรูปโปรโมชันก่อน จะได้เซฟเข้า Firebase ได้ (สำคัญมาก)
             tempPromoImageBase64 = await resizeImage(fileInput.files[0], 800, 800, 0.75);
             document.getElementById('promoPreview').src = tempPromoImageBase64;
             document.getElementById('promoPreview').classList.remove('hidden');
@@ -400,9 +396,7 @@
             await db.collection('settings').doc('promotion').set(payload);
             Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' });
             closePromoModal();
-        } catch (error) {
-            Swal.fire('ข้อผิดพลาด', 'ขนาดไฟล์อาจจะยังใหญ่เกินไป กรุณาลองใช้รูปอื่น', 'error');
-        }
+        } catch (error) { Swal.fire('ข้อผิดพลาด', 'ขนาดไฟล์อาจจะยังใหญ่เกินไป กรุณาลองใช้รูปอื่น', 'error'); }
     }
 
     function loadInitialData() {
@@ -493,11 +487,45 @@
         hasRows = true; const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
         const isFree = item.name === "-" || item.name === "";
         const safeNumStr = String(item.number || "000000").padStart(6, '0');
-        const barColors = ['bg-t-red', 'bg-t-green', 'bg-t-blue', 'bg-t-yellow', 'bg-t-purple'];
-        const barColorClass = barColors[parseInt(safeNumStr.charAt(0)) % 5] || 'bg-t-red';
         const qty = parseInt(item.quantity) || 1; const amount = qty * 100;
 
-        const ticketHtml = `<div class="real-ticket mx-auto my-1.5"><div class="rt-color-bar ${barColorClass} flex flex-col items-center justify-center text-center p-0.5"><span class="text-xs font-black leading-none">${qty}</span><span class="text-[8px] font-medium my-0.5">ชุด</span><span class="text-sm font-black leading-none">${qty*6}</span><span class="text-[8px] font-medium leading-none">ล้าน</span></div><div class="rt-body"><div class="rt-header"><span class="rt-gov">สลากกินแบ่งรัฐบาล</span><span class="text-[8px] text-slate-400">#FB</span></div><div class="rt-digits-container"><div class="rt-digits">${safeNumStr}</div></div><div class="rt-footer"><div class="rt-barcode"></div><div class="rt-price">100 บาท</div></div></div></div>`;
+        const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${safeNumStr}&size=40x40`;
+
+        // สร้างสลากรูปแบบใหม่ในฝั่งแอดมิน
+        const ticketHtml = `
+        <div class="real-ticket mx-auto my-1">
+          <div class="w-full h-full flex" style="${ticketBgStyle}">
+             <div class="rt-stub pr-1">
+                <span class="rt-stub-txt tracking-tighter">สลากกินแบ่งรัฐบาล</span>
+                <div class="text-center">
+                   <div class="text-[12px] font-black text-gray-900 leading-none">${qty} ใบ</div>
+                   <div class="text-[8px] font-bold text-gray-500 mt-1">${qty*6} ล้าน</div>
+                </div>
+                <div class="text-center mt-1 leading-none">
+                   <div class="text-[18px] font-black text-[#d31a1a]">80</div>
+                   <div class="text-[8px] font-bold text-gray-800">บาท</div>
+                </div>
+             </div>
+             
+             <div class="rt-main">
+                <div class="flex justify-between items-start">
+                   <div class="flex items-center gap-1">
+                      <div class="w-[18px] h-[18px] rounded-full border border-red-200 bg-red-50 flex items-center justify-center text-[7px] shrink-0">🦅</div>
+                      <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.2]">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-600 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
+                   </div>
+                   <div class="rt-digits shrink-0">${safeNumStr}</div>
+                </div>
+                
+                <div class="flex justify-between items-end mt-1.5 opacity-80 w-full min-w-0">
+                   <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-300 bg-white shrink-0">
+                   <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[18px] min-w-0">
+                      <span class="real-barcode">*${safeNumStr}*</span>
+                   </div>
+                </div>
+             </div>
+          </div>
+        </div>`;
 
         let statusBadge = isFree ? `<span class="bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-md font-bold text-xs">✨ ว่างแผง</span>` : `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1 rounded-md font-bold text-xs">${item.status}</span>`;
         if(!isFree && item.status === "ชำระแล้ว") statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-md font-bold text-xs">🟢 ชำระแล้ว</span>`;
