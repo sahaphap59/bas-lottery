@@ -35,16 +35,28 @@
     .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px 0; color: #9ca3af; transition: 0.2s; cursor: pointer; }
     .nav-item.active { color: #d31a1a; }
     
-    .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); border: 2px solid #F59E0B !important; }
     .real-barcode { font-family: 'Libre Barcode 39', cursive; font-size: 26px; line-height: 1; color: #1f2937; transform: scaleY(0.7); transform-origin: bottom; white-space: nowrap; }
+
+    /* CSS สำหรับสีทองเคลื่อนไหว */
+    @keyframes goldShine {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .gold-gradient-anim {
+      background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #bf953f);
+      background-size: 200% auto;
+      animation: goldShine 3s linear infinite;
+      color: #0f172a;
+    }
+    .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); border: 2px solid #F59E0B !important; }
   </style>
 </head>
-<body class="pb-24">
+<body class="pb-32">
 
   <header class="brand-header shadow-md">
     <div class="max-w-md mx-auto flex justify-between items-center px-4 py-2">
       <div class="flex items-center">
-        <img id="main-store-logo" src="Gemini_Generated_Image_gwe108gwe108gwe1.jpg" alt="BAS ลอตเตอรี่" class="h-10 w-auto object-contain rounded-lg drop-shadow-md hidden">
+        <img id="main-store-logo" src="" alt="BAS ลอตเตอรี่" class="h-10 w-auto object-contain rounded-lg drop-shadow-md hidden">
         <div id="text-logo-fallback" class="flex items-center gap-2">
             <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-500 text-xl shadow-inner border border-red-200">💎</div>
             <div class="text-xl font-black premium-logo tracking-wide">BAS ลอตเตอรี่</div>
@@ -53,6 +65,9 @@
       <div id="user-info">
         <button onclick="forceLineLogin()" class="text-xs bg-white text-[#d31a1a] rounded-full px-4 py-1.5 font-bold shadow-sm">เข้าสู่ระบบ</button>
       </div>
+    </div>
+    <div id="announcement-bar" class="hidden bg-red-900 text-red-100 text-xs py-1.5 px-4 overflow-hidden border-t border-red-800 shadow-inner">
+        <marquee scrollamount="4" id="announcement-text" class="font-medium tracking-wide"></marquee>
     </div>
   </header>
 
@@ -92,13 +107,18 @@
       <div class="order-tab" id="tab-pending" onclick="setOrderTab('pending')">รอตรวจสอบ</div>
       <div class="order-tab" id="tab-success" onclick="setOrderTab('success')">สำเร็จ</div>
     </div>
-    <main class="px-3">
+    <main class="px-3 relative">
       <div id="my-orders-grid" class="space-y-4"></div>
       <div id="no-orders-data" class="hidden text-center py-12 bg-rose-50 rounded-2xl border border-dashed border-rose-200">
         <div class="text-4xl mb-2 text-rose-300">📭</div>
         <h3 class="text-rose-400 font-bold text-sm">ไม่มีคำสั่งซื้อในหมวดหมู่นี้</h3>
       </div>
     </main>
+  </div>
+
+  <div id="bulk-pay-bar" class="hidden fixed bottom-[58px] left-0 right-0 max-w-md mx-auto bg-white border-t border-red-200 p-3 flex justify-between items-center z-30 shadow-[0_-4px_15px_rgba(211,26,26,0.15)]">
+     <div class="text-sm font-bold text-gray-700 leading-tight">เลือกแล้ว <span id="bulk-count" class="text-[#d31a1a] text-lg">0</span> ใบ<br>รวม: <span id="bulk-total" class="text-[#d31a1a] text-xl font-black tracking-wide">฿0</span></div>
+     <button onclick="processBulkPayment()" id="btn-bulk-pay" class="bg-[#d31a1a] text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:bg-red-700 transition opacity-50 pointer-events-none">📸 แจ้งโอนทีเดียว</button>
   </div>
 
   <div id="profile-section" class="hidden max-w-md mx-auto min-h-screen bg-gray-50 pb-6">
@@ -191,6 +211,13 @@
       document.getElementById('nav-home').className = tab === 'home' ? 'nav-item active' : 'nav-item';
       document.getElementById('nav-orders').className = tab === 'orders' ? 'nav-item active' : 'nav-item';
       document.getElementById('nav-profile').className = tab === 'profile' ? 'nav-item active' : 'nav-item';
+      
+      // จัดการแถบชำระเงินแบบรวม
+      if(tab === 'orders' && currentOrderTab === 'unpaid') {
+          document.getElementById('bulk-pay-bar').classList.remove('hidden');
+      } else {
+          document.getElementById('bulk-pay-bar').classList.add('hidden');
+      }
       window.scrollTo(0, 0);
     }
 
@@ -221,6 +248,15 @@
                   document.getElementById('text-logo-fallback').classList.remove('hidden');
               }
               if(data.ticketBgUrl) { globalTicketBg = data.ticketBgUrl; } else { globalTicketBg = ""; }
+              
+              // ดึงข้อความประกาศวิ่ง
+              if(data.announcement) {
+                  document.getElementById('announcement-bar').classList.remove('hidden');
+                  document.getElementById('announcement-text').innerText = data.announcement;
+              } else {
+                  document.getElementById('announcement-bar').classList.add('hidden');
+              }
+
               filterData(); 
               if(userProfile && currentOrderTab !== '') renderMyOrders();
           }
@@ -284,19 +320,16 @@
                    <div class="text-[8px] font-bold text-gray-900 drop-shadow-sm">บาท</div>
                 </div>
              </div>
-             
              <div class="ticket-main">
                 <div class="flex justify-between items-start shrink-0 pr-2.5 pl-1 w-full">
                    <div class="text-[5.5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
                    <div class="text-[20px] sm:text-[22px] font-mono tracking-widest font-black text-gray-900 leading-none shrink-0">${numStr}</div>
                 </div>
-                
                 <div class="flex justify-center mt-0.5 shrink-0 w-full">
                    <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
                       <div class="text-[7.5px] font-bold text-gray-800 whitespace-nowrap">${currentDraw}</div>
                    </div>
                 </div>
-                
                 <div class="flex justify-between items-end mt-auto pt-1 opacity-85 w-full min-w-0 shrink-0">
                    <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm">
                    <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[18px] min-w-0">
@@ -330,11 +363,18 @@
       });
     }
 
+    // --- อัปเดตส่วนคำสั่งซื้อ ให้มี Checkbox โหมดจ่ายรวม ---
     function setOrderTab(tab) {
       currentOrderTab = tab;
       document.getElementById('tab-unpaid').className = tab === 'unpaid' ? 'order-tab active' : 'order-tab';
       document.getElementById('tab-pending').className = tab === 'pending' ? 'order-tab active' : 'order-tab';
       document.getElementById('tab-success').className = tab === 'success' ? 'order-tab active' : 'order-tab';
+      
+      if(tab === 'unpaid') {
+          document.getElementById('bulk-pay-bar').classList.remove('hidden');
+      } else {
+          document.getElementById('bulk-pay-bar').classList.add('hidden');
+      }
       renderMyOrders();
     }
 
@@ -359,7 +399,11 @@
       else if (currentOrderTab === 'pending') filteredList = myTickets.filter(t => t.status === 'รอตรวจสอบสลิป' || t.status === 'pending');
       else if (currentOrderTab === 'success') filteredList = myTickets.filter(t => t.status === 'ชำระสำเร็จ' || t.status === 'sold' || t.status === 'success');
 
-      if(filteredList.length === 0) { document.getElementById('no-orders-data').classList.remove('hidden'); return; }
+      if(filteredList.length === 0) { 
+          document.getElementById('no-orders-data').classList.remove('hidden'); 
+          updateBulkPayment(); // รีเซ็ตแถบด้านล่าง
+          return; 
+      }
       document.getElementById('no-orders-data').classList.add('hidden');
 
       filteredList.forEach((item) => {
@@ -367,10 +411,12 @@
         const qty = item.quantity || 1;
         const amount = qty * 100;
         
-        let statusBadge = ''; let actionHTML = '';
+        let statusBadge = ''; let actionHTML = ''; let checkboxHTML = '';
+        
         if (currentOrderTab === 'unpaid') {
             statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>';
-            actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}')" class="w-full bg-[#d31a1a] text-white p-3 rounded-b-xl text-sm font-bold shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] hover:bg-red-700 transition">📸 แจ้งโอนเงิน (฿${amount})</button>`;
+            actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="w-full bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl text-xs font-bold hover:bg-red-50 transition">ชำระเฉพาะใบนี้</button>`;
+            checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
         } else if (currentOrderTab === 'pending') {
             statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold border border-amber-200 shadow-sm">⏳ รอตรวจสอบสลิป</span>';
         } else {
@@ -384,40 +430,66 @@
              const prizeInfo = checkWinningPrize(item.number, item.quantity, currentWinData);
              if (prizeInfo.won) {
                  prizeBoxHTML = `
-                 <div class="bg-gradient-to-b from-[#fffce8] to-[#ffed99] border-t-2 border-[#f5c200] p-4 text-center rounded-b-xl relative overflow-hidden">
-                    <p class="text-[13px] font-bold text-[#b38000] mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
-                    <p class="text-base font-black text-[#8a6300] drop-shadow-sm">${prizeInfo.labels.join(', ')}</p>
-                    <p class="text-[#d31a1a] font-black text-[22px] mt-1 drop-shadow-sm tracking-wide">ได้รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
+                 <div class="gold-gradient-anim border-t-2 border-[#f5c200] p-4 text-center rounded-b-xl relative overflow-hidden">
+                    <p class="text-[13px] font-black text-gray-800 mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
+                    <p class="text-base font-black text-gray-900 drop-shadow-sm">${prizeInfo.labels.join(', ')}</p>
+                    <p class="text-[#d31a1a] font-black text-[22px] mt-1 drop-shadow-sm tracking-wide bg-white/80 inline-block px-3 py-1 rounded-lg">รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
                  </div>`;
              } else if (isDrawAnnounced) {
-                 prizeBoxHTML = `
-                 <div class="bg-gray-50 border-t border-gray-200 p-2.5 text-center rounded-b-xl">
-                    <p class="text-sm font-black text-gray-500">❌ ไม่ถูกรางวัล</p>
-                 </div>`;
+                 prizeBoxHTML = `<div class="bg-gray-50 border-t border-gray-200 p-2.5 text-center rounded-b-xl"><p class="text-sm font-black text-gray-500">❌ ไม่ถูกรางวัล</p></div>`;
              }
         }
 
         const ticketDesignHTML = buildProTicketHTML(item.id, item.number, item.quantity, 'order');
 
         const html = `
-          <div class="bg-white rounded-xl shadow-md border ${prizeBoxHTML.includes('ยินดีด้วย') ? 'border-[#f5c200] gold-glow' : 'border-gray-200'} flex flex-col">
-            <div class="flex justify-between items-center p-3 border-b border-gray-100 bg-gray-50 rounded-t-xl">
-              <span class="text-[11px] font-bold text-gray-500">รหัสคำสั่งซื้อ: #${item.id.substring(0,8)}</span>
+          <div class="bg-white rounded-xl shadow-md border ${prizeBoxHTML.includes('ถูกรางวัล') ? 'border-[#f5c200] gold-glow' : 'border-gray-200'} flex flex-col">
+            <div class="flex justify-between items-center p-3 border-b border-gray-100 bg-gray-50 rounded-t-xl gap-2">
+              <div class="flex items-center gap-2">
+                 ${checkboxHTML}
+                 <span class="text-[11px] font-bold text-gray-500">รหัส: #${item.id.substring(0,8)}</span>
+              </div>
               ${statusBadge}
             </div>
-            
-            <div class="p-4 pb-3 flex justify-center bg-[#f8fafc]">
-                <div class="w-full max-w-[260px]">
+            <div class="p-4 pb-3 flex justify-center bg-[#f8fafc]" onclick="toggleCheckbox('${item.id}')">
+                <div class="w-full max-w-[260px] pointer-events-none">
                     ${ticketDesignHTML}
                 </div>
             </div>
-            
             ${prizeBoxHTML}
             ${actionHTML}
           </div>
         `;
         grid.insertAdjacentHTML('beforeend', html);
       });
+      updateBulkPayment(); // รีเซ็ตแถบเมื่อโหลดเสร็จ
+    }
+
+    // กดที่ตัวสลากให้ทำเครื่องหมายเช็คถูกได้เลย
+    function toggleCheckbox(id) {
+        if(currentOrderTab !== 'unpaid') return;
+        const cb = document.querySelector(`.ticket-checkbox[value="${id}"]`);
+        if(cb) { cb.checked = !cb.checked; updateBulkPayment(); }
+    }
+
+    // ฟังก์ชันคำนวณยอดรวมเมื่อเลือกหลายใบ
+    window.updateBulkPayment = function() {
+        let total = 0; let count = 0; let selectedIds = [];
+        document.querySelectorAll('.ticket-checkbox:checked').forEach(cb => {
+            total += parseInt(cb.dataset.amount); count++; selectedIds.push(cb.value);
+        });
+        
+        document.getElementById('bulk-count').innerText = count;
+        document.getElementById('bulk-total').innerText = '฿' + total.toLocaleString();
+        
+        const btn = document.getElementById('btn-bulk-pay');
+        if(count > 0) {
+            btn.classList.remove('opacity-50', 'pointer-events-none');
+            btn.dataset.ids = JSON.stringify(selectedIds);
+            btn.dataset.total = total;
+        } else {
+            btn.classList.add('opacity-50', 'pointer-events-none');
+        }
     }
 
     async function fetchUserProfileData() {
@@ -458,7 +530,7 @@
       if (!liff.isLoggedIn()) { forceLineLogin(); return; }
       Swal.fire({
         title: 'ยืนยันการสั่งซื้อ',
-        html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ชุด ${qty} ใบ • ยอดชำระ <span class="text-gray-900 text-lg">฿${(qty*100).toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 24 ชม.)</option></select>`,
+        html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ชุด ${qty} ใบ • ยอดชำระ <span class="text-gray-900 text-lg">฿${(qty*100).toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (จ่ายรวบยอดในตะกร้าทีหลังได้)</option></select>`,
         showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
         preConfirm: async () => {
           const phone = document.getElementById('checkoutPhone').value.trim();
@@ -469,20 +541,54 @@
         if (result.isConfirmed) {
           db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now(), displayName: userProfile.displayName, pictureUrl: userProfile.pictureUrl }, { merge: true });
           db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (24*60*60*1000) })
-            .then(() => { Swal.fire('สำเร็จ', 'บันทึกการจองแล้ว ไปที่เมนูคำสั่งซื้อเพื่อแจ้งโอนเงินครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); });
+            .then(() => { Swal.fire('จองสลากสำเร็จ!', 'สามารถเลือกชำระเงินหลายใบพร้อมกันได้ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); });
         }
       });
     }
 
     function handleFileSelection(fileInputId) { return new Promise((resolve) => { const fileInput = document.getElementById(fileInputId); if(fileInput.files.length === 0) { resolve(null); return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onloadend = function() { resolve(reader.result); }; reader.readAsDataURL(file); }); }
 
-    function notifyPayment(docId, num) {
+    // แจ้งชำระเงินใบเดียว
+    function notifyPayment(docId, num, amount) {
         Swal.fire({
             title: 'อัปโหลดสลิปโอนเงิน',
-            html: `<div class="text-sm font-bold text-gray-500 mb-3">สลากหมายเลข <span class="text-[#d31a1a] text-lg">${num}</span></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-4 text-left"><div class="text-xs text-gray-700 font-medium space-y-1"><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[15px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><input type="file" id="directSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
+            html: `<div class="text-sm font-bold text-gray-500 mb-2">สลาก: <span class="text-[#d31a1a] text-lg">${num}</span><br>ยอดโอน: <span class="text-gray-900 text-lg">฿${amount.toLocaleString()}</span></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-4 text-left"><div class="text-xs text-gray-700 font-medium space-y-1"><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[15px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><input type="file" id="directSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
             showCancelButton: true, confirmButtonText: 'ส่งสลิป', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
             preConfirm: async () => { const fileInput = document.getElementById('directSlipFile'); if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; } Swal.showLoading(); return await handleFileSelection('directSlipFile'); }
-        }).then((result) => { if(result.isConfirmed) { db.collection('lotteries').doc(docId).update({ status: 'รอตรวจสอบสลิป', slip: result.value, expiresAt: null }).then(() => { Swal.fire('ส่งหลักฐานสำเร็จ', 'ระบบบันทึกรูปภาพสลิปเรียบร้อยแล้ว แอดมินจะรีบตรวจสอบให้ครับ', 'success').then(()=> { setOrderTab('pending'); }); }); } });
+        }).then((result) => { 
+            if(result.isConfirmed) { 
+                db.collection('lotteries').doc(docId).update({ status: 'รอตรวจสอบสลิป', slip: result.value, expiresAt: null }).then(() => { Swal.fire('ส่งหลักฐานสำเร็จ', 'ระบบบันทึกรูปภาพสลิปเรียบร้อยแล้ว แอดมินจะรีบตรวจสอบให้ครับ', 'success').then(()=> { setOrderTab('pending'); }); }); 
+            } 
+        });
+    }
+
+    // แจ้งชำระเงินหลายใบ (Bulk Payment)
+    window.processBulkPayment = function() {
+        const btn = document.getElementById('btn-bulk-pay');
+        const ids = JSON.parse(btn.dataset.ids);
+        const total = parseInt(btn.dataset.total);
+        
+        Swal.fire({
+            title: 'โอนเงินรวบยอด',
+            html: `<div class="text-sm font-bold text-gray-500 mb-2">จำนวน <span class="text-[#d31a1a]">${ids.length}</span> รายการ<br>ยอดโอนรวม: <span class="text-gray-900 text-2xl font-black">฿${total.toLocaleString()}</span></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-4 text-left"><div class="text-xs text-gray-700 font-medium space-y-1"><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[15px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><input type="file" id="bulkSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
+            showCancelButton: true, confirmButtonText: 'ส่งสลิปชำระทั้งหมด', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
+            preConfirm: async () => { const fileInput = document.getElementById('bulkSlipFile'); if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; } Swal.showLoading(); return await handleFileSelection('bulkSlipFile'); }
+        }).then((result) => { 
+            if(result.isConfirmed) { 
+                Swal.fire({title: 'กำลังอัปเดตระบบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                const batch = db.batch();
+                ids.forEach(id => {
+                    const ref = db.collection('lotteries').doc(id);
+                    batch.update(ref, { status: 'รอตรวจสอบสลิป', slip: result.value, expiresAt: null });
+                });
+                batch.commit().then(() => {
+                    Swal.fire('สำเร็จ', 'แจ้งโอนเงินเรียบร้อยแล้ว แอดมินจะตรวจสอบยอดทั้งหมดให้ครับ', 'success');
+                    setOrderTab('pending');
+                }).catch(err => {
+                    Swal.fire('ข้อผิดพลาด', err.message, 'error');
+                });
+            } 
+        });
     }
 
     function checkWinningPrize(ticketNumber, qty, winData) {
@@ -515,11 +621,11 @@
                 if (prizeInfo.won) {
                     totalWinAmount += prizeInfo.total;
                     winningTicketsHTML += `
-                        <div class="bg-white/95 rounded-xl p-3 shadow-inner mb-2 border-b-4 border-amber-500 text-center">
-                            <p class="text-gray-600 font-bold text-sm">สลากหมายเลข</p>
+                        <div class="bg-white/90 rounded-xl p-3 shadow-inner mb-2 border-b-4 border-amber-500 text-center">
+                            <p class="text-gray-700 font-bold text-sm">สลากหมายเลข</p>
                             <p class="text-[#d31a1a] font-mono text-3xl font-black tracking-widest drop-shadow-sm">${String(ticket.number).padStart(6, '0')}</p>
-                            <p class="text-emerald-600 font-extrabold text-[15px] mt-1">✨ ${prizeInfo.labels.join(', ')} ✨</p>
-                            <p class="text-amber-600 font-black text-sm mt-0.5">รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
+                            <p class="text-gray-900 font-extrabold text-[15px] mt-1">✨ ${prizeInfo.labels.join(', ')} ✨</p>
+                            <p class="text-amber-700 font-black text-sm mt-0.5">รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
                         </div>`;
                 }
             }
@@ -527,16 +633,16 @@
 
         if (totalWinAmount > 0 && !sessionStorage.getItem(`notified_win_${currentDraw}`)) {
             let htmlContent = `
-                <div class="bg-gradient-to-br from-[#fffce8] to-[#ffed99] border border-[#f5c200] p-6 rounded-2xl shadow-xl relative overflow-hidden">
+                <div class="gold-gradient-anim border-2 border-[#f5c200] p-6 rounded-2xl shadow-xl relative overflow-hidden">
                     <div class="text-7xl mb-2 animate-bounce">🏆</div>
-                    <h3 class="text-3xl font-black mb-1 text-[#8a6300] tracking-wide">ยินดีด้วยเศรษฐีใหม่!</h3>
-                    <p class="text-[#b38000] font-bold text-sm mb-4">คุณถูกรางวัลรับเงินก้อนโต</p>
+                    <h3 class="text-3xl font-black mb-1 text-gray-900 tracking-wide">ยินดีด้วยเศรษฐีใหม่!</h3>
+                    <p class="text-gray-800 font-bold text-sm mb-4">คุณถูกรางวัลรับเงินก้อนโต</p>
                     <div class="bg-white p-3 rounded-xl mb-4 border-2 border-[#f5c200] shadow-inner">
-                        <p class="text-xs text-[#b38000] font-bold mb-1">ยอดเงินรางวัลรวมของคุณ</p>
+                        <p class="text-xs text-gray-600 font-bold mb-1">ยอดเงินรางวัลรวมของคุณ</p>
                         <p class="text-4xl font-black tracking-wider text-[#d31a1a]">฿${totalWinAmount.toLocaleString()}</p>
                     </div>
                     ${winningTicketsHTML}
-                    <p class="text-sm font-bold text-gray-800 mt-4 bg-white/70 p-2 rounded-lg inline-block">💬 กรุณาแคปหน้าจอนี้ติดต่อแอดมิน</p>
+                    <p class="text-sm font-bold text-gray-800 mt-4 bg-white/70 p-2 rounded-lg inline-block shadow-sm">💬 กรุณาแคปหน้าจอนี้ติดต่อแอดมิน</p>
                 </div>`;
 
             Swal.fire({ html: htmlContent, background: 'transparent', showConfirmButton: true, confirmButtonText: '✨ รับทราบยอดเงิน ✨', confirmButtonColor: '#d31a1a', width: '26rem', padding: '0' })
