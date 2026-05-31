@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>BAS ลอตเตอรี่ออนไลน์</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;0,600;0,700;0,800;1,700;1,800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   
@@ -13,35 +13,35 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
   <style>
-    body { font-family: 'Prompt', sans-serif; background-color: #f3f4f6; color: #1f2937; }
-    .brand-header { background: #e12424; color: white; position: sticky; top: 0; z-index: 50; }
-    .filter-btn { border: 1px solid #e12424; color: #e12424; background: white; padding: 6px 0; border-radius: 8px; font-weight: 600; font-size: 13px; text-align: center; transition: 0.2s; cursor: pointer; }
-    .filter-btn.active { background: #e12424; color: white; }
+    body { font-family: 'Prompt', sans-serif; background-color: #f4f6f9; color: #1f2937; }
+    .brand-header { background: linear-gradient(90deg, #d31a1a 0%, #e53e3e 100%); color: white; position: sticky; top: 0; z-index: 50; }
+    .premium-logo { font-family: 'Kanit', sans-serif; font-style: italic; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+    .filter-btn { border: 1px solid #d31a1a; color: #d31a1a; background: white; padding: 6px 0; border-radius: 8px; font-weight: 600; font-size: 13px; text-align: center; transition: 0.2s; cursor: pointer; }
+    .filter-btn.active { background: #d31a1a; color: white; }
     
-    /* สไตล์การ์ดหวยแบบใหม่ อิงจาก images.jpg */
-    .pro-ticket-card { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .pro-ticket-card { background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s; }
+    .ticket-body-wrap { display: flex; height: 96px; width: 100%; background: #fdfdfd; position: relative; }
+    .ticket-stub { width: 26%; border-right: 1.5px dashed #cbd5e1; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 4px 2px; position: relative; background: #fafafa; }
+    .ticket-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #d31a1a; font-weight: 800; font-size: 7.5px; position: absolute; left: 1px; top: 5px; letter-spacing: 0.5px;}
+    .ticket-main { width: 74%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; }
     
-    /* สไตล์ Tabs เมนูคำสั่งซื้อ */
     .order-tab { flex: 1; text-align: center; padding: 10px 0; font-size: 13px; font-weight: 600; color: #6b7280; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.2s; }
-    .order-tab.active { color: #e12424; border-bottom-color: #e12424; }
-    
+    .order-tab.active { color: #d31a1a; border-bottom-color: #d31a1a; }
     .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px 0; color: #9ca3af; transition: 0.2s; cursor: pointer; }
-    .nav-item.active { color: #e12424; }
-    
-    .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); border: 2px solid #F59E0B !important; }
+    .nav-item.active { color: #d31a1a; }
+    .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); border: 2px solid #F59E0B !important; }
   </style>
 </head>
 <body class="pb-24">
 
   <header class="brand-header shadow-md">
     <div class="max-w-md mx-auto flex justify-between items-center px-4 py-3">
-      <div class="flex items-center gap-2">
-        <!-- โลโก้ใหม่ที่ดูดีขึ้น -->
-        <div class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#e12424] text-xl shadow-inner border border-red-200">💎</div>
-        <div class="text-xl font-black italic tracking-tight drop-shadow-sm">BAS ลอตเตอรี่</div>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-500 text-xl shadow-inner border border-red-200">💎</div>
+        <div class="text-[22px] font-black premium-logo tracking-wide">BAS ลอตเตอรี่</div>
       </div>
       <div id="user-info">
-        <button onclick="forceLineLogin()" class="text-xs bg-white text-[#e12424] rounded-full px-4 py-1.5 font-bold shadow-sm">เข้าสู่ระบบ</button>
+        <button onclick="forceLineLogin()" class="text-xs bg-white text-[#d31a1a] rounded-full px-4 py-1.5 font-bold shadow-sm">เข้าสู่ระบบ</button>
       </div>
     </div>
   </header>
@@ -60,16 +60,17 @@
         <button onclick="randomizeNumber()" class="bg-gray-800 text-white px-4 rounded-xl font-bold flex items-center gap-1 text-sm shadow-sm active:scale-95 transition">
           ✨ สุ่มตัวเลข
         </button>
-        <input type="number" id="search-input" oninput="filterData()" maxlength="6" placeholder="ค้นหาเลข 6 หลัก..." class="flex-1 border border-gray-300 bg-gray-50 text-gray-800 py-3 px-4 rounded-xl outline-none text-center text-xl font-bold tracking-[0.3em] focus:border-[#e12424] focus:ring-1 focus:ring-[#e12424] transition">
+        <input type="number" id="search-input" oninput="filterData()" maxlength="6" placeholder="ค้นหาเลข 6 หลัก..." class="flex-1 border border-gray-300 bg-gray-50 text-gray-800 py-3 px-4 rounded-xl outline-none text-center text-xl font-bold tracking-[0.3em] focus:border-[#d31a1a] focus:ring-1 focus:ring-[#d31a1a] transition">
       </div>
-      <p class="text-xs text-gray-500 mt-3 text-center font-medium">พบสลากว่าง <span id="ticket-count" class="font-bold text-[#e12424]">0</span> ใบ (งวด: <span id="storefront-draw-name">...</span>)</p>
+      <p class="text-xs text-gray-500 mt-3 text-center font-medium">พบสลากว่าง <span id="ticket-count" class="font-bold text-[#d31a1a]">0</span> ใบ (งวด: <span id="storefront-draw-name">...</span>)</p>
     </div>
 
     <main class="px-3">
       <div class="flex items-center justify-between mb-3 px-1">
         <h3 class="font-black text-gray-800 text-lg">สลากบนแผง</h3>
       </div>
-      <div id="lottery-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <div id="lottery-grid" class="grid grid-cols-2 gap-2"></div>
+      
       <div id="no-data" class="hidden text-center py-12 bg-white rounded-2xl shadow-sm mt-2">
         <div class="text-4xl mb-2">🕵️‍♂️</div>
         <h3 class="text-gray-500 font-bold">ไม่พบเลขที่คุณค้นหา</h3>
@@ -78,7 +79,7 @@
   </div>
 
   <div id="orders-section" class="hidden max-w-md mx-auto">
-    <div class="bg-[#e12424] text-white p-4 shadow-sm text-center relative rounded-b-2xl mb-4">
+    <div class="bg-[#d31a1a] text-white p-4 shadow-sm text-center relative rounded-b-2xl mb-4">
       <h2 class="text-xl font-black">คำสั่งซื้อของฉัน</h2>
     </div>
     
@@ -98,12 +99,12 @@
   </div>
 
   <div id="profile-section" class="hidden max-w-md mx-auto min-h-screen bg-gray-50 pb-6">
-    <div class="bg-[#e12424] px-4 pt-6 pb-12 rounded-b-[32px] shadow-sm text-white">
+    <div class="bg-[#d31a1a] px-4 pt-6 pb-12 rounded-b-[32px] shadow-sm text-white">
       <div class="flex items-center gap-4">
         <img id="page-profile-img" src="https://via.placeholder.com/150" class="w-16 h-16 rounded-full border-2 border-white/80 shadow-md object-cover bg-white">
         <div>
           <h2 id="page-profile-name" class="text-xl font-bold">กำลังโหลด...</h2>
-          <span class="text-[11px] bg-black/20 px-2.5 py-0.5 rounded-full mt-1 inline-block" id="page-profile-id">รหัสสมาชิก: ...</span>
+          <span class="text-[11px] bg-black/20 px-2.5 py-0.5 rounded-full mt-1 inline-block font-medium" id="page-profile-id">รหัสสมาชิก: ...</span>
         </div>
       </div>
     </div>
@@ -128,7 +129,7 @@
     <div class="flex justify-between items-center px-2">
       <div class="nav-item active" id="nav-home" onclick="switchTab('home')"><span class="text-2xl mb-0.5">🏠</span><span class="text-[10px] font-bold">หน้าแรก</span></div>
       <div class="nav-item" id="nav-orders" onclick="switchTab('orders')"><span class="text-2xl mb-0.5">📋</span><span class="text-[10px] font-bold">คำสั่งซื้อ</span></div>
-      <a href="https://www.glo.or.th/mission/reward-payment/check-reward" target="_blank" class="nav-item hover:text-[#e12424]"><span class="text-2xl mb-0.5">🏆</span><span class="text-[10px] font-bold">ตรวจรางวัล</span></a>
+      <a href="https://www.glo.or.th/mission/reward-payment/check-reward" target="_blank" class="nav-item hover:text-[#d31a1a]"><span class="text-2xl mb-0.5">🏆</span><span class="text-[10px] font-bold">ตรวจรางวัล</span></a>
       <div class="nav-item" id="nav-profile" onclick="switchTab('profile')"><span class="text-2xl mb-0.5">👤</span><span class="text-[10px] font-bold">สมาชิก</span></div>
     </div>
   </div>
@@ -155,14 +156,14 @@
     let globalSavedPhone = ""; 
     let globalSavedAddress = "";
     let currentWinData = null;
-    let globalSalesOpen = true; // เช็คสถานะเปิดแผง
+    let globalSalesOpen = true; 
 
     async function initLIFF() {
       try {
         await liff.init({ liffId: LIFF_ID });
         if (liff.isLoggedIn()) {
           userProfile = await liff.getProfile();
-          document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="switchTab('profile')" class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover cursor-pointer">`;
+          document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="switchTab('profile')" class="w-8 h-8 rounded-full border border-white shadow-sm object-cover cursor-pointer">`;
           fetchUserProfileData();
           loadMyTickets();
         } else {
@@ -176,7 +177,7 @@
 
     function switchTab(tab) {
       if ((tab === 'orders' || tab === 'profile') && (!liff || !liff.isLoggedIn())) {
-        Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE ก่อนครับ', icon: 'info', confirmButtonColor: '#e12424'}).then(() => forceLineLogin()); return;
+        Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE ก่อนครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin()); return;
       }
       document.getElementById('home-section').style.display = tab === 'home' ? 'block' : 'none';
       document.getElementById('orders-section').style.display = tab === 'orders' ? 'block' : 'none';
@@ -203,19 +204,19 @@
     }
 
     function loadShopLotteries() {
-      // ดึงสถานะแผง และ ตรวจสอบว่าแผงปิด/เปิด
       db.collection('settings').doc('storefront').onSnapshot(snap => {
         if(!snap.exists || !snap.data().activeDraw) { document.getElementById('storefront-draw-name').innerText = 'ยังไม่ได้ตั้งค่า'; return; }
         
         const data = snap.data();
         currentDraw = data.activeDraw;
-        globalSalesOpen = data.isSalesOpen !== false; // ค่า default คือ true
+        globalSalesOpen = data.isSalesOpen !== false;
         document.getElementById('storefront-draw-name').innerText = currentDraw;
         
         db.collection('winning_results').doc(currentDraw).onSnapshot(doc => { 
             currentWinData = doc.exists ? doc.data() : null; 
             if(userProfile) checkAndShowWinnerPopup(); 
-            filterData(); // re-render กรณีต้องการโชว์ข้อมูลรางวัล/หรือซ่อนปุ่ม
+            filterData();
+            if(userProfile && currentOrderTab !== '') renderMyOrders(); 
         });
         
         db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => {
@@ -223,7 +224,6 @@
         });
       });
 
-      // ดึงข้อมูลโปรโมชั่น
       db.collection('settings').doc('promotion').get().then(doc => {
           if (doc.exists) {
               const promo = doc.data();
@@ -242,50 +242,55 @@
       });
     }
 
-    function buildProTicketHTML(id, number, qty) {
+    function buildProTicketHTML(id, number, qty, mode = 'store') {
       const numStr = String(number).padStart(6, '0');
       const amount = qty * 100;
       
-      // ปุ่มตะกร้าเช็คสถานะร้าน
-      let buttonHTML = globalSalesOpen 
-          ? `<button onclick="openCheckout('${id}', '${numStr}', ${qty})" class="w-full bg-[#e12424] hover:bg-red-700 text-white font-bold p-2 text-[13px] rounded-b-md transition flex items-center justify-center gap-1 shadow-inner">🛒 หยิบใส่ตะกร้า (฿${amount})</button>`
-          : `<button class="w-full bg-gray-400 text-white font-bold p-2 text-[13px] rounded-b-md cursor-not-allowed">🚫 ปิดรับการซื้อสลากงวดนี้</button>`;
+      let bottomActionHTML = '';
+
+      if (mode === 'store') {
+          bottomActionHTML = globalSalesOpen 
+              ? `<button onclick="openCheckout('${id}', '${numStr}', ${qty})" class="w-full bg-[#e52a2a] hover:bg-[#c91818] text-white font-black py-2.5 text-[13px] transition shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">🛒 หยิบใส่ตะกร้า (฿${amount})</button>`
+              : `<button class="w-full bg-gray-400 text-white font-bold py-2.5 text-[13px] cursor-not-allowed">🚫 ปิดรับการซื้อสลากงวดนี้</button>`;
+      } 
 
       return `
         <div class="pro-ticket-card">
-          <!-- ดีไซน์สลากเสมือนจริง อิงจาก images.jpg -->
-          <div class="relative bg-[#fffdf5] flex w-full" style="height: 110px; background-image: url('https://www.glo.or.th/asset/images/ticket/ticket-1.png'); background-size: cover; background-blend-mode: overlay;">
-             <!-- Left Stub (ขั้วสลาก) -->
-             <div class="w-[30%] border-r border-dashed border-gray-400 flex flex-col justify-between items-center py-2 px-1 relative bg-white/40 backdrop-blur-[1px]">
-                <div class="text-[8px] text-[#e12424] font-bold rotate-[-90deg] absolute -left-[14px] top-9 whitespace-nowrap">สลากกินแบ่งรัฐบาล</div>
-                <div class="text-center mt-1">
-                   <div class="text-sm font-black text-gray-800">${qty} ใบ</div>
-                   <div class="text-[10px] font-bold text-gray-600">${qty*6} ล้าน</div>
+          <div class="ticket-body-wrap">
+             <div class="ticket-stub">
+                <span class="ticket-stub-txt">สลากกินแบ่งรัฐบาล</span>
+                <div class="text-center mt-1 pl-1">
+                   <div class="text-sm font-black text-gray-900 leading-tight">${qty} ใบ</div>
+                   <div class="text-[9px] font-bold text-gray-500">${qty*6} ล้าน</div>
                 </div>
-                <div class="text-center leading-none">
-                   <div class="text-[20px] font-black text-[#e12424]">80</div>
+                <div class="text-center leading-tight mb-1 pl-1">
+                   <div class="text-[22px] font-black text-[#d31a1a]">80</div>
                    <div class="text-[9px] font-bold text-gray-800">บาท</div>
                 </div>
              </div>
-             <!-- Main Area (เนื้อสลาก) -->
-             <div class="w-[70%] p-1.5 relative flex flex-col justify-between bg-white/20">
-                <div class="flex justify-between items-start pt-1">
-                   <div class="flex items-center gap-1 pl-1">
-                      <div class="w-5 h-5 rounded-full border border-red-300 bg-red-50 flex items-center justify-center"><span class="text-[8px]">🦅</span></div>
-                      <div class="text-[7.5px] text-[#e12424] font-bold leading-tight">สลากกินแบ่งรัฐบาล<br><span class="text-[5.5px] text-gray-600">THAI GOVERNMENT LOTTERY</span></div>
+             
+             <div class="ticket-main">
+                <div class="flex justify-between items-start">
+                   <div class="flex items-center gap-1">
+                      <div class="w-[22px] h-[22px] rounded-full border border-red-200 bg-red-50 flex items-center justify-center text-[9px]">🦅</div>
+                      <div class="text-[6.5px] text-[#d31a1a] font-bold leading-[1.1]">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[4.5px] text-gray-500 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
                    </div>
-                   <div class="text-[26px] font-mono tracking-widest font-black text-gray-900 leading-none drop-shadow-sm">${numStr}</div>
+                   <div class="text-[24px] font-mono tracking-widest font-black text-gray-900 drop-shadow-sm leading-none pt-0.5">${numStr}</div>
                 </div>
-                <div class="text-center bg-white/90 rounded py-0.5 mt-1 border border-blue-100 shadow-sm mx-1">
-                   <div class="text-[11px] font-black text-gray-800">${currentDraw}</div>
+                
+                <div class="flex justify-center mt-1">
+                   <div class="bg-white border border-gray-200 rounded-md py-0.5 px-3 shadow-sm inline-block">
+                      <div class="text-[10px] font-black text-gray-800">งวดที่ ${currentDraw}</div>
+                   </div>
                 </div>
-                <div class="flex justify-between items-end pb-1 px-1">
-                   <div class="w-7 h-7 bg-white p-0.5 border border-gray-300 flex"><div class="w-full h-full bg-[repeating-linear-gradient(45deg,#fff,#fff_2px,#000_2px,#000_4px)] opacity-70"></div></div>
-                   <div class="w-24 h-4 bg-[repeating-linear-gradient(90deg,#333,#333_1.5px,transparent_1.5px,transparent_3px)] opacity-70"></div>
+                
+                <div class="flex justify-between items-end mt-1">
+                   <div class="w-6 h-6 p-0.5 border border-gray-300 opacity-60 flex"><div class="w-full h-full bg-[repeating-linear-gradient(45deg,#fff,#fff_2px,#333_2px,#333_4px)]"></div></div>
+                   <div class="h-3.5 flex-1 ml-2 bg-[repeating-linear-gradient(90deg,#555,#555_1.5px,transparent_1.5px,transparent_3px)] opacity-50"></div>
                 </div>
              </div>
           </div>
-          ${buttonHTML}
+          ${bottomActionHTML}
         </div>
       `;
     }
@@ -306,7 +311,7 @@
       document.getElementById('no-data').classList.add('hidden');
 
       list.forEach((item) => {
-        grid.insertAdjacentHTML('beforeend', buildProTicketHTML(item.id, item.number, item.quantity));
+        grid.insertAdjacentHTML('beforeend', buildProTicketHTML(item.id, item.number, item.quantity, 'store'));
       });
     }
 
@@ -349,44 +354,49 @@
         
         let statusBadge = ''; let actionHTML = '';
         if (currentOrderTab === 'unpaid') {
-            statusBadge = '<span class="text-xs bg-rose-100 text-rose-600 px-2 py-1 rounded font-bold border border-rose-200">ยังไม่ชำระ (จอง)</span>';
-            actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}')" class="w-full bg-[#e12424] text-white p-2.5 rounded-lg text-sm font-bold mt-3 shadow-sm hover:bg-red-700 transition">📸 แจ้งโอนเงิน</button>`;
+            statusBadge = '<span class="text-xs bg-rose-100 text-rose-600 px-2.5 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>';
+            actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}')" class="w-full bg-[#d31a1a] text-white p-2.5 rounded-b-xl text-sm font-bold shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] hover:bg-red-700 transition">📸 แจ้งโอนเงิน (฿${amount})</button>`;
         } else if (currentOrderTab === 'pending') {
-            statusBadge = '<span class="text-xs bg-amber-100 text-amber-600 px-2 py-1 rounded font-bold border border-amber-200">⏳ รอตรวจสอบสลิป</span>';
+            statusBadge = '<span class="text-xs bg-amber-100 text-amber-600 px-2.5 py-1 rounded-full font-bold border border-amber-200 shadow-sm">⏳ รอตรวจสอบสลิป</span>';
         } else {
-            statusBadge = '<span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded font-bold border border-emerald-200">✅ ชำระสำเร็จ</span>';
+            statusBadge = '<span class="text-xs bg-emerald-100 text-emerald-600 px-2.5 py-1 rounded-full font-bold border border-emerald-200 shadow-sm">✅ ชำระสำเร็จ</span>';
         }
         
         let prizeBoxHTML = '';
-        let isDrawAnnounced = currentWinData && currentWinData.prize1; // เช็คว่าประกาศผลรางวัลหรือยัง
+        let isDrawAnnounced = currentWinData && currentWinData.prize1; 
         
         if(currentWinData && (item.status === 'ชำระสำเร็จ' || item.status === 'sold' || item.status === 'success')){
              const prizeInfo = checkWinningPrize(item.number, item.quantity, currentWinData);
              if (prizeInfo.won) {
                  prizeBoxHTML = `
-                 <div class="mt-3 bg-amber-50 border-2 border-amber-300 rounded-xl p-3 text-center">
+                 <div class="bg-gradient-to-r from-amber-50 to-amber-100 border-t border-amber-200 p-3 text-center rounded-b-xl">
                     <p class="text-xs font-bold text-amber-700 mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
-                    <p class="text-sm font-black text-amber-900">${prizeInfo.labels.join(', ')}</p>
-                    <p class="text-[#e12424] font-black text-lg mt-1">ได้รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
+                    <p class="text-[13px] font-black text-amber-900">${prizeInfo.labels.join(', ')}</p>
+                    <p class="text-[#d31a1a] font-black text-lg mt-0.5">ได้รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
                  </div>`;
              } else if (isDrawAnnounced) {
-                 // ตรวจแล้ว และไม่ถูกรางวัล
                  prizeBoxHTML = `
-                 <div class="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-2 text-center opacity-80">
+                 <div class="bg-gray-50 border-t border-gray-200 p-2 text-center rounded-b-xl">
                     <p class="text-sm font-bold text-gray-500">❌ ไม่ถูกรางวัล</p>
                  </div>`;
              }
         }
 
+        const ticketDesignHTML = buildProTicketHTML(item.id, item.number, item.quantity, 'order');
+
         const html = `
-          <div class="bg-white p-4 rounded-xl shadow-sm border ${prizeBoxHTML.includes('ยินดีด้วย') ? 'border-amber-400 gold-glow' : 'border-gray-200'}">
-            <div class="flex justify-between items-start mb-3">
-              <div>
-                <p class="text-sm font-bold text-gray-800">สลากเลข: <span class="text-xl text-[#e12424] font-mono tracking-widest font-black">${numStr}</span></p>
-                <p class="text-xs text-gray-500 mt-0.5">ชุด ${qty} ใบ (${qty*6} ล้าน) • ยอด ${amount} บาท</p>
-              </div>
-              <div>${statusBadge}</div>
+          <div class="bg-white rounded-xl shadow-md border ${prizeBoxHTML.includes('ยินดีด้วย') ? 'border-amber-400 gold-glow' : 'border-gray-200'} flex flex-col">
+            <div class="flex justify-between items-center p-3 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+              <span class="text-[11px] font-bold text-gray-500">รหัสคำสั่งซื้อ: #${item.id.substring(0,8)}</span>
+              ${statusBadge}
             </div>
+            
+            <div class="p-3 pb-2 flex justify-center bg-[#f4f6f9]">
+                <div class="w-[280px]">
+                    ${ticketDesignHTML}
+                </div>
+            </div>
+            
             ${prizeBoxHTML}
             ${actionHTML}
           </div>
@@ -411,10 +421,10 @@
         let title = field === 'phone' ? '📱 เบอร์โทรศัพท์' : '🚚 ที่อยู่จัดส่ง';
         let currentValue = field === 'phone' ? globalSavedPhone : globalSavedAddress;
         let inputHtml = field === 'phone' 
-            ? `<input type="tel" id="edit-field-input" value="${currentValue}" placeholder="เช่น 0891234567" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#e12424] outline-none font-bold text-center text-lg bg-gray-50 shadow-inner">`
-            : `<textarea id="edit-field-input" rows="4" placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#e12424] outline-none font-medium text-sm bg-gray-50 shadow-inner">${currentValue}</textarea>`;
+            ? `<input type="tel" id="edit-field-input" value="${currentValue}" placeholder="เช่น 0891234567" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-center text-lg bg-gray-50 shadow-inner">`
+            : `<textarea id="edit-field-input" rows="4" placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-medium text-sm bg-gray-50 shadow-inner">${currentValue}</textarea>`;
 
-        Swal.fire({ title: title, html: inputHtml, showCancelButton: true, confirmButtonText: '💾 บันทึก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#e12424', preConfirm: async () => {
+        Swal.fire({ title: title, html: inputHtml, showCancelButton: true, confirmButtonText: '💾 บันทึก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => {
                 const newVal = document.getElementById('edit-field-input').value.trim();
                 if(field === 'phone' && !newVal) { Swal.showValidationMessage('กรุณากรอกข้อมูลด้วยครับ'); return false; }
                 try {
@@ -427,14 +437,14 @@
         }).then((res) => { if(res.isConfirmed) Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false }); });
     }
 
-    function showShopBankInfo() { Swal.fire({ title: '🏦 บัญชีร้านค้า', html: `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left mt-2"><p class="text-sm font-medium text-gray-600 mb-1">ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="text-sm font-medium text-gray-600 mb-1">ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p><p class="text-sm font-medium text-gray-600 mt-3">เลขที่บัญชี:</p><div class="bg-white border border-emerald-100 rounded-lg p-2 text-center mt-1"><span class="font-mono font-black text-2xl text-gray-800 tracking-widest select-all">0138284018</span></div></div>`, confirmButtonText: 'ปิด', confirmButtonColor: '#e12424' }); }
+    function showShopBankInfo() { Swal.fire({ title: '🏦 บัญชีร้านค้า', html: `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left mt-2"><p class="text-sm font-medium text-gray-600 mb-1">ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="text-sm font-medium text-gray-600 mb-1">ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p><p class="text-sm font-medium text-gray-600 mt-3">เลขที่บัญชี:</p><div class="bg-white border border-emerald-100 rounded-lg p-2 text-center mt-1"><span class="font-mono font-black text-2xl text-gray-800 tracking-widest select-all">0138284018</span></div></div>`, confirmButtonText: 'ปิด', confirmButtonColor: '#d31a1a' }); }
 
     function openCheckout(docId, num, qty) { 
       if (!liff.isLoggedIn()) { forceLineLogin(); return; }
       Swal.fire({
         title: 'ยืนยันการสั่งซื้อ',
-        html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#e12424] bg-red-50 py-3 rounded-xl border border-red-100 mb-2">${num}</div><div class="text-sm font-bold text-gray-600">ชุด ${qty} ใบ • ยอดชำระ <span class="text-gray-900 text-lg">฿${(qty*100).toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#e12424] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 24 ชม.)</option></select>`,
-        showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#e12424',
+        html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ชุด ${qty} ใบ • ยอดชำระ <span class="text-gray-900 text-lg">฿${(qty*100).toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 24 ชม.)</option></select>`,
+        showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
         preConfirm: async () => {
           const phone = document.getElementById('checkoutPhone').value.trim();
           if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; }
@@ -454,8 +464,8 @@
     function notifyPayment(docId, num) {
         Swal.fire({
             title: 'อัปโหลดสลิปโอนเงิน',
-            html: `<div class="text-sm font-bold text-gray-500 mb-3">สลากหมายเลข <span class="text-[#e12424] text-lg">${num}</span></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-4 text-left"><div class="text-xs text-gray-700 font-medium space-y-1"><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[15px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><input type="file" id="directSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
-            showCancelButton: true, confirmButtonText: 'ส่งสลิป', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#e12424',
+            html: `<div class="text-sm font-bold text-gray-500 mb-3">สลากหมายเลข <span class="text-[#d31a1a] text-lg">${num}</span></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-4 text-left"><div class="text-xs text-gray-700 font-medium space-y-1"><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[15px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><input type="file" id="directSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
+            showCancelButton: true, confirmButtonText: 'ส่งสลิป', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
             preConfirm: async () => { const fileInput = document.getElementById('directSlipFile'); if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; } Swal.showLoading(); return await handleFileSelection('directSlipFile'); }
         }).then((result) => { if(result.isConfirmed) { db.collection('lotteries').doc(docId).update({ status: 'รอตรวจสอบสลิป', slip: result.value, expiresAt: null }).then(() => { Swal.fire('ส่งหลักฐานสำเร็จ', 'ระบบบันทึกรูปภาพสลิปเรียบร้อยแล้ว แอดมินจะรีบตรวจสอบให้ครับ', 'success').then(()=> { setOrderTab('pending'); }); }); } });
     }
@@ -492,7 +502,7 @@
                     winningTicketsHTML += `
                         <div class="bg-white/95 rounded-xl p-3 shadow-inner mb-2 border-b-4 border-amber-500 text-center">
                             <p class="text-gray-600 font-bold text-sm">สลากหมายเลข</p>
-                            <p class="text-[#e12424] font-mono text-3xl font-black tracking-widest drop-shadow-sm">${String(ticket.number).padStart(6, '0')}</p>
+                            <p class="text-[#d31a1a] font-mono text-3xl font-black tracking-widest drop-shadow-sm">${String(ticket.number).padStart(6, '0')}</p>
                             <p class="text-emerald-600 font-extrabold text-[15px] mt-1">✨ ${prizeInfo.labels.join(', ')} ✨</p>
                             <p class="text-amber-600 font-black text-sm mt-0.5">รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
                         </div>`;

@@ -71,7 +71,7 @@
         
         <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🏪 ไปหน้าร้าน</button>
         <button onclick="toggleSales()" id="btn-toggle-sales" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🛒 สถานะขาย: เปิด</button>
-        <button onclick="openPromoModal()" class="bg-fuchsia-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📣 โปรโมชั่น</button>
+        <button onclick="openPromoModal()" class="bg-fuchsia-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📣 โปรโมชัน</button>
         <button onclick="addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
         <button onclick="openWinningModal()" class="gold-gradient text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md hover:opacity-90">🏆 บันทึกผลรางวัล</button>
         <button onclick="openModal()" class="bg-slate-700 border border-slate-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">➕ ลงทะเบียนสลาก</button>
@@ -123,20 +123,24 @@
     </div>
   </div>
 
-  <!-- Promotion Modal -->
+  <!-- Promotion Modal (อัปโหลดรูปจากเครื่อง) -->
   <div id="promoModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
       <div class="bg-fuchsia-600 text-white px-6 py-4 flex justify-between items-center">
-        <h2 class="text-lg font-bold flex items-center gap-2">📣 จัดการรูปโปรโมชั่น Pop-up</h2>
+        <h2 class="text-lg font-bold flex items-center gap-2">📣 จัดการรูปโปรโมชัน Pop-up</h2>
         <button onclick="closePromoModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button>
       </div>
       <form id="promoForm" onsubmit="savePromotion(event)" class="p-6 space-y-5">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">ลิงก์รูปภาพโปรโมชั่น (Image URL)</label>
-          <input type="url" id="promoImageUrl" placeholder="https://..." class="w-full border border-slate-300 p-3 rounded-lg text-sm font-semibold outline-none focus:border-fuchsia-500">
+          <label class="block text-xs font-bold text-slate-700 mb-1">อัปโหลดรูปภาพโปรโมชันจากเครื่อง</label>
+          <input type="file" id="promoImageFile" accept="image/*" onchange="previewPromoImage()" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 cursor-pointer">
+          <div class="mt-3 border border-dashed border-slate-300 rounded-lg p-2 text-center bg-slate-50 min-h-[100px] flex items-center justify-center">
+            <img id="promoPreview" class="max-h-40 rounded shadow-sm hidden">
+            <span id="promoPreviewPlaceholder" class="text-xs text-slate-400 font-bold">ยังไม่ได้เลือกรูปภาพ</span>
+          </div>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">สถานะโปรโมชั่น</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">สถานะโปรโมชัน</label>
           <select id="promoStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none">
             <option value="true">🟢 เปิดใช้งาน (ลูกค้าจะเห็น Pop-up)</option>
             <option value="false">🔴 ปิดใช้งาน</option>
@@ -144,7 +148,7 @@
         </div>
         <div class="flex justify-end pt-4 border-t border-slate-200">
           <button type="button" onclick="closePromoModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button>
-          <button type="submit" class="px-6 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึกโปรโมชั่น</button>
+          <button type="submit" class="px-6 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึกโปรโมชัน</button>
         </div>
       </form>
     </div>
@@ -220,7 +224,7 @@
     const db = firebase.firestore();
 
     let allTicketsList = []; let currentTab = 'all'; let currentSelectedSheet = ""; let unsubListener = null;
-    let currentWinData = null; let isSalesOpen = true;
+    let currentWinData = null; let isSalesOpen = true; let tempPromoImageBase64 = "";
 
     function checkAdminLogin() {
       if (document.getElementById('adminPin').value === '123456') { 
@@ -237,7 +241,6 @@
         .then(r => { if(r.isConfirmed) { db.collection('settings').doc('storefront').set({ activeDraw: currentSelectedSheet }, { merge: true }).then(() => Swal.fire({toast:true, position: 'top-end', title: 'ตั้งงวดหน้าร้านสำเร็จ', icon: 'success', timer: 2000, showConfirmButton:false})); } });
     }
 
-    // ฟังก์ชันจัดการเปิดปิดแผงขาย
     function toggleSales() {
         const newStatus = !isSalesOpen;
         db.collection('settings').doc('storefront').set({ isSalesOpen: newStatus }, { merge: true }).then(() => {
@@ -263,25 +266,49 @@
         }); 
     }
 
-    // ฟังก์ชันโปรโมชั่น
     function openPromoModal() {
+        tempPromoImageBase64 = "";
+        document.getElementById('promoImageFile').value = "";
         db.collection('settings').doc('promotion').get().then(doc => {
             if(doc.exists) {
-                document.getElementById('promoImageUrl').value = doc.data().imageUrl || "";
                 document.getElementById('promoStatus').value = doc.data().isActive ? "true" : "false";
+                if(doc.data().imageUrl) {
+                    document.getElementById('promoPreview').src = doc.data().imageUrl;
+                    document.getElementById('promoPreview').classList.remove('hidden');
+                    document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
+                    tempPromoImageBase64 = doc.data().imageUrl;
+                } else {
+                    document.getElementById('promoPreview').classList.add('hidden');
+                    document.getElementById('promoPreviewPlaceholder').classList.remove('hidden');
+                }
             }
             document.getElementById('promoModal').classList.remove('hidden');
         });
     }
+    
+    function previewPromoImage() {
+        const fileInput = document.getElementById('promoImageFile');
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempPromoImageBase64 = e.target.result;
+                document.getElementById('promoPreview').src = tempPromoImageBase64;
+                document.getElementById('promoPreview').classList.remove('hidden');
+                document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    }
+
     function closePromoModal() { document.getElementById('promoModal').classList.add('hidden'); }
     function savePromotion(e) {
         e.preventDefault();
         const payload = {
-            imageUrl: document.getElementById('promoImageUrl').value.trim(),
+            imageUrl: tempPromoImageBase64,
             isActive: document.getElementById('promoStatus').value === "true"
         };
         db.collection('settings').doc('promotion').set(payload).then(() => {
-            Swal.fire({ title: 'บันทึกโปรโมชั่นสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' });
+            Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' });
             closePromoModal();
         });
     }
