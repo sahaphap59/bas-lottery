@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BAS LOTTERY ONLINE Premium</title>
+  <title>BAS LOTTERY ONLINE Premium (Admin)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=IBM+Plex+Sans+Thai:wght@600;700&family=Libre+Barcode+39&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -27,6 +27,18 @@
     .tab-btn { padding: 10px 18px; font-weight: 700; font-size: 13px; transition: 0.2s; border-radius: 8px; }
     .tab-active { background-color: #0f172a; color: white; }
     .gold-gradient { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
+    
+    /* โค้ดสำหรับทำสีทองเคลื่อนไหว */
+    @keyframes goldShine {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .gold-gradient-anim {
+      background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #bf953f);
+      background-size: 200% auto;
+      animation: goldShine 3s linear infinite;
+      color: #0f172a;
+    }
     
     .real-barcode { font-family: 'Libre Barcode 39', cursive; font-size: 24px; line-height: 1; color: #1e293b; transform: scaleY(0.7); transform-origin: bottom; white-space: nowrap; }
   </style>
@@ -91,7 +103,7 @@
             <button onclick="switchTab('empty')" id="tab-empty" class="tab-btn text-slate-600 hover:bg-white">🎟️ ยังไม่มีผู้ซื้อ</button>
             <button onclick="switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white">🟢 ชำระแล้ว</button>
             <button onclick="switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white">🔴 ค้างชำระ/จอง</button>
-            <button onclick="switchTab('winners')" id="tab-winners" class="tab-btn text-slate-900 bg-amber-300/80 hover:bg-amber-300 font-black shadow-sm">🎉 คนที่ถูกรางวัล</button>
+            <button onclick="switchTab('winners')" id="tab-winners" class="tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition">🎉 คนที่ถูกรางวัล</button>
             <button onclick="switchTab('crm')" id="tab-crm" class="tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2">👥 ฐานข้อมูลลูกค้า</button>
           </div>
           <input type="text" id="search-input" oninput="filterData()" placeholder="🔍 ค้นหาเลขสลาก หรือ ชื่อผู้ซื้อ..." class="w-full md:w-72 px-4 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500">
@@ -441,6 +453,9 @@
 
     function loadLotteryDataFromServer(drawName) {
       if(unsubListener) unsubListener();
+      if(!drawName) return;
+      
+      // ดักจับ Error ตรงนี้
       unsubListener = db.collection('lotteries').where('draw', '==', drawName).onSnapshot(snapshot => {
           allTicketsList = []; let totalBuyers = 0, totalQty = 0, sumTotal = 0, sumPaid = 0, sumUnpaid = 0;
           snapshot.forEach(doc => {
@@ -465,6 +480,9 @@
           document.getElementById('sum-paid').innerText = '฿' + sumPaid.toLocaleString('th-TH');
           document.getElementById('sum-unpaid').innerText = '฿' + sumUnpaid.toLocaleString('th-TH');
           if(currentTab !== 'crm') renderTable(document.getElementById('search-input').value.trim());
+        }, error => {
+             console.error("🔥 Error ดึงข้อมูล:", error);
+             Swal.fire('ข้อผิดพลาดฐานข้อมูล', 'หากคุณเพิ่งเริ่มใช้งาน กรุณาเช็ค Error ใน Console (F12) ระบบอาจต้องการสร้าง Index ก่อนครับ', 'error');
         });
     }
 
@@ -529,7 +547,7 @@
         if(item.status === 'รอตรวจสอบสลิป') statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 px-3 py-1 rounded-md font-black text-xs animate-pulse">⏳ รอตรวจสอบสลิป</span>`;
 
         if(item.prizeInfo && item.prizeInfo.won && item.status === "ชำระแล้ว") {
-            statusBadge += `<br><div class="mt-2 inline-block gold-gradient text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`;
+            statusBadge += `<br><div class="mt-2 inline-block gold-gradient-anim text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md border border-yellow-400">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`;
         }
 
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
@@ -547,7 +565,7 @@
         ['all','empty','paid','unpaid','winners'].forEach(k => { 
             const btn = document.getElementById('tab-'+k);
             if(k === 'winners') {
-                btn.className = (k===t) ? "tab-btn bg-amber-400 text-slate-900 font-black shadow-inner" : "tab-btn text-slate-900 bg-amber-300/80 hover:bg-amber-300 font-black shadow-sm";
+                btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition";
             } else {
                 btn.className = (k===t) ? "tab-btn tab-active" : "tab-btn text-slate-600 hover:bg-slate-200"; 
             }
