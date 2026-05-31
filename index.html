@@ -15,16 +15,17 @@
   <style>
     body { font-family: 'Prompt', sans-serif; background-color: #f4f6f9; color: #1f2937; }
     .brand-header { background: #d31a1a; color: white; position: sticky; top: 0; z-index: 50; }
+    .premium-logo { font-family: 'Kanit', sans-serif; font-style: italic; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
     
     .filter-btn { border: 1px solid #d31a1a; color: #d31a1a; background: white; padding: 6px 0; border-radius: 8px; font-weight: 600; font-size: 13px; text-align: center; transition: 0.2s; cursor: pointer; }
     .filter-btn.active { background: #d31a1a; color: white; }
     
-    /* ดีไซน์สลากรูปแบบใหม่ ถอดแบบจากรูปภาพ */
+    /* ดีไซน์สลากรูปแบบใหม่ */
     .pro-ticket-card { background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .ticket-body-wrap { display: flex; height: 85px; width: 100%; background: #ffffff; position: relative; }
-    .ticket-stub { width: 30%; border-right: 1px dashed #cbd5e1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 4px 0; }
+    .ticket-body-wrap { display: flex; height: 85px; width: 100%; position: relative; }
+    .ticket-stub { width: 30%; border-right: 1px dashed #cbd5e1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 4px 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(2px); }
     .ticket-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #d31a1a; font-weight: 800; font-size: 6px; position: absolute; left: 2px; top: 5px; letter-spacing: 0.5px;}
-    .ticket-main { width: 70%; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between; }
+    .ticket-main { width: 70%; padding: 6px 8px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.4); }
     
     /* ปุ่มแดงลายทาง */
     .btn-cart-texture { background-color: #d31a1a; background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px); }
@@ -41,9 +42,14 @@
 
   <header class="brand-header shadow-md">
     <div class="max-w-md mx-auto flex justify-between items-center px-4 py-2">
-      <!-- เปลี่ยนเป็นรูปโลโก้ตามที่ต้องการ -->
+      <!-- รูปโลโก้ที่จะดึงจากระบบหลังบ้านมาแสดง -->
       <div class="flex items-center">
-        <img src="Gemini_Generated_Image_gwe108gwe108gwe1.jpg" alt="BAS ลอตเตอรี่" class="h-10 w-auto object-contain rounded-lg drop-shadow-md">
+        <img id="main-store-logo" src="" alt="BAS ลอตเตอรี่" class="h-10 w-auto object-contain rounded-lg drop-shadow-md hidden">
+        <!-- กรณีแอดมินยังไม่ได้อัปโหลดโลโก้ จะขึ้นข้อความนี้แทนชั่วคราว -->
+        <div id="text-logo-fallback" class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-500 text-xl shadow-inner border border-red-200">💎</div>
+            <div class="text-xl font-black premium-logo tracking-wide">BAS ลอตเตอรี่</div>
+        </div>
       </div>
       <div id="user-info">
         <button onclick="forceLineLogin()" class="text-xs bg-white text-[#d31a1a] rounded-full px-4 py-1.5 font-bold shadow-sm">เข้าสู่ระบบ</button>
@@ -75,7 +81,6 @@
         <h3 class="font-black text-gray-800 text-lg">สลากบนแผง</h3>
       </div>
       
-      <!-- จัดกริดเป็น 2 คอลัมน์สำหรับมือถือโดยเฉพาะ -->
       <div id="lottery-grid" class="grid grid-cols-2 gap-2.5"></div>
       
       <div id="no-data" class="hidden text-center py-12 bg-white rounded-2xl shadow-sm mt-2">
@@ -108,7 +113,7 @@
   <div id="profile-section" class="hidden max-w-md mx-auto min-h-screen bg-gray-50 pb-6">
     <div class="bg-[#d31a1a] px-4 pt-6 pb-12 rounded-b-[32px] shadow-sm text-white">
       <div class="flex items-center gap-4">
-        <!-- แก้ไขรูปโปรไฟล์ให้แสดงผลตรงนี้ -->
+        <!-- รูปโปรไฟล์ของลูกค้า -->
         <img id="page-profile-img" src="https://via.placeholder.com/150" alt="Profile" class="w-16 h-16 rounded-full border-2 border-white/80 shadow-md object-cover bg-white">
         <div>
           <h2 id="page-profile-name" class="text-xl font-bold">กำลังโหลด...</h2>
@@ -165,6 +170,7 @@
     let globalSavedAddress = "";
     let currentWinData = null;
     let globalSalesOpen = true; 
+    let globalTicketBg = ""; // ตัวแปรเก็บรูปลายน้ำสลาก
 
     async function initLIFF() {
       try {
@@ -172,9 +178,11 @@
         if (liff.isLoggedIn()) {
           userProfile = await liff.getProfile();
           
-          // นำรูปโปรไฟล์ไปใส่ที่ปุ่ม มุมขวาบน
-          document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="switchTab('profile')" class="w-8 h-8 rounded-full border border-white shadow-sm object-cover cursor-pointer">`;
-          
+          if(userProfile.pictureUrl) {
+              document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="switchTab('profile')" class="w-8 h-8 rounded-full border border-white shadow-sm object-cover cursor-pointer">`;
+              document.getElementById('page-profile-img').src = userProfile.pictureUrl;
+          }
+
           fetchUserProfileData();
           loadMyTickets();
         } else {
@@ -215,6 +223,26 @@
     }
 
     function loadShopLotteries() {
+      // ดึงรูปภาพระบบ
+      db.collection('settings').doc('design').onSnapshot(doc => {
+          if(doc.exists) {
+              const data = doc.data();
+              if(data.logoUrl) {
+                  document.getElementById('main-store-logo').src = data.logoUrl;
+                  document.getElementById('main-store-logo').classList.remove('hidden');
+                  document.getElementById('text-logo-fallback').classList.add('hidden');
+              } else {
+                  document.getElementById('main-store-logo').classList.add('hidden');
+                  document.getElementById('text-logo-fallback').classList.remove('hidden');
+              }
+              if(data.ticketBgUrl) { globalTicketBg = data.ticketBgUrl; } 
+              else { globalTicketBg = ""; }
+              filterData(); // รีเฟรชสลากให้เปลี่ยนรูปพื้นหลัง
+              if(userProfile && currentOrderTab !== '') renderMyOrders();
+          }
+      });
+
+      // ดึงข้อมูลการขายและสลาก
       db.collection('settings').doc('storefront').onSnapshot(snap => {
         if(!snap.exists || !snap.data().activeDraw) { document.getElementById('storefront-draw-name').innerText = 'ยังไม่ได้ตั้งค่า'; return; }
         
@@ -235,6 +263,7 @@
         });
       });
 
+      // ดึงโปรโมชัน
       db.collection('settings').doc('promotion').get().then(doc => {
           if (doc.exists) {
               const promo = doc.data();
@@ -253,22 +282,24 @@
       });
     }
 
-    // ฟังก์ชันวาด UI สลาก ให้พอดี 2 คอลัมน์ (ตามรูปที่ 1)
+    // ฟังก์ชันวาด UI สลาก พร้อมรองรับภาพพื้นหลังที่แอดมินอัปโหลดมา
     function buildProTicketHTML(id, number, qty, mode = 'store') {
       const numStr = String(number).padStart(6, '0');
       const amount = qty * 100;
       
       let bottomActionHTML = '';
-
       if (mode === 'store') {
           bottomActionHTML = globalSalesOpen 
               ? `<button onclick="openCheckout('${id}', '${numStr}', ${qty})" class="w-full btn-cart-texture hover:opacity-90 text-white font-bold py-2 text-[11px] transition flex items-center justify-center gap-1.5 shadow-[inset_0_2px_3px_rgba(0,0,0,0.15)]"><span class="text-sm">🛒</span> หยิบใส่ตะกร้า (฿${amount})</button>`
               : `<button class="w-full bg-gray-400 text-white font-bold py-2 text-[11px] cursor-not-allowed">🚫 ปิดรับการซื้อ</button>`;
       } 
 
+      // แทรกภาพพื้นหลังสลาก
+      const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
+
       return `
         <div class="pro-ticket-card">
-          <div class="ticket-body-wrap">
+          <div class="ticket-body-wrap" style="${ticketBgStyle}">
              <!-- ขั้วซ้าย -->
              <div class="ticket-stub pl-3 pr-1">
                 <span class="ticket-stub-txt tracking-tighter">สลากกินแบ่งรัฐบาล</span>
@@ -286,21 +317,20 @@
              <div class="ticket-main">
                 <div class="flex justify-between items-start">
                    <div class="flex items-center gap-1">
-                      <div class="w-[18px] h-[18px] rounded-full border border-red-200 bg-red-50 flex items-center justify-center text-[7px]">🦅</div>
-                      <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.2]">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-500 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
+                      <div class="w-[18px] h-[18px] rounded-full border border-red-200 bg-red-50 flex items-center justify-center text-[7px] shadow-sm">🦅</div>
+                      <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.2] drop-shadow-sm">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-600 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
                    </div>
-                   <!-- ปรับขนาดตัวเลขให้ใหญ่ชัดเจนและพอดีกรอบ -->
                    <div class="text-[19px] sm:text-[21px] font-mono tracking-widest font-black text-gray-900 leading-none pt-0.5">${numStr}</div>
                 </div>
                 
                 <div class="flex justify-center mt-1.5">
-                   <div class="border border-gray-300 rounded px-1.5 py-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+                   <div class="bg-white/90 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
                       <div class="text-[7.5px] font-bold text-gray-800">งวดที่ ${currentDraw}</div>
                    </div>
                 </div>
                 
                 <div class="flex justify-between items-end mt-1.5 opacity-60">
-                   <div class="w-[18px] h-[18px] p-[1px] border border-gray-300 flex"><div class="w-full h-full bg-[repeating-linear-gradient(45deg,#fff,#fff_1px,#333_1px,#333_2px)]"></div></div>
+                   <div class="w-[18px] h-[18px] p-[1px] border border-gray-400 flex bg-white/50"><div class="w-full h-full bg-[repeating-linear-gradient(45deg,#fff,#fff_1px,#333_1px,#333_2px)]"></div></div>
                    <div class="h-2.5 flex-1 ml-2 bg-[repeating-linear-gradient(90deg,#555,#555_1px,transparent_1px,transparent_2px)]"></div>
                 </div>
              </div>
@@ -383,7 +413,6 @@
         if(currentWinData && (item.status === 'ชำระสำเร็จ' || item.status === 'sold' || item.status === 'success')){
              const prizeInfo = checkWinningPrize(item.number, item.quantity, currentWinData);
              if (prizeInfo.won) {
-                 // กล่องถูกรางวัลสีทองอาร่าม (ตามรูปที่ 3)
                  prizeBoxHTML = `
                  <div class="bg-gradient-to-b from-[#fffce8] to-[#ffed99] border-t-2 border-[#f5c200] p-4 text-center rounded-b-xl relative overflow-hidden">
                     <p class="text-[13px] font-bold text-[#b38000] mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
@@ -391,7 +420,6 @@
                     <p class="text-[#d31a1a] font-black text-[22px] mt-1 drop-shadow-sm tracking-wide">ได้รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
                  </div>`;
              } else if (isDrawAnnounced) {
-                 // ป้ายไม่ถูกรางวัล
                  prizeBoxHTML = `
                  <div class="bg-gray-50 border-t border-gray-200 p-2.5 text-center rounded-b-xl">
                     <p class="text-sm font-black text-gray-500">❌ ไม่ถูกรางวัล</p>
@@ -399,7 +427,6 @@
              }
         }
 
-        // นำสลากมาใส่ในหน้าคำสั่งซื้อโดยแสดง 1 ใบเต็มตาตรงกลาง
         const ticketDesignHTML = buildProTicketHTML(item.id, item.number, item.quantity, 'order');
 
         const html = `
@@ -426,11 +453,6 @@
     async function fetchUserProfileData() {
         if(!userProfile) return;
         
-        // แก้ไขให้รูปโปรไฟล์ขึ้นในแท็บ "สมาชิก"
-        if(userProfile.pictureUrl) {
-            document.getElementById('page-profile-img').src = userProfile.pictureUrl;
-        }
-
         document.getElementById('page-profile-name').innerText = userProfile.displayName;
         document.getElementById('page-profile-id').innerText = `รหัสสมาชิก : P${userProfile.userId.substring(0,6).toUpperCase()}`;
         
