@@ -15,11 +15,11 @@
     body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; color: #1e293b; }
     .premium-nav { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); border-bottom: 3px solid #fbbf24; }
     
-    /* สไตล์สลากแบบใหม่ในหน้าแอดมิน */
-    .real-ticket { position: relative; width: 260px; height: 90px; background: #fffdf5; border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; overflow: hidden; border: 1px solid #cbd5e1; }
-    .rt-stub { width: 28%; border-right: 1.5px dashed #94a3b8; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; background: rgba(255,255,255,0.8); }
+    /* สไตล์สลากแบบใหม่ในหน้าแอดมิน ให้ตรงกับหน้าร้าน */
+    .real-ticket { position: relative; width: 260px; height: 92px; background: #fffdf5; border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; overflow: hidden; border: 1px solid #cbd5e1; }
+    .rt-stub { width: 28%; border-right: 1.5px dashed #94a3b8; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; background: rgba(0,0,0,0.12); backdrop-filter: blur(1.5px); }
     .rt-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #dc2626; font-weight: 800; font-size: 8px; position: absolute; left: 2px; }
-    .rt-main { width: 72%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.4); }
+    .rt-main { width: 72%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.7); backdrop-filter: blur(1px); }
     .rt-digits { font-family: 'IBM Plex Sans Thai', monospace; font-size: 24px; font-weight: 800; color: #0f172a; letter-spacing: 2px; text-align: right; line-height: 1; }
     
     .dash-box { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -246,7 +246,7 @@
     let currentWinData = null; let isSalesOpen = true; 
     let tempPromoImageBase64 = "";
     let tempLogoBase64 = ""; let tempTicketBgBase64 = "";
-    let globalTicketBg = ""; // ไว้เก็บภาพพื้นหลังสลาก
+    let globalTicketBg = "";
 
     function checkAdminLogin() {
       if (document.getElementById('adminPin').value === '123456') { 
@@ -257,7 +257,6 @@
     }
     document.getElementById('adminPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAdminLogin(); });
 
-    // ฟังก์ชันบีบอัดรูปภาพ
     function resizeImage(file, maxWidth, maxHeight, quality = 0.7) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -293,7 +292,6 @@
     }
 
     function listenToStorefrontSettings() { 
-        // ดึงภาพพื้นหลังด้วย
         db.collection('settings').doc('design').onSnapshot(doc => {
             if(doc.exists && doc.data().ticketBgUrl) { globalTicketBg = doc.data().ticketBgUrl; } 
             else { globalTicketBg = ""; }
@@ -317,7 +315,6 @@
         }); 
     }
 
-    // --- ระบบจัดการรูประบบ ---
     function openDesignModal() {
         tempLogoBase64 = ""; tempTicketBgBase64 = "";
         document.getElementById('logoImageFile').value = ""; document.getElementById('ticketBgImageFile').value = "";
@@ -358,7 +355,6 @@
         } catch (error) { Swal.fire('เกิดข้อผิดพลาด', error.message, 'error'); }
     }
 
-    // --- ระบบโปรโมชัน ---
     function openPromoModal() {
         tempPromoImageBase64 = "";
         document.getElementById('promoImageFile').value = "";
@@ -492,33 +488,38 @@
         const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${safeNumStr}&size=40x40`;
 
-        // สร้างสลากรูปแบบใหม่ในฝั่งแอดมิน
         const ticketHtml = `
         <div class="real-ticket mx-auto my-1">
           <div class="w-full h-full flex" style="${ticketBgStyle}">
-             <div class="rt-stub pr-1">
+             <div class="rt-stub pr-1 bg-slate-900/15 backdrop-blur-[2px]">
                 <span class="rt-stub-txt tracking-tighter">สลากกินแบ่งรัฐบาล</span>
                 <div class="text-center">
-                   <div class="text-[12px] font-black text-gray-900 leading-none">${qty} ใบ</div>
-                   <div class="text-[8px] font-bold text-gray-500 mt-1">${qty*6} ล้าน</div>
+                   <div class="text-[12px] font-black text-gray-900 leading-none drop-shadow-sm">${qty} ใบ</div>
+                   <div class="text-[8px] font-bold text-gray-700 mt-1">${qty*6} ล้าน</div>
                 </div>
                 <div class="text-center mt-1 leading-none">
-                   <div class="text-[18px] font-black text-[#d31a1a]">80</div>
+                   <div class="text-[18px] font-black text-[#d31a1a] drop-shadow-sm">80</div>
                    <div class="text-[8px] font-bold text-gray-800">บาท</div>
                 </div>
              </div>
              
-             <div class="rt-main">
+             <div class="rt-main bg-white/60 backdrop-blur-[1px]">
                 <div class="flex justify-between items-start">
-                   <div class="flex items-center gap-1">
+                   <div class="flex items-center gap-1 shrink-0">
                       <div class="w-[18px] h-[18px] rounded-full border border-red-200 bg-red-50 flex items-center justify-center text-[7px] shrink-0">🦅</div>
-                      <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.2]">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-600 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
+                      <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.2] drop-shadow-sm">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-600 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
                    </div>
                    <div class="rt-digits shrink-0">${safeNumStr}</div>
                 </div>
                 
-                <div class="flex justify-between items-end mt-1.5 opacity-80 w-full min-w-0">
-                   <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-300 bg-white shrink-0">
+                <div class="flex justify-center mt-0.5 shrink-0">
+                   <div class="bg-white/90 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
+                      <div class="text-[7.5px] font-bold text-gray-800 whitespace-nowrap">${currentDraw}</div>
+                   </div>
+                </div>
+                
+                <div class="flex justify-between items-end mt-auto pt-0.5 opacity-80 w-full min-w-0 shrink-0">
+                   <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-400 bg-white shrink-0">
                    <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[18px] min-w-0">
                       <span class="real-barcode">*${safeNumStr}*</span>
                    </div>
