@@ -16,9 +16,9 @@
     .premium-nav { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); border-bottom: 3px solid #fbbf24; }
     
     .real-ticket { position: relative; width: 260px; height: 92px; background: #fffdf5; border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; overflow: hidden; border: 1px solid #cbd5e1; }
-    .rt-stub { width: 28%; border-right: 1.5px dashed #94a3b8; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; background: rgba(0,0,0,0.12); backdrop-filter: blur(1.5px); }
+    .rt-stub { width: 28%; border-right: 1.5px dashed #94a3b8; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; background: rgba(255,255,255,0.2); }
     .rt-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #dc2626; font-weight: 800; font-size: 8px; position: absolute; left: 2px; }
-    .rt-main { width: 72%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.7); backdrop-filter: blur(1px); }
+    .rt-main { width: 72%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.2); }
     .rt-digits { font-family: 'IBM Plex Sans Thai', monospace; font-size: 24px; font-weight: 800; color: #0f172a; letter-spacing: 2px; text-align: right; line-height: 1; }
     
     .dash-box { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -89,13 +89,13 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-12">
         <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
           <div class="flex flex-wrap p-1.5 bg-slate-200/70 rounded-xl w-full md:w-auto gap-1">
-            <button onclick="switchTab('all')" id="tab-all" class="tab-btn tab-active">🌐 ทั้งหมด</button>
-            <button onclick="switchTab('empty')" id="tab-empty" class="tab-btn text-slate-600 hover:bg-white">🎟️ ยังไม่มีผู้ซื้อ</button>
-            <button onclick="switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white">🟢 ชำระแล้ว</button>
-            <button onclick="switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white">🔴 ค้างชำระ/จอง</button>
-            <button onclick="switchTab('winners')" id="tab-winners" class="tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition">🎉 คนที่ถูกรางวัล</button>
-            <button onclick="switchTab('crm')" id="tab-crm" class="tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2">👥 ลูกค้า</button>
-            <button onclick="switchTab('withdraw')" id="tab-withdraw" class="tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative">💸 แจ้งถอนเงิน <span id="withdraw-badge" class="hidden absolute -top-1 -right-1 bg-white text-rose-600 w-4 h-4 rounded-full text-[10px] items-center justify-center font-black shadow-sm">!</span></button>
+            <button onclick="switchTab('all')" id="tab-all" class="tab-btn tab-active relative">🌐 ทั้งหมด <span id="badge-all" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-slate-800 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="switchTab('empty')" id="tab-empty" class="tab-btn text-slate-600 hover:bg-white relative">🎟️ ยังไม่มีผู้ซื้อ <span id="badge-empty" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-slate-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white relative">🟢 ชำระแล้ว <span id="badge-paid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white relative">🔴 ค้างชำระ/จอง <span id="badge-unpaid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm animate-pulse flex items-center justify-center">0</span></button>
+            <button onclick="switchTab('winners')" id="tab-winners" class="tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative">🎉 คนที่ถูกรางวัล <span id="badge-winners" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-yellow-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="switchTab('crm')" id="tab-crm" class="tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative">👥 ลูกค้า <span id="badge-crm" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-indigo-900 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="switchTab('withdraw')" id="tab-withdraw" class="tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative">💸 แจ้งถอนเงิน <span id="badge-withdraw" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-white text-rose-600 rounded-full text-[10px] font-black border border-rose-300 shadow-sm animate-bounce flex items-center justify-center">0</span></button>
           </div>
           <input type="text" id="search-input" oninput="filterData()" placeholder="🔍 ค้นหาเลขสลาก หรือ ชื่อผู้ซื้อ..." class="w-full md:w-72 px-4 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500">
         </div>
@@ -240,9 +240,6 @@
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">อัปโหลดรูปภาพโปรโมชันจากเครื่อง</label>
           <input type="file" id="promoImageFile" accept="image/*" onchange="previewPromoImage()" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 cursor-pointer">
-          <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">อัปโหลดรูปภาพโปรโมชันจากเครื่อง</label>
-          <input type="file" id="promoImageFile" accept="image/*" onchange="previewPromoImage()" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 cursor-pointer">
           <div class="mt-3 border border-dashed border-slate-300 rounded-lg p-2 text-center bg-slate-50 min-h-[100px] flex items-center justify-center">
             <img id="promoPreview" class="max-h-40 rounded shadow-sm hidden">
             <span id="promoPreviewPlaceholder" class="text-xs text-slate-400 font-bold">ยังไม่ได้เลือกรูปภาพ</span>
@@ -251,6 +248,7 @@
             <button type="button" id="btn-remove-promo" onclick="removePromoImage()" class="hidden text-xs bg-rose-100 text-rose-600 hover:bg-rose-200 font-bold py-1.5 px-4 rounded-lg transition shadow-sm border border-rose-200">🗑️ ลบรูปโปรโมชันออก</button>
           </div>
         </div>
+        <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">สถานะโปรโมชัน</label>
           <select id="promoStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none">
             <option value="true">🟢 เปิดใช้งาน (ลูกค้าจะเห็น Pop-up)</option>
@@ -287,12 +285,27 @@
     let tempPromoImageBase64 = ""; let tempLogoBase64 = ""; let tempTicketBgBase64 = "";
     let globalTicketBg = "";
 
+    function updateTabBadge(id, count) {
+        const el = document.getElementById(id);
+        if(el) {
+            if(count > 0) {
+                el.innerText = count > 99 ? '99+' : count;
+                el.classList.remove('hidden');
+                el.classList.add('flex', 'items-center', 'justify-center');
+            } else {
+                el.classList.add('hidden');
+                el.classList.remove('flex', 'items-center', 'justify-center');
+            }
+        }
+    }
+
     function checkAdminLogin() {
       if (document.getElementById('adminPin').value === '123456') { 
         document.getElementById('adminAuthOverlay').style.display = 'none';
         loadInitialData();
         listenToStorefrontSettings();
         listenToWithdrawals(); 
+        listenToCustomersCount();
       } else { 
         Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); 
         document.getElementById('adminPin').value = ''; 
@@ -352,10 +365,14 @@
 
     function listenToWithdrawals() {
         db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => {
-            const badge = document.getElementById('withdraw-badge');
-            if(snap.size > 0) { badge.classList.remove('hidden'); badge.classList.add('flex'); badge.innerText = snap.size; } 
-            else { badge.classList.add('hidden'); badge.classList.remove('flex'); }
+            updateTabBadge('badge-withdraw', snap.size);
             if(currentTab === 'withdraw') loadWithdrawalsCRM();
+        });
+    }
+
+    function listenToCustomersCount() {
+        db.collection('users').onSnapshot(snap => {
+            updateTabBadge('badge-crm', snap.size);
         });
     }
 
@@ -448,6 +465,8 @@
       
       unsubListener = db.collection('lotteries').where('draw', '==', drawName).onSnapshot(snapshot => {
           allTicketsList = []; let totalBuyers = 0, totalQty = 0, sumTotal = 0, sumPaid = 0, sumUnpaid = 0;
+          let cEmpty=0, cPaid=0, cUnpaid=0, cWinners=0; 
+
           snapshot.forEach(doc => {
             const item = doc.data(); const ticket = { id: doc.id, ...item };
             if (item.status === 'available') ticket.status = 'ยังไม่ชำระ';
@@ -457,6 +476,13 @@
             
             ticket.prizeInfo = checkWinningPrize(ticket.number, ticket.quantity, currentWinData);
             allTicketsList.push(ticket);
+
+            if(ticket.name === "-" || ticket.name === "") cEmpty++;
+            else if(ticket.status === "ชำระแล้ว") {
+                cPaid++;
+                if(ticket.prizeInfo && ticket.prizeInfo.won) cWinners++;
+            }
+            else cUnpaid++;
             
             const qty = parseInt(ticket.quantity) || 1; const price = qty * 100; totalQty += qty;
             if (ticket.name && ticket.name !== '-' && ticket.name !== '') {
@@ -464,6 +490,13 @@
               if (ticket.status === 'ชำระแล้ว') sumPaid += price; else sumUnpaid += price;
             }
           });
+
+          updateTabBadge('badge-all', allTicketsList.length);
+          updateTabBadge('badge-empty', cEmpty);
+          updateTabBadge('badge-paid', cPaid);
+          updateTabBadge('badge-unpaid', cUnpaid); 
+          updateTabBadge('badge-winners', cWinners);
+
           document.getElementById('sum-buyers').innerText = totalBuyers + ' ท่าน';
           document.getElementById('sum-qty').innerText = totalQty.toLocaleString('th-TH') + ' ใบ';
           document.getElementById('sum-total').innerText = '฿' + sumTotal.toLocaleString('th-TH');
@@ -509,19 +542,16 @@
                    <div class="text-[9px] font-black text-black drop-shadow-md">บาท</div>
                 </div>
              </div>
-             
              <div class="rt-main">
                 <div class="flex justify-between items-start pr-3 pl-1 w-full shrink-0">
                    <div class="text-[5.5px] text-[#dc2626] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-800 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
                    <div class="rt-digits shrink-0 drop-shadow-sm text-gray-900">${safeNumStr}</div>
                 </div>
-                
                 <div class="flex justify-center mt-0.5 shrink-0 w-full">
                    <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
                       <div class="text-[7.5px] font-bold text-gray-900 whitespace-nowrap">${currentSelectedSheet}</div>
                    </div>
                 </div>
-                
                 <div class="flex justify-between items-end mt-auto pt-0.5 opacity-90 w-full min-w-0 shrink-0">
                    <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm">
                    <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[18px] min-w-0">
@@ -558,11 +588,11 @@
         currentTab = t; 
         ['all','empty','paid','unpaid','winners'].forEach(k => { 
             const btn = document.getElementById('tab-'+k);
-            if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition"; } 
-            else { btn.className = (k===t) ? "tab-btn tab-active" : "tab-btn text-slate-600 hover:bg-slate-200"; }
+            if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative"; } 
+            else { btn.className = (k===t) ? "tab-btn tab-active relative" : "tab-btn text-slate-600 hover:bg-slate-200 relative"; }
         }); 
         
-        document.getElementById('tab-crm').className = (t === 'crm') ? "tab-btn text-white bg-indigo-600 font-bold ml-2 shadow-inner" : "tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2";
+        document.getElementById('tab-crm').className = (t === 'crm') ? "tab-btn text-white bg-indigo-600 font-bold ml-2 shadow-inner relative" : "tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative";
         document.getElementById('tab-withdraw').className = (t === 'withdraw') ? "tab-btn text-white bg-rose-600 font-bold ml-1 relative shadow-inner" : "tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative";
 
         if(t === 'crm') {
@@ -758,7 +788,32 @@
     function calculateAmount() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); }
     function openModal() { document.getElementById('formModal').classList.remove('hidden'); document.getElementById('lotteryForm').reset(); document.getElementById('formRowIndex').value = ""; document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; document.getElementById('slip-display').classList.add('hidden'); calculateAmount(); }
     function closeModal() { document.getElementById('formModal').classList.add('hidden'); }
+    
     function clearTicket(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null }); } }); }
+    
+    // ฟังก์ชันลบสลากทิ้งถาวร
+    function deleteTicket(id) {
+        Swal.fire({
+            title: 'ยืนยันการลบสลาก?',
+            text: "หากลบแล้วข้อมูลสลากใบนี้จะหายไปจากระบบอย่างถาวร ไม่สามารถกู้คืนได้!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'ใช่, ลบทิ้งเลย!',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                db.collection('lotteries').doc(id).delete().then(() => {
+                    Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success');
+                }).catch(err => {
+                    Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+                });
+            }
+        });
+    }
+
     function addNewMonthPopup() { Swal.fire({ title: "สร้างแผ่นงานงวดใหม่", input: "text", inputPlaceholder: "งวด 1 กรกฎาคม 2569", showCancelButton: true, confirmButtonColor: '#1e293b' }).then(r => { if(r.value) db.collection('draws').add({ name: r.value.trim(), createdAt: new Date() }); }); }
 
     function openWinningModal() {
@@ -808,18 +863,17 @@
                     document.getElementById('promoPreview').src = doc.data().imageUrl;
                     document.getElementById('promoPreview').classList.remove('hidden');
                     document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
-                    document.getElementById('btn-remove-promo').classList.remove('hidden'); // แสดงปุ่มลบ
+                    document.getElementById('btn-remove-promo').classList.remove('hidden');
                     tempPromoImageBase64 = doc.data().imageUrl;
                 } else {
                     document.getElementById('promoPreview').classList.add('hidden');
                     document.getElementById('promoPreviewPlaceholder').classList.remove('hidden');
-                    document.getElementById('btn-remove-promo').classList.add('hidden'); // ซ่อนปุ่มลบ
+                    document.getElementById('btn-remove-promo').classList.add('hidden');
                 }
             }
             document.getElementById('promoModal').classList.remove('hidden');
         });
     }
-
     async function previewPromoImage() {
         const fileInput = document.getElementById('promoImageFile');
         if (fileInput.files && fileInput.files[0]) {
@@ -827,11 +881,9 @@
             document.getElementById('promoPreview').src = tempPromoImageBase64;
             document.getElementById('promoPreview').classList.remove('hidden');
             document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
-            document.getElementById('btn-remove-promo').classList.remove('hidden'); // แสดงปุ่มลบ
+            document.getElementById('btn-remove-promo').classList.remove('hidden');
         }
     }
-
-    // ฟังก์ชันใหม่: เคลียร์รูปโปรโมชันทิ้ง
     function removePromoImage() {
         tempPromoImageBase64 = "";
         document.getElementById('promoImageFile').value = "";
@@ -840,41 +892,18 @@
         document.getElementById('promoPreviewPlaceholder').classList.remove('hidden');
         document.getElementById('btn-remove-promo').classList.add('hidden');
     }
-
     function closePromoModal() { document.getElementById('promoModal').classList.add('hidden'); }
-    
     async function savePromotion(e) {
         e.preventDefault();
         Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-        // ถ้าแอดมินกดลบรูป tempPromoImageBase64 จะเป็น "" ซึ่งจะบันทึกค่าว่างลงฐานข้อมูล
         const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" };
         try {
             await db.collection('settings').doc('promotion').set(payload);
             Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' });
             closePromoModal();
-        } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่', 'error'); }
+        } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); }
     }
-function deleteTicket(id) {
-        Swal.fire({
-            title: 'ยืนยันการลบสลาก?',
-            text: "หากลบแล้วข้อมูลสลากใบนี้จะหายไปจากระบบอย่างถาวร ไม่สามารถกู้คืนได้!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'ใช่, ลบทิ้งเลย!',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-                db.collection('lotteries').doc(id).delete().then(() => {
-                    Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success');
-                }).catch(err => {
-                    Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
-                });
-            }
-        });
-    }
+
   </script>
 </body>
 </html>
