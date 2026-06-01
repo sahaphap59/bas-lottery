@@ -686,7 +686,91 @@
     function openPromoModal() { /* ...ย่อไว้เพราะโค้ดเหมือนเดิม... */ }
     function openWinningModal() { /* ...ย่อไว้เพราะโค้ดเหมือนเดิม... */ }
     // ...ระบบส่วนอื่นๆที่เหลือทำงานเหมือนเดิมทั้งหมดครับ
+/* =========================================
+       ระบบประกาศผลรางวัล (แก้ไขให้ใช้งานได้)
+       ========================================= */
+    function openWinningModal() {
+        if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดสลากก่อนครับ', 'warning');
+        db.collection('winning_results').doc(currentSelectedSheet).get().then(doc => {
+            if(doc.exists) {
+                const data = doc.data();
+                document.getElementById('win_prize1').value = data.prize1 || "";
+                document.getElementById('win_last2').value = data.last2 || "";
+                document.getElementById('win_front3').value = (data.front3 || []).join(' ');
+                document.getElementById('win_last3').value = (data.last3 || []).join(' ');
+                document.getElementById('win_prize2').value = (data.prize2 || []).join(' ');
+                document.getElementById('win_prize3').value = (data.prize3 || []).join(' ');
+                document.getElementById('win_prize4').value = (data.prize4 || []).join(' ');
+                document.getElementById('win_prize5').value = (data.prize5 || []).join(' ');
+            } else { document.getElementById('winningForm').reset(); }
+            document.getElementById('winningModal').classList.remove('hidden');
+        });
+    }
 
+    function closeWinningModal() { document.getElementById('winningModal').classList.add('hidden'); }
+    
+    function parseNumberString(str) { return str.split(/[\s,]+/).filter(item => item.trim() !== ""); }
+    
+    function saveWinningData(e) {
+        e.preventDefault();
+        const payload = {
+            prize1: document.getElementById('win_prize1').value.trim(),
+            last2: document.getElementById('win_last2').value.trim(),
+            front3: parseNumberString(document.getElementById('win_front3').value),
+            last3: parseNumberString(document.getElementById('win_last3').value),
+            prize2: parseNumberString(document.getElementById('win_prize2').value),
+            prize3: parseNumberString(document.getElementById('win_prize3').value),
+            prize4: parseNumberString(document.getElementById('win_prize4').value),
+            prize5: parseNumberString(document.getElementById('win_prize5').value),
+            updatedAt: new Date()
+        };
+        db.collection('winning_results').doc(currentSelectedSheet).set(payload, { merge: true })
+        .then(() => { Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', confirmButtonColor: '#b38728' }); closeWinningModal(); })
+        .catch(err => Swal.fire('เกิดข้อผิดพลาด', err.message, 'error'));
+    }
+
+    /* =========================================
+       ระบบโปรโมชัน (ย่อไว้ให้ทำงานได้ปกติ)
+       ========================================= */
+    function openPromoModal() {
+        tempPromoImageBase64 = "";
+        document.getElementById('promoImageFile').value = "";
+        db.collection('settings').doc('promotion').get().then(doc => {
+            if(doc.exists) {
+                document.getElementById('promoStatus').value = doc.data().isActive ? "true" : "false";
+                if(doc.data().imageUrl) {
+                    document.getElementById('promoPreview').src = doc.data().imageUrl;
+                    document.getElementById('promoPreview').classList.remove('hidden');
+                    document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
+                    tempPromoImageBase64 = doc.data().imageUrl;
+                } else {
+                    document.getElementById('promoPreview').classList.add('hidden');
+                    document.getElementById('promoPreviewPlaceholder').classList.remove('hidden');
+                }
+            }
+            document.getElementById('promoModal').classList.remove('hidden');
+        });
+    }
+    async function previewPromoImage() {
+        const fileInput = document.getElementById('promoImageFile');
+        if (fileInput.files && fileInput.files[0]) {
+            tempPromoImageBase64 = await resizeImage(fileInput.files[0], 800, 800, 0.75);
+            document.getElementById('promoPreview').src = tempPromoImageBase64;
+            document.getElementById('promoPreview').classList.remove('hidden');
+            document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
+        }
+    }
+    function closePromoModal() { document.getElementById('promoModal').classList.add('hidden'); }
+    async function savePromotion(e) {
+        e.preventDefault();
+        Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+        const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" };
+        try {
+            await db.collection('settings').doc('promotion').set(payload);
+            Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' });
+            closePromoModal();
+        } catch (error) { Swal.fire('ข้อผิดพลาด', 'ขนาดไฟล์อาจจะยังใหญ่เกินไป กรุณาลองใช้รูปอื่น', 'error'); }
+    }
   </script>
 </body>
 </html>
