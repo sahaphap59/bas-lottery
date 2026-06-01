@@ -107,7 +107,6 @@
             <h3 class="text-sm font-bold text-gray-800">ยอดเงินรางวัลสุทธิ (งวดปัจจุบัน)</h3>
             <p class="text-3xl font-black text-[#d31a1a] drop-shadow-sm my-1" id="total-win-amount">฿0</p>
             <p class="text-xs text-gray-700 font-bold mb-3">ตรวจสอบสลากที่ถูกรางวัลได้ในแท็บ "สำเร็จ"</p>
-            
             <div id="withdraw-action-area">
                 <button onclick="requestWithdrawal()" class="bg-gray-900 text-white font-bold py-2.5 px-6 rounded-lg shadow-md hover:bg-gray-800 transition">💸 แจ้งถอนเงินรางวัล</button>
             </div>
@@ -191,7 +190,7 @@
     let globalSavedPhone = ""; let globalSavedAddress = "";
     let globalBankName = ""; let globalBankAccountName = ""; let globalBankAccountNumber = "";
     let currentWinData = null; let globalSalesOpen = true; let globalTicketBg = "";
-    let userTotalPrizeAmount = 0;
+    let userTotalPrizeAmount = 0; let countdownInterval = null; // ตัวแปรสำหรับเวลานับถอยหลัง
 
     async function initLIFF() {
       try {
@@ -363,8 +362,11 @@
       document.getElementById('tab-pending').className = tab === 'pending' ? 'order-tab active' : 'order-tab';
       document.getElementById('tab-success').className = tab === 'success' ? 'order-tab active' : 'order-tab';
       
-      if(tab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden');
-      else document.getElementById('bulk-pay-bar').classList.add('hidden');
+      if(tab === 'unpaid') {
+          document.getElementById('bulk-pay-bar').classList.remove('hidden');
+      } else {
+          document.getElementById('bulk-pay-bar').classList.add('hidden');
+      }
       renderMyOrders();
     }
 
@@ -378,6 +380,26 @@
         });
         renderMyOrders();
       });
+    }
+
+    // ฟังก์ชันสร้างตัวนับเวลา (นำกลับมาให้ใหม่)
+    function startCountdownTimer() {
+        if(countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            const now = Date.now();
+            document.querySelectorAll('.timer-display').forEach(el => {
+                const expiresAt = parseInt(el.dataset.expire);
+                const diff = expiresAt - now;
+                if(diff <= 0) { 
+                    el.innerHTML = "🚫 หมดเวลาจองแล้ว ระบบกำลังดึงสลากคืนแผง..."; 
+                    el.className = "timer-display text-[11px] text-gray-500 font-bold bg-gray-100 text-center py-2 rounded-lg border border-gray-200 mb-3 shadow-inner mx-3";
+                } else {
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); 
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    el.innerHTML = `⏱️ ต้องชำระเงินภายใน: <span class="text-[#d31a1a]">${minutes} นาที ${seconds} วินาที</span>`;
+                }
+            });
+        }, 1000);
     }
 
     function renderMyOrders() {
@@ -402,12 +424,18 @@
         const qty = item.quantity || 1;
         const amount = qty * 100;
         
-        let statusBadge = ''; let actionHTML = ''; let checkboxHTML = '';
+        let statusBadge = ''; let actionHTML = ''; let checkboxHTML = ''; let timerHTML = '';
         
         if (currentOrderTab === 'unpaid') {
             statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>';
             actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="w-full bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl text-xs font-bold hover:bg-red-50 transition">ชำระเฉพาะใบนี้</button>`;
             checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
+            
+            // ใส่ UI เวลานับถอยหลัง
+            if (item.expiresAt) {
+                timerHTML = `<div class="timer-display mx-3 text-[11px] text-rose-600 font-bold bg-rose-50 text-center py-2 rounded-lg border border-rose-200 mb-3 shadow-inner" data-expire="${item.expiresAt}">⏱️ กำลังคำนวณเวลา...</div>`;
+            }
+
         } else if (currentOrderTab === 'pending') {
             statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold border border-amber-200 shadow-sm">⏳ รอตรวจสอบสลิป</span>';
         } else {
@@ -448,6 +476,7 @@
                     ${ticketDesignHTML}
                 </div>
             </div>
+            ${timerHTML}
             ${prizeBoxHTML}
             ${actionHTML}
           </div>
@@ -456,17 +485,16 @@
       });
       
       updateBulkPayment(); 
-      checkWithdrawalStatus(); // อัปเดตแถบถอนเงิน
+      checkWithdrawalStatus(); 
+      startCountdownTimer(); // ให้ฟังก์ชันนับเวลาทำงาน
     }
 
-    // ตรวจสอบสถานะการถอนเงิน
     function checkWithdrawalStatus() {
         const withdrawBar = document.getElementById('withdraw-prize-bar');
         if (userTotalPrizeAmount > 0 && currentOrderTab === 'success') {
             withdrawBar.classList.remove('hidden');
             document.getElementById('total-win-amount').innerText = `฿${userTotalPrizeAmount.toLocaleString()}`;
             
-            // เช็คว่าเคยแจ้งถอนงวดนี้ไปหรือยัง
             const withdrawId = `${userProfile.userId}_${currentDraw}`;
             db.collection('withdrawals').doc(withdrawId).onSnapshot(doc => {
                 const actionArea = document.getElementById('withdraw-action-area');
@@ -628,7 +656,7 @@
       if (!liff.isLoggedIn()) { forceLineLogin(); return; }
       Swal.fire({
         title: 'ยืนยันการสั่งซื้อ',
-        html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ชุด ${qty} ใบ • ยอดชำระ <span class="text-gray-900 text-lg">฿${(qty*100).toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (จ่ายรวบยอดในตะกร้าทีหลังได้)</option></select>`,
+        html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ชุด ${qty} ใบ • ยอดชำระ <span class="text-gray-900 text-lg">฿${(qty*100).toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`,
         showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
         preConfirm: async () => {
           const phone = document.getElementById('checkoutPhone').value.trim();
@@ -638,8 +666,10 @@
       }).then((result) => {
         if (result.isConfirmed) {
           db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true });
-          db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (24*60*60*1000) })
-            .then(() => { Swal.fire('จองสลากสำเร็จ!', 'สามารถเลือกชำระเงินหลายใบพร้อมกันได้ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); });
+          
+          // ปรับเวลาเป็น 30 นาที 
+          db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000) })
+            .then(() => { Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); });
         }
       });
     }
