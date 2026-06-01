@@ -40,7 +40,6 @@
     .gold-gradient-anim { background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #bf953f); background-size: 200% auto; animation: goldShine 3s linear infinite; color: #0f172a; }
     .gold-glow { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); border: 2px solid #F59E0B !important; }
     
-    /* ซ่อน Scrollbar ของแท็บ */
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -94,17 +93,6 @@
       <h2 class="text-xl font-black">คำสั่งซื้อของฉัน</h2>
     </div>
     
-    <div id="withdraw-prize-bar" class="hidden bg-white mx-3 mb-4 rounded-xl shadow-md border border-[#f5c200] gold-glow overflow-hidden">
-        <div class="gold-gradient-anim p-4 text-center">
-            <h3 class="text-sm font-bold text-gray-800">ยอดเงินรางวัลสุทธิ (งวดปัจจุบัน)</h3>
-            <p class="text-3xl font-black text-[#d31a1a] drop-shadow-sm my-1" id="total-win-amount">฿0</p>
-            <p class="text-xs text-gray-700 font-bold mb-3" id="win-status-text">กำลังตรวจสอบข้อมูล...</p>
-            <div id="withdraw-action-area">
-                <button class="bg-gray-400 text-white font-bold py-2.5 px-6 rounded-lg cursor-not-allowed transition">💸 ยังไม่มียอดให้ถอน</button>
-            </div>
-        </div>
-    </div>
-
     <div class="bg-white mx-3 rounded-xl shadow-sm border border-gray-100 flex overflow-x-auto mb-4 hide-scrollbar">
       <div class="order-tab active px-3" id="tab-unpaid" onclick="setOrderTab('unpaid')">ยังไม่ชำระ</div>
       <div class="order-tab px-3" id="tab-pending" onclick="setOrderTab('pending')">รอตรวจสอบ</div>
@@ -149,7 +137,7 @@
           <div class="flex items-center gap-3"><div class="text-xl">🏦</div><div><div class="text-sm font-bold text-gray-700">บัญชีรับเงินรางวัล</div><div class="text-xs text-amber-500 font-bold" id="display-bank">กดเพื่อเพิ่มบัญชีรับเงิน</div></div></div><span class="text-gray-300 font-bold">❯</span>
         </div>
       </div>
-
+      
       <div onclick="switchTab('orders'); setOrderTab('success');" class="bg-white rounded-xl shadow-sm border border-[#f5c200] p-4 cursor-pointer hover:bg-yellow-50 flex items-center justify-between mt-4">
           <div class="flex items-center gap-3"><div class="text-xl">💸</div><div><div class="text-sm font-bold text-gray-800">แจ้งถอนเงินรางวัล</div><div class="text-xs text-gray-500">เช็คยอดและถอนเงินเขัาบัญชี</div></div></div><span class="text-[#f5c200] font-bold">❯</span>
       </div>
@@ -188,7 +176,8 @@
     let globalSavedPhone = ""; let globalSavedAddress = "";
     let globalBankName = ""; let globalBankAccountName = ""; let globalBankAccountNumber = "";
     let currentWinData = null; let globalSalesOpen = true; let globalTicketBg = "";
-    let userTotalPrizeAmount = 0; let countdownInterval = null; 
+    let countdownInterval = null; 
+    let myWithdrawals = {}; // เก็บข้อมูลการถอนเงินแบบรายรหัสคำสั่งซื้อ
 
     async function initLIFF() {
       try {
@@ -376,13 +365,19 @@
 
     function loadMyTickets() {
       if(!userProfile) return;
-      db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => {
-        myTickets = [];
-        s.forEach(doc => {
-            const data = doc.data();
-            if(data.status !== 'available') myTickets.push({ id: doc.id, ...data });
-        });
-        renderMyOrders();
+      
+      db.collection('withdrawals').where('userId', '==', userProfile.userId).onSnapshot(ws => {
+          myWithdrawals = {};
+          ws.forEach(d => { myWithdrawals[d.id] = d.data(); });
+          
+          db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => {
+            myTickets = [];
+            s.forEach(doc => {
+                const data = doc.data();
+                if(data.status !== 'available') myTickets.push({ id: doc.id, ...data });
+            });
+            renderMyOrders();
+          });
       });
     }
 
@@ -407,7 +402,6 @@
 
     function renderMyOrders() {
       const grid = document.getElementById('my-orders-grid'); grid.innerHTML = '';
-      userTotalPrizeAmount = 0;
       
       let filteredList = [];
       if (currentOrderTab === 'unpaid') {
@@ -423,7 +417,6 @@
       if(filteredList.length === 0) { 
           document.getElementById('no-orders-data').classList.remove('hidden'); 
           updateBulkPayment(); 
-          checkWithdrawalStatus(); 
           return; 
       }
       document.getElementById('no-orders-data').classList.add('hidden');
@@ -437,7 +430,7 @@
         
         if (currentOrderTab === 'unpaid') {
             statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>';
-            actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="w-full bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl text-xs font-bold hover:bg-red-50 transition">ชำระเฉพาะใบนี้</button>`;
+            actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="w-full bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl text-xs font-bold hover:bg-red-50 transition mt-3">ชำระเฉพาะใบนี้</button>`;
             checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
             if (item.expiresAt) {
                 timerHTML = `<div class="timer-display mx-3 text-[11px] text-rose-600 font-bold bg-rose-50 text-center py-2 rounded-lg border border-rose-200 mb-3 shadow-inner" data-expire="${item.expiresAt}">⏱️ กำลังคำนวณเวลา...</div>`;
@@ -450,22 +443,38 @@
 
         if (currentOrderTab === 'history') {
              if(item.status === 'จอง' || item.status === 'reserve') statusBadge = '<span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-1 rounded font-bold">หมดอายุ/ไม่ชำระ</span>';
+             else if (item.status === 'รอตรวจสอบสลิป' || item.status === 'pending') statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold">รอยืนยัน</span>';
+             else statusBadge = '<span class="text-[11px] bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-md font-bold">✅ สำเร็จ</span>';
         }
         
         let prizeBoxHTML = '';
         
+        // การคำนวณเงินรางวัลและการถอน แบบรายใบ (ใช้ ID ของ Order อ้างอิง)
         if(currentOrderTab === 'success' && currentWinData && (item.status === 'ชำระสำเร็จ' || item.status === 'sold' || item.status === 'success')){
              const prizeInfo = checkWinningPrize(item.number, item.quantity, currentWinData);
              if (prizeInfo.won) {
-                 userTotalPrizeAmount += prizeInfo.total;
+                 
+                 let wdBtn = '';
+                 let wdInfo = myWithdrawals[item.id];
+                 if(wdInfo) {
+                     if(wdInfo.status === 'สำเร็จ') {
+                         wdBtn = `<div class="mt-2 bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-3 rounded-lg border border-emerald-300 shadow-sm">✅ โอนเงินรางวัลให้คุณสำเร็จแล้ว</div>`;
+                     } else {
+                         wdBtn = `<div class="mt-2 bg-amber-100 text-amber-700 text-xs font-bold py-2.5 px-3 rounded-lg border border-amber-300 animate-pulse shadow-sm">⏳ รอแอดมินโอนเงิน</div>`;
+                     }
+                 } else {
+                     wdBtn = `<button onclick="requestWithdrawal('${item.id}', ${prizeInfo.total}, '${numStr}')" class="mt-2 w-full bg-[#111] text-white font-bold py-2.5 px-4 rounded-lg shadow-md hover:bg-gray-800 transition border border-gray-900">💸 แจ้งถอนเงินรางวัลนี้</button>`;
+                 }
+
                  prizeBoxHTML = `
-                 <div class="gold-gradient-anim border-t-2 border-[#f5c200] p-4 text-center rounded-b-xl relative overflow-hidden">
-                    <p class="text-[13px] font-black text-gray-800 mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
-                    <p class="text-base font-black text-gray-900 drop-shadow-sm">${prizeInfo.labels.join(', ')}</p>
+                 <div class="bg-gradient-to-b from-[#fffce8] to-[#ffed99] border-t-2 border-[#f5c200] p-4 text-center rounded-b-xl relative overflow-hidden mt-2">
+                    <p class="text-[13px] font-bold text-[#b38000] mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
+                    <p class="text-base font-black text-[#8a6300] drop-shadow-sm">${prizeInfo.labels.join(', ')}</p>
                     <p class="text-[#d31a1a] font-black text-[22px] mt-1 drop-shadow-sm tracking-wide bg-white/80 inline-block px-3 py-1 rounded-lg">รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
+                    ${wdBtn}
                  </div>`;
              } else if (currentWinData.prize1) {
-                 prizeBoxHTML = `<div class="bg-gray-50 border-t border-gray-200 p-2.5 text-center rounded-b-xl"><p class="text-sm font-black text-gray-500">❌ ไม่ถูกรางวัล</p></div>`;
+                 prizeBoxHTML = `<div class="bg-gray-50 border-t border-gray-200 p-2.5 text-center rounded-b-xl mt-2"><p class="text-sm font-black text-gray-500">❌ ไม่ถูกรางวัล</p></div>`;
              }
         }
 
@@ -473,19 +482,19 @@
 
         const html = `
           <div class="bg-white rounded-xl shadow-md border ${prizeBoxHTML.includes('ถูกรางวัล') ? 'border-[#f5c200] gold-glow' : 'border-gray-200'} flex flex-col">
-            <div class="flex justify-between items-center p-3 border-b border-gray-100 bg-gray-50 rounded-t-xl gap-2">
+            <div class="flex justify-between items-center p-3 border-b border-gray-100 bg-gray-50 rounded-t-xl gap-2 mb-2">
               <div class="flex items-center gap-2">
                  ${checkboxHTML}
                  <span class="text-[11px] font-bold text-gray-500">รหัส: #${item.id.substring(0,8)}</span>
               </div>
               ${statusBadge}
             </div>
+            ${timerHTML}
             <div class="p-4 pb-3 flex justify-center bg-[#f8fafc]" onclick="toggleCheckbox('${item.id}')">
                 <div class="w-full max-w-[260px] pointer-events-none">
                     ${ticketDesignHTML}
                 </div>
             </div>
-            ${timerHTML}
             ${prizeBoxHTML}
             ${actionHTML}
           </div>
@@ -494,47 +503,11 @@
       });
       
       updateBulkPayment(); 
-      checkWithdrawalStatus(); 
       startCountdownTimer(); 
     }
 
-    // แจ้งถอนเงิน - จะโชว์เฉพาะแท็บ "สำเร็จ" เสมอ แม้ยอดเป็น 0
-    function checkWithdrawalStatus() {
-        const withdrawBar = document.getElementById('withdraw-prize-bar');
-        
-        if (currentOrderTab === 'success') {
-            withdrawBar.classList.remove('hidden');
-            document.getElementById('total-win-amount').innerText = `฿${userTotalPrizeAmount.toLocaleString()}`;
-            
-            const actionArea = document.getElementById('withdraw-action-area');
-            const statusText = document.getElementById('win-status-text');
-
-            if (userTotalPrizeAmount > 0) {
-                statusText.innerText = "🎉 คุณถูกรางวัลสลากงวดปัจจุบัน!";
-                
-                const withdrawId = `${userProfile.userId}_${currentDraw}`;
-                db.collection('withdrawals').doc(withdrawId).onSnapshot(doc => {
-                    if(doc.exists) {
-                        const status = doc.data().status;
-                        if(status === 'สำเร็จ') {
-                            actionArea.innerHTML = `<button class="w-full bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold py-2.5 px-6 rounded-lg cursor-default shadow-sm">✅ โอนเงินรางวัลให้คุณสำเร็จแล้ว</button>`;
-                        } else {
-                            actionArea.innerHTML = `<button class="w-full bg-amber-100 text-amber-700 border border-amber-300 font-bold py-2.5 px-6 rounded-lg cursor-default animate-pulse shadow-sm">⏳ รอแอดมินดำเนินการโอนเงิน</button>`;
-                        }
-                    } else {
-                        actionArea.innerHTML = `<button onclick="requestWithdrawal()" class="w-full bg-gray-900 text-white font-bold py-2.5 px-6 rounded-lg shadow-md hover:bg-gray-800 transition">💸 แจ้งถอนเงินรางวัลเขัาบัญชี</button>`;
-                    }
-                });
-            } else {
-                statusText.innerText = "ยังไม่พบสลากที่ถูกรางวัลในงวดนี้";
-                actionArea.innerHTML = `<button class="w-full bg-gray-300 text-gray-500 font-bold py-2.5 px-6 rounded-lg cursor-not-allowed">💸 ยังไม่มียอดให้ถอน</button>`;
-            }
-        } else {
-            withdrawBar.classList.add('hidden');
-        }
-    }
-
-    function requestWithdrawal() {
+    // ฟังก์ชันถอนเงินแบบรายคำสั่งซื้อ
+    function requestWithdrawal(orderId, amount, numStr) {
         if(!globalBankName || !globalBankAccountNumber) {
             Swal.fire({
                 title: 'ยังไม่มีบัญชีรับเงิน',
@@ -548,7 +521,7 @@
 
         Swal.fire({
             title: 'ยืนยันการถอนเงิน',
-            html: `ระบบจะทำการโอนเงินรางวัล <b>฿${userTotalPrizeAmount.toLocaleString()}</b><br>ไปยังบัญชี: <b>${globalBankName}</b><br>เลขที่: <b>${globalBankAccountNumber}</b><br>ชื่อ: <b>${globalBankAccountName}</b>`,
+            html: `รหัสคำสั่งซื้อ: <b>${orderId.substring(0,8)}</b><br>สลากเลข: <b>${numStr}</b><br>ยอดเงินรางวัล: <b>฿${amount.toLocaleString()}</b><br>ไปยังบัญชี: <b>${globalBankName}</b><br>เลขที่: <b>${globalBankAccountNumber}</b>`,
             icon: 'info',
             showCancelButton: true,
             confirmButtonText: 'ยืนยันแจ้งถอน',
@@ -556,12 +529,12 @@
             confirmButtonColor: '#d31a1a'
         }).then((result) => {
             if (result.isConfirmed) {
-                const withdrawId = `${userProfile.userId}_${currentDraw}`;
-                db.collection('withdrawals').doc(withdrawId).set({
+                db.collection('withdrawals').doc(orderId).set({
                     userId: userProfile.userId,
                     displayName: userProfile.displayName,
                     draw: currentDraw,
-                    amount: userTotalPrizeAmount,
+                    ticketNumber: numStr,
+                    amount: amount,
                     bankName: globalBankName,
                     bankAccountName: globalBankAccountName,
                     bankAccountNumber: globalBankAccountNumber,
@@ -716,7 +689,7 @@
         Swal.fire({
             title: 'โอนเงินรวบยอด',
             html: `<div class="text-sm font-bold text-gray-500 mb-2">จำนวน <span class="text-[#d31a1a]">${ids.length}</span> รายการ<br>ยอดโอนรวม: <span class="text-gray-900 text-2xl font-black">฿${total.toLocaleString()}</span></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-4 text-left"><div class="text-xs text-gray-700 font-medium space-y-1"><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[15px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><input type="file" id="bulkSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
-            showCancelButton: true, confirmButtonText: 'ส่งสลิชำระทั้งหมด', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
+            showCancelButton: true, confirmButtonText: 'ส่งสลิปชำระทั้งหมด', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
             preConfirm: async () => { const fileInput = document.getElementById('bulkSlipFile'); if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; } Swal.showLoading(); return await handleFileSelection('bulkSlipFile'); }
         }).then((result) => { 
             if(result.isConfirmed) { 

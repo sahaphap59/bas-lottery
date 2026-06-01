@@ -97,7 +97,7 @@
             <button onclick="switchTab('crm')" id="tab-crm" class="tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative">👥 ลูกค้า <span id="badge-crm" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-indigo-900 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="switchTab('withdraw')" id="tab-withdraw" class="tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative">💸 แจ้งถอนเงิน <span id="badge-withdraw" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-white text-rose-600 rounded-full text-[10px] font-black border border-rose-300 shadow-sm animate-bounce flex items-center justify-center">0</span></button>
           </div>
-          <input type="text" id="search-input" oninput="filterData()" placeholder="🔍 ค้นหาเลขสลาก หรือ ชื่อผู้ซื้อ..." class="w-full md:w-72 px-4 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500">
+          <input type="text" id="search-input" oninput="filterData()" placeholder="🔍 ค้นหาเลข, ชื่อ หรือ รหัสคำสั่งซื้อ..." class="w-full md:w-72 px-4 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500">
         </div>
 
         <div class="overflow-x-auto">
@@ -297,15 +297,12 @@
         const el = document.getElementById('badge-' + tabKey);
         if(!el) return;
         
-        // ถ้าแอดมินกำลังเปิดแท็บนี้อยู่ ให้อัปเดตข้อมูลว่า "อ่านแล้ว" ทันที
         if (currentTab === tabKey) {
             seenCounts[tabKey] = currentCounts[tabKey];
             saveSeenCounts();
         }
 
         let unread = currentCounts[tabKey] - seenCounts[tabKey];
-        
-        // ถ้ายอดรวมน้อยลง (เช่น โดนลบออก) ให้รีเซ็ตค่านับใหม่
         if (unread < 0) {
             seenCounts[tabKey] = currentCounts[tabKey];
             saveSeenCounts();
@@ -543,7 +540,14 @@
       else if(currentTab === 'unpaid') list = list.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== "");
       else if(currentTab === 'winners') list = list.filter(x => x.prizeInfo && x.prizeInfo.won === true && x.status === "ชำระแล้ว");
 
-      if (filterText) { const text = filterText.toLowerCase(); list = list.filter(item => String(item.number || "").includes(text) || String(item.name || "").toLowerCase().includes(text)); }
+      if (filterText) { 
+          const text = filterText.toLowerCase(); 
+          list = list.filter(item => 
+              String(item.number || "").includes(text) || 
+              String(item.name || "").toLowerCase().includes(text) ||
+              String(item.id || "").toLowerCase().includes(text) // ค้นหาจาก Order ID ได้ด้วย
+          ); 
+      }
       let hasRows = false; let displayCounter = 1;
       
       list.forEach((item) => {
@@ -600,10 +604,12 @@
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
         let action = `
           <div class="flex gap-1.5 items-center justify-center">
-            <button onclick='editRow(${itemJson})' class="bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs">📝 จัดการ</button>
-            <button onclick="clearTicket('${item.id}')" class="bg-rose-50 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs">🔄 คืนแผง</button>
+            <button onclick='editRow(${itemJson})' class="bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">📝 จัดการ</button>
+            <button onclick="clearTicket('${item.id}')" class="bg-rose-50 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">🔄 คืนแผง</button>
             <button onclick="deleteTicket('${item.id}')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">🗑️ ลบ</button>
-          </div>`;
+          </div>
+          <div class="text-[10px] text-gray-400 text-center mt-1 w-full">ID: #${item.id.substring(0,8)}</div>
+          `;
 
         tr.innerHTML = `<td class="py-3 px-4 text-center text-slate-400 font-mono text-xs">${displayCounter++}</td><td class="py-1 px-2 text-center">${ticketHtml}</td><td class="py-3 px-6 font-bold text-slate-800 text-sm">${isFree ? '<span class="text-slate-400 font-normal italic">ยังไม่มีผู้ถือครอง</span>' : item.name}</td><td class="py-3 px-4 text-center font-bold text-slate-600">${item.quantity}</td><td class="py-3 px-6 text-right font-black text-rose-600 text-base">฿${amount.toLocaleString()}</td><td class="py-3 px-4 text-center">${statusBadge}</td><td class="py-3 px-4 text-center">${action}</td>`;
         body.appendChild(tr);
@@ -614,7 +620,6 @@
     function switchTab(t) { 
         currentTab = t; 
         
-        // อัปเดตการอ่านให้ระบบทราบ
         seenCounts[t] = currentCounts[t];
         updateTabBadge(t);
         
@@ -642,7 +647,7 @@
                 <th class="py-4 px-4 text-center">สถานะ</th>
                 <th class="py-4 px-4 text-center">แผงควบคุม</th>
               </tr>`;
-            document.getElementById('search-input').placeholder = "🔍 ค้นหาเลขสลาก หรือ ชื่อผู้ซื้อ...";
+            document.getElementById('search-input').placeholder = "🔍 ค้นหาเลขสลาก หรือ รหัสออเดอร์...";
             document.getElementById('search-input').value = ""; 
             renderTable(); 
         }
@@ -659,7 +664,7 @@
     }
 
     function loadWithdrawalsCRM() {
-      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อ หรือ ธนาคาร...";
+      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อ หรือ รหัสออเดอร์...";
       document.getElementById('search-input').value = "";
       const body = document.getElementById('table-body');
       body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดข้อมูลการถอน...</td></tr>';
@@ -668,7 +673,7 @@
       document.getElementById('main-thead').innerHTML = `
         <tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider">
             <th class="py-4 px-4">วันที่แจ้งถอน</th>
-            <th class="py-4 px-6">ชื่อลูกค้า / งวด</th>
+            <th class="py-4 px-6">ข้อมูลสลาก / งวด</th>
             <th class="py-4 px-4">ยอดโอน (บาท)</th>
             <th class="py-4 px-6">ข้อมูลบัญชีธนาคาร</th>
             <th class="py-4 px-4 text-center">สถานะ</th>
@@ -684,12 +689,17 @@
           const dateStr = data.createdAt ? new Date(data.createdAt).toLocaleString('th-TH') : '-';
           
           let statusBadge = data.status === 'สำเร็จ' ? `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">✅ สำเร็จแล้ว</span>` : `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold animate-pulse">⏳ รอแอดมินโอน</span>`;
-          let actionBtn = data.status === 'สำเร็จ' ? `-` : `<button onclick="approveWithdrawal('${doc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">อนุมัติโอนแล้ว</button>`;
+          let actionBtn = data.status === 'สำเร็จ' ? `-` : `<button onclick="approveWithdrawal('${doc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">โอนสำเร็จ</button>`;
+          let deleteBtn = `<button onclick="deleteWithdrawal('${doc.id}')" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm ml-1">🗑️ ลบ</button>`;
 
           body.insertAdjacentHTML('beforeend', `
             <tr class="hover:bg-slate-50 border-b border-slate-100 text-sm">
               <td class="py-3 px-4 text-slate-500 text-xs">${dateStr}</td>
-              <td class="py-3 px-6"><div class="font-bold text-slate-800">${data.displayName}</div><div class="text-xs text-gray-400 mt-0.5">งวด: ${data.draw}</div></td>
+              <td class="py-3 px-6">
+                 <div class="font-bold text-[#dc2626] text-lg tracking-widest">${data.ticketNumber}</div>
+                 <div class="font-bold text-slate-800">${data.displayName}</div>
+                 <div class="text-[10px] text-gray-400 mt-0.5">งวด: ${data.draw} | รหัสออเดอร์: #${doc.id.substring(0,8)}</div>
+              </td>
               <td class="py-3 px-4 font-black text-rose-600 text-lg">฿${(data.amount||0).toLocaleString()}</td>
               <td class="py-3 px-6">
                  <div class="text-indigo-700 font-bold text-xs">${data.bankName}</div>
@@ -697,7 +707,7 @@
                  <div class="text-gray-500 text-xs">ชื่อ: ${data.bankAccountName}</div>
               </td>
               <td class="py-3 px-4 text-center">${statusBadge}</td>
-              <td class="py-3 px-4 text-center">${actionBtn}</td>
+              <td class="py-3 px-4 text-center">${actionBtn} ${deleteBtn}</td>
             </tr>
           `);
         });
@@ -716,6 +726,23 @@
             if (result.isConfirmed) {
                 db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => {
                     Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success');
+                });
+            }
+        });
+    }
+
+    function deleteWithdrawal(docId) {
+        Swal.fire({
+            title: 'ยืนยันการลบรายการถอน?',
+            text: "ข้อมูลการแจ้งถอนนี้จะหายไปอย่างถาวร!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'ใช่, ลบทิ้งเลย'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                db.collection('withdrawals').doc(docId).delete().then(() => {
+                    Swal.fire('ลบสำเร็จ!', 'ข้อมูลการถอนถูกลบทิ้งแล้ว', 'success');
                 });
             }
         });
