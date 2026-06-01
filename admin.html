@@ -46,10 +46,10 @@
 
   <div class="premium-nav py-6 px-6 text-white shadow-md mb-8">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-      <div class="flex items-center gap-4">
-        <div class="bg-amber-400 text-slate-900 font-black p-3 rounded-xl text-2xl">BAS</div>
+      <div class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition" onclick="window.location.reload();" title="รีเฟรชหน้าเว็บ">
+        <div class="bg-amber-400 text-slate-900 font-black p-3 rounded-xl text-2xl shadow-md">BAS</div>
         <div>
-          <h1 class="text-2xl font-extrabold text-amber-400 uppercase">BAS LOTTERY ONLINE</h1>
+          <h1 class="text-2xl font-extrabold text-amber-400 uppercase drop-shadow-sm">BAS LOTTERY ONLINE</h1>
           <p class="text-slate-300 text-sm font-light mt-1">แผงบริหารจัดการระบบหลังบ้าน</p>
         </div>
       </div>
@@ -496,34 +496,34 @@
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${safeNumStr}&size=40x40`;
 
         const ticketHtml = `
-        <div class="real-ticket mx-auto my-1">
+        <div class="real-ticket mx-auto my-1 border border-gray-300 shadow-sm">
           <div class="w-full h-full flex" style="${ticketBgStyle}">
-             <div class="rt-stub pr-1 bg-slate-900/15 backdrop-blur-[2px]">
-                <span class="rt-stub-txt tracking-tighter">สลากกินแบ่งรัฐบาล</span>
-                <div class="text-center">
-                   <div class="text-[12px] font-black text-gray-900 leading-none drop-shadow-sm">${qty} ใบ</div>
-                   <div class="text-[8px] font-bold text-gray-700 mt-1">${qty*6} ล้าน</div>
+             <div class="rt-stub pr-1">
+                <span class="rt-stub-txt tracking-tighter text-[#dc2626]">สลากกินแบ่งรัฐบาล</span>
+                <div class="text-center mt-0.5">
+                   <div class="text-[15px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div>
+                   <div class="text-[10px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div>
                 </div>
-                <div class="text-center mt-1 leading-none">
-                   <div class="text-[18px] font-black text-[#dc2626] drop-shadow-sm">80</div>
-                   <div class="text-[8px] font-bold text-gray-800">บาท</div>
+                <div class="text-center mt-1.5 leading-none">
+                   <div class="text-[22px] font-black text-[#dc2626] drop-shadow-md">80</div>
+                   <div class="text-[9px] font-black text-black drop-shadow-md">บาท</div>
                 </div>
              </div>
              
-             <div class="rt-main bg-white/60 backdrop-blur-[1px]">
+             <div class="rt-main">
                 <div class="flex justify-between items-start pr-3 pl-1 w-full shrink-0">
-                   <div class="text-[5.5px] text-[#dc2626] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-600 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
-                   <div class="rt-digits shrink-0">${safeNumStr}</div>
+                   <div class="text-[5.5px] text-[#dc2626] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-800 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
+                   <div class="rt-digits shrink-0 drop-shadow-sm text-gray-900">${safeNumStr}</div>
                 </div>
                 
                 <div class="flex justify-center mt-0.5 shrink-0 w-full">
-                   <div class="bg-white/90 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
-                      <div class="text-[7.5px] font-bold text-gray-800 whitespace-nowrap">${currentSelectedSheet}</div>
+                   <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
+                      <div class="text-[7.5px] font-bold text-gray-900 whitespace-nowrap">${currentSelectedSheet}</div>
                    </div>
                 </div>
                 
-                <div class="flex justify-between items-end mt-auto pt-0.5 opacity-80 w-full min-w-0 shrink-0">
-                   <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-400 bg-white shrink-0">
+                <div class="flex justify-between items-end mt-auto pt-0.5 opacity-90 w-full min-w-0 shrink-0">
+                   <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm">
                    <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[18px] min-w-0">
                       <span class="real-barcode">*${safeNumStr}*</span>
                    </div>
