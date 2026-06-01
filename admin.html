@@ -285,17 +285,40 @@
     let tempPromoImageBase64 = ""; let tempLogoBase64 = ""; let tempTicketBgBase64 = "";
     let globalTicketBg = "";
 
-    function updateTabBadge(id, count) {
-        const el = document.getElementById(id);
-        if(el) {
-            if(count > 0) {
-                el.innerText = count > 99 ? '99+' : count;
-                el.classList.remove('hidden');
-                el.classList.add('flex', 'items-center', 'justify-center');
-            } else {
-                el.classList.add('hidden');
-                el.classList.remove('flex', 'items-center', 'justify-center');
-            }
+    // ระบบจดจำตัวเลขแจ้งเตือน (Seen Count)
+    let currentCounts = { all: 0, empty: 0, paid: 0, unpaid: 0, winners: 0, crm: 0, withdraw: 0 };
+    let seenCounts = JSON.parse(localStorage.getItem('admin_seen_counts')) || { all: 0, empty: 0, paid: 0, unpaid: 0, winners: 0, crm: 0, withdraw: 0 };
+
+    function saveSeenCounts() {
+        localStorage.setItem('admin_seen_counts', JSON.stringify(seenCounts));
+    }
+
+    function updateTabBadge(tabKey) {
+        const el = document.getElementById('badge-' + tabKey);
+        if(!el) return;
+        
+        // ถ้าแอดมินกำลังเปิดแท็บนี้อยู่ ให้อัปเดตข้อมูลว่า "อ่านแล้ว" ทันที
+        if (currentTab === tabKey) {
+            seenCounts[tabKey] = currentCounts[tabKey];
+            saveSeenCounts();
+        }
+
+        let unread = currentCounts[tabKey] - seenCounts[tabKey];
+        
+        // ถ้ายอดรวมน้อยลง (เช่น โดนลบออก) ให้รีเซ็ตค่านับใหม่
+        if (unread < 0) {
+            seenCounts[tabKey] = currentCounts[tabKey];
+            saveSeenCounts();
+            unread = 0;
+        }
+
+        if(unread > 0) {
+            el.innerText = unread > 99 ? '99+' : unread;
+            el.classList.remove('hidden');
+            el.classList.add('flex', 'items-center', 'justify-center');
+        } else {
+            el.classList.add('hidden');
+            el.classList.remove('flex', 'items-center', 'justify-center');
         }
     }
 
@@ -305,7 +328,7 @@
         loadInitialData();
         listenToStorefrontSettings();
         listenToWithdrawals(); 
-        listenToCustomersCount();
+        listenToCustomersCount(); 
       } else { 
         Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); 
         document.getElementById('adminPin').value = ''; 
@@ -365,14 +388,16 @@
 
     function listenToWithdrawals() {
         db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => {
-            updateTabBadge('badge-withdraw', snap.size);
+            currentCounts['withdraw'] = snap.size;
+            updateTabBadge('withdraw');
             if(currentTab === 'withdraw') loadWithdrawalsCRM();
         });
     }
 
     function listenToCustomersCount() {
         db.collection('users').onSnapshot(snap => {
-            updateTabBadge('badge-crm', snap.size);
+            currentCounts['crm'] = snap.size;
+            updateTabBadge('crm');
         });
     }
 
@@ -465,7 +490,7 @@
       
       unsubListener = db.collection('lotteries').where('draw', '==', drawName).onSnapshot(snapshot => {
           allTicketsList = []; let totalBuyers = 0, totalQty = 0, sumTotal = 0, sumPaid = 0, sumUnpaid = 0;
-          let cEmpty=0, cPaid=0, cUnpaid=0, cWinners=0; 
+          let cEmpty = 0, cPaid = 0, cUnpaid = 0, cWinners = 0; 
 
           snapshot.forEach(doc => {
             const item = doc.data(); const ticket = { id: doc.id, ...item };
@@ -491,11 +516,13 @@
             }
           });
 
-          updateTabBadge('badge-all', allTicketsList.length);
-          updateTabBadge('badge-empty', cEmpty);
-          updateTabBadge('badge-paid', cPaid);
-          updateTabBadge('badge-unpaid', cUnpaid); 
-          updateTabBadge('badge-winners', cWinners);
+          currentCounts['all'] = allTicketsList.length;
+          currentCounts['empty'] = cEmpty;
+          currentCounts['paid'] = cPaid;
+          currentCounts['unpaid'] = cUnpaid;
+          currentCounts['winners'] = cWinners;
+
+          ['all','empty','paid','unpaid','winners'].forEach(k => updateTabBadge(k));
 
           document.getElementById('sum-buyers').innerText = totalBuyers + ' ท่าน';
           document.getElementById('sum-qty').innerText = totalQty.toLocaleString('th-TH') + ' ใบ';
@@ -586,6 +613,11 @@
 
     function switchTab(t) { 
         currentTab = t; 
+        
+        // อัปเดตการอ่านให้ระบบทราบ
+        seenCounts[t] = currentCounts[t];
+        updateTabBadge(t);
+        
         ['all','empty','paid','unpaid','winners'].forEach(k => { 
             const btn = document.getElementById('tab-'+k);
             if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative"; } 
@@ -791,7 +823,6 @@
     
     function clearTicket(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null }); } }); }
     
-    // ฟังก์ชันลบสลากทิ้งถาวร
     function deleteTicket(id) {
         Swal.fire({
             title: 'ยืนยันการลบสลาก?',
