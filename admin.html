@@ -240,12 +240,17 @@
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">อัปโหลดรูปภาพโปรโมชันจากเครื่อง</label>
           <input type="file" id="promoImageFile" accept="image/*" onchange="previewPromoImage()" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 cursor-pointer">
+          <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">อัปโหลดรูปภาพโปรโมชันจากเครื่อง</label>
+          <input type="file" id="promoImageFile" accept="image/*" onchange="previewPromoImage()" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 cursor-pointer">
           <div class="mt-3 border border-dashed border-slate-300 rounded-lg p-2 text-center bg-slate-50 min-h-[100px] flex items-center justify-center">
             <img id="promoPreview" class="max-h-40 rounded shadow-sm hidden">
             <span id="promoPreviewPlaceholder" class="text-xs text-slate-400 font-bold">ยังไม่ได้เลือกรูปภาพ</span>
           </div>
+          <div class="mt-2 text-center">
+            <button type="button" id="btn-remove-promo" onclick="removePromoImage()" class="hidden text-xs bg-rose-100 text-rose-600 hover:bg-rose-200 font-bold py-1.5 px-4 rounded-lg transition shadow-sm border border-rose-200">🗑️ ลบรูปโปรโมชันออก</button>
+          </div>
         </div>
-        <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">สถานะโปรโมชัน</label>
           <select id="promoStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none">
             <option value="true">🟢 เปิดใช้งาน (ลูกค้าจะเห็น Pop-up)</option>
@@ -536,7 +541,12 @@
         }
 
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
-        let action = `<div class="flex gap-1.5 items-center justify-center"><button onclick='editRow(${itemJson})' class="bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs">📝 จัดการ</button><button onclick="clearTicket('${item.id}')" class="bg-rose-50 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs">🔄 คืนแผง</button></div>`;
+        let action = `
+          <div class="flex gap-1.5 items-center justify-center">
+            <button onclick='editRow(${itemJson})' class="bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs">📝 จัดการ</button>
+            <button onclick="clearTicket('${item.id}')" class="bg-rose-50 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs">🔄 คืนแผง</button>
+            <button onclick="deleteTicket('${item.id}')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">🗑️ ลบ</button>
+          </div>`;
 
         tr.innerHTML = `<td class="py-3 px-4 text-center text-slate-400 font-mono text-xs">${displayCounter++}</td><td class="py-1 px-2 text-center">${ticketHtml}</td><td class="py-3 px-6 font-bold text-slate-800 text-sm">${isFree ? '<span class="text-slate-400 font-normal italic">ยังไม่มีผู้ถือครอง</span>' : item.name}</td><td class="py-3 px-4 text-center font-bold text-slate-600">${item.quantity}</td><td class="py-3 px-6 text-right font-black text-rose-600 text-base">฿${amount.toLocaleString()}</td><td class="py-3 px-4 text-center">${statusBadge}</td><td class="py-3 px-4 text-center">${action}</td>`;
         body.appendChild(tr);
@@ -798,15 +808,18 @@
                     document.getElementById('promoPreview').src = doc.data().imageUrl;
                     document.getElementById('promoPreview').classList.remove('hidden');
                     document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
+                    document.getElementById('btn-remove-promo').classList.remove('hidden'); // แสดงปุ่มลบ
                     tempPromoImageBase64 = doc.data().imageUrl;
                 } else {
                     document.getElementById('promoPreview').classList.add('hidden');
                     document.getElementById('promoPreviewPlaceholder').classList.remove('hidden');
+                    document.getElementById('btn-remove-promo').classList.add('hidden'); // ซ่อนปุ่มลบ
                 }
             }
             document.getElementById('promoModal').classList.remove('hidden');
         });
     }
+
     async function previewPromoImage() {
         const fileInput = document.getElementById('promoImageFile');
         if (fileInput.files && fileInput.files[0]) {
@@ -814,20 +827,54 @@
             document.getElementById('promoPreview').src = tempPromoImageBase64;
             document.getElementById('promoPreview').classList.remove('hidden');
             document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
+            document.getElementById('btn-remove-promo').classList.remove('hidden'); // แสดงปุ่มลบ
         }
     }
+
+    // ฟังก์ชันใหม่: เคลียร์รูปโปรโมชันทิ้ง
+    function removePromoImage() {
+        tempPromoImageBase64 = "";
+        document.getElementById('promoImageFile').value = "";
+        document.getElementById('promoPreview').src = "";
+        document.getElementById('promoPreview').classList.add('hidden');
+        document.getElementById('promoPreviewPlaceholder').classList.remove('hidden');
+        document.getElementById('btn-remove-promo').classList.add('hidden');
+    }
+
     function closePromoModal() { document.getElementById('promoModal').classList.add('hidden'); }
+    
     async function savePromotion(e) {
         e.preventDefault();
         Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+        // ถ้าแอดมินกดลบรูป tempPromoImageBase64 จะเป็น "" ซึ่งจะบันทึกค่าว่างลงฐานข้อมูล
         const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" };
         try {
             await db.collection('settings').doc('promotion').set(payload);
             Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' });
             closePromoModal();
-        } catch (error) { Swal.fire('ข้อผิดพลาด', 'ขนาดไฟล์อาจจะยังใหญ่เกินไป กรุณาลองใช้รูปอื่น', 'error'); }
+        } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่', 'error'); }
     }
-
+function deleteTicket(id) {
+        Swal.fire({
+            title: 'ยืนยันการลบสลาก?',
+            text: "หากลบแล้วข้อมูลสลากใบนี้จะหายไปจากระบบอย่างถาวร ไม่สามารถกู้คืนได้!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'ใช่, ลบทิ้งเลย!',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                db.collection('lotteries').doc(id).delete().then(() => {
+                    Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success');
+                }).catch(err => {
+                    Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+                });
+            }
+        });
+    }
   </script>
 </body>
 </html>
