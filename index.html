@@ -42,6 +42,22 @@
     
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* สไลเดอร์แบนเนอร์ */
+    .carousel-container { position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 12px; aspect-ratio: 16/9; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .carousel-slide { display: none; width: 100%; height: 100%; object-fit: cover; animation: fadeEffect 1.5s; }
+    @keyframes fadeEffect { from {opacity: 0.4} to {opacity: 1} }
+    
+    /* นับถอยหลัง */
+    .countdown-box { display: flex; justify-content: center; gap: 8px; margin-top: 8px; margin-bottom: 16px; }
+    .cd-item { background: #d31a1a; color: white; padding: 8px 12px; border-radius: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 65px; }
+    .cd-num { font-size: 22px; font-weight: 900; line-height: 1; }
+    .cd-label { font-size: 10px; font-weight: 600; margin-top: 2px; }
+
+    /* สลากซ้อนกันแบบ 3D (ปรับให้พอดี 2 คอลัมน์) */
+    .ticket-stack-wrapper { position: relative; padding-bottom: 6px; padding-right: 6px; margin-bottom: 6px; }
+    .ticket-layer { position: absolute; top: 0; left: 0; right: 6px; bottom: 6px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+    .layer-1 { transform: translate(3px, 3px); z-index: 1; opacity: 0.8; }
+    .layer-2 { transform: translate(6px, 6px); z-index: 0; opacity: 0.5; }
   </style>
 </head>
 <body class="pb-32">
@@ -62,6 +78,19 @@
   </header>
 
   <div id="home-section" class="block max-w-md mx-auto">
+<div class="px-4 mt-4">
+        <div id="countdown-display" class="countdown-box hidden">
+            <div class="cd-item"><div class="cd-num" id="cd-days">00</div><div class="cd-label">วัน</div></div>
+            <div class="cd-item"><div class="cd-num" id="cd-hours">00</div><div class="cd-label">ชั่วโมง</div></div>
+            <div class="cd-item"><div class="cd-num" id="cd-mins">00</div><div class="cd-label">นาที</div></div>
+            <div class="cd-item"><div class="cd-num" id="cd-secs">00</div><div class="cd-label">วินาที</div></div>
+        </div>
+        <div id="promo-carousel" class="carousel-container hidden">
+            <img id="slide1" class="carousel-slide active-slide">
+            <img id="slide2" class="carousel-slide active-slide">
+            <img id="slide3" class="carousel-slide active-slide">
+        </div>
+    </div>
     <div class="bg-white p-4 shadow-sm rounded-b-2xl mb-4">
       <h2 class="text-gray-800 font-bold mb-3">กรอกตัวเลข ค้นหารางวัลที่ 1</h2>
       <div class="grid grid-cols-3 gap-2 mb-3">
@@ -228,105 +257,121 @@
       filterData();
     }
 
+    let slideIndex = 0; let slideInterval;
+    function showSlides() {
+        const slides = document.querySelectorAll('.carousel-slide.active-slide');
+        if(slides.length === 0) return;
+        for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";
+        slideIndex++;
+        if (slideIndex > slides.length) slideIndex = 1;
+        slides[slideIndex - 1].style.display = "block";
+        slideInterval = setTimeout(showSlides, 3000); // สลับทุก 3 วินาที
+    }
+
+    let mainCountdownInterval;
+    function startMainCountdown(targetDateStr) {
+        if(mainCountdownInterval) clearInterval(mainCountdownInterval);
+        const cdBox = document.getElementById('countdown-display');
+        if(!targetDateStr) { cdBox.classList.add('hidden'); return; }
+        const target = new Date(targetDateStr).getTime();
+        if(isNaN(target)) { cdBox.classList.add('hidden'); return; }
+        
+        cdBox.classList.remove('hidden');
+        mainCountdownInterval = setInterval(() => {
+            const distance = target - new Date().getTime();
+            if (distance < 0) { clearInterval(mainCountdownInterval); cdBox.classList.add('hidden'); return; }
+            document.getElementById('cd-days').innerText = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0');
+            document.getElementById('cd-hours').innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+            document.getElementById('cd-mins').innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+            document.getElementById('cd-secs').innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+        }, 1000);
+    }
+
     function loadShopLotteries() {
-      db.collection('settings').doc('design').onSnapshot(doc => {
+      db.collection('settings').doc('storefront').onSnapshot(doc => {
           if(doc.exists) {
               const data = doc.data();
-              if(data.storeName) { 
-                  document.getElementById('display-store-name').innerText = data.storeName; 
-              }
-              if(data.logoUrl) {
-                  document.getElementById('main-store-logo').src = data.logoUrl;
-                  document.getElementById('main-store-logo').classList.remove('hidden');
-              } else {
-                  document.getElementById('main-store-logo').classList.add('hidden');
-              }
+              if(data.storeName) document.getElementById('display-store-name').innerText = data.storeName; 
+              if(data.logoUrl) { document.getElementById('main-store-logo').src = data.logoUrl; document.getElementById('main-store-logo').classList.remove('hidden'); }
               if(data.ticketBgUrl) globalTicketBg = data.ticketBgUrl; else globalTicketBg = "";
-              if(data.announcement) {
-                  document.getElementById('announcement-bar').classList.remove('hidden');
-                  document.getElementById('announcement-text').innerText = data.announcement;
-              } else { document.getElementById('announcement-bar').classList.add('hidden'); }
-              filterData(); 
-              if(userProfile && currentOrderTab !== '') renderMyOrders();
-          }
-      });
+              
+              // แบนเนอร์ และ นับถอยหลัง
+              clearTimeout(slideInterval);
+              let hasSlide = false;
+              ['slide1','slide2','slide3'].forEach(k => {
+                  const el = document.getElementById(k);
+                  if(data[k]) { el.src = data[k]; el.classList.add('active-slide'); hasSlide = true; } 
+                  else { el.classList.remove('active-slide'); el.style.display = "none"; }
+              });
+              if(hasSlide) { document.getElementById('promo-carousel').classList.remove('hidden'); showSlides(); } 
+              else { document.getElementById('promo-carousel').classList.add('hidden'); }
+              startMainCountdown(data.countdownTarget);
 
-      db.collection('settings').doc('storefront').onSnapshot(snap => {
-        if(!snap.exists || !snap.data().activeDraw) { document.getElementById('storefront-draw-name').innerText = 'ยังไม่ได้ตั้งค่า'; return; }
-        const data = snap.data();
-        currentDraw = data.activeDraw;
-        globalSalesOpen = data.isSalesOpen !== false;
-        document.getElementById('storefront-draw-name').innerText = currentDraw;
-        
-        db.collection('winning_results').doc(currentDraw).onSnapshot(doc => { 
-            currentWinData = doc.exists ? doc.data() : null; 
-            filterData();
-            if(userProfile && currentOrderTab !== '') renderMyOrders(); 
-        });
-        
-        db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => {
-            availableTickets = []; s.forEach(doc => availableTickets.push({ id: doc.id, ...doc.data() })); filterData();
-        });
-      });
-
-      db.collection('settings').doc('promotion').get().then(doc => {
-          if (doc.exists) {
-              const promo = doc.data();
-              if (promo.isActive && promo.imageUrl && !sessionStorage.getItem('promo_seen')) {
-                  Swal.fire({ imageUrl: promo.imageUrl, imageAlt: 'Promotion', showCloseButton: true, showConfirmButton: false, background: 'transparent', padding: 0 });
-                  sessionStorage.setItem('promo_seen', 'true');
+              if(data.activeDraw) {
+                  currentDraw = data.activeDraw;
+                  globalSalesOpen = data.isSalesOpen !== false;
+                  document.getElementById('storefront-draw-name').innerText = currentDraw;
+                  db.collection('winning_results').doc(currentDraw).onSnapshot(wDoc => { currentWinData = wDoc.exists ? wDoc.data() : null; filterData(); if(userProfile && currentOrderTab !== '') renderMyOrders(); });
+                  db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => { availableTickets = []; s.forEach(tk => availableTickets.push({ id: tk.id, ...tk.data() })); filterData(); });
               }
           }
       });
     }
 
+// สร้างสลากแบบซ้อนกันและย่อส่วนให้เข้ากับ 2 ช่องพอดี
     function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
-      const numStr = String(number).padStart(6, '0');
-      const amount = qty * 100;
+      const numStr = String(number).padStart(6, '0'); 
+      const amount = qty * 100; 
       let bottomActionHTML = '';
-
+      
+      // ปุ่มหยิบลงตะกร้า (ปรับ py-1.5 และ text-[11px] ให้เล็กลง)
       if (mode === 'store') {
           bottomActionHTML = globalSalesOpen 
-              ? `<button onclick="openCheckout('${id}', '${numStr}', ${qty})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-2.5 text-[13px] transition flex items-center justify-center gap-1.5 shadow-md"><span class="text-base">🛒</span> หยิบใส่ตะกร้า (฿${amount})</button>`
-              : `<button class="w-full bg-gray-400 text-white font-bold py-2.5 text-[13px] cursor-not-allowed">🚫 ปิดรับการซื้อ</button>`;
+              ? `<button onclick="openCheckout('${id}', '${numStr}', ${qty})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-md relative z-10 rounded-b-lg border-t border-red-800"><span class="text-sm">🛒</span> หยิบใส่ตะกร้า (฿${amount})</button>` 
+              : `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed relative z-10 rounded-b-lg border-t border-gray-500">🚫 ปิดรับการซื้อ</button>`;
       } 
-
+      
       const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${numStr}&size=40x40`;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${numStr}&size=30x30`;
+
+      // เลเยอร์รูปซ้อน
+      let layers = '';
+      if (qty >= 2) layers += `<div class="ticket-layer layer-1"></div>`;
+      if (qty >= 3) layers += `<div class="ticket-layer layer-2"></div>`;
 
       return `
-        <div class="pro-ticket-card shadow-sm border-gray-200">
-          <div class="ticket-body-wrap" style="${ticketBgStyle}">
-             <div class="ticket-stub pl-2 pr-1">
-                <span class="ticket-stub-txt tracking-tighter text-[#d31a1a]">สลากกินแบ่งรัฐบาล</span>
-                <div class="text-center mt-0.5">
-                   <div class="text-[16px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div>
-                   <div class="text-[11px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div>
-                </div>
-                <div class="text-center leading-none mt-2">
-                   <div class="text-[24px] font-black text-[#d31a1a] drop-shadow-md">80</div>
-                   <div class="text-[10px] font-black text-black drop-shadow-md">บาท</div>
-                </div>
+        <div class="ticket-stack-wrapper">
+          ${layers}
+          <div class="relative z-10 bg-white flex flex-col border border-gray-200 shadow-sm rounded-lg">
+             <div class="flex flex-row h-[65px] w-full rounded-t-lg overflow-hidden">
+                 <div class="bg-[#111] text-white w-7 flex flex-col justify-center items-center shrink-0 border-r border-gray-300">
+                     <span class="text-[6px] font-bold text-gray-300">ชุด</span>
+                     <span class="text-[14px] font-black leading-none my-0.5">${qty}</span>
+                     <span class="text-[6px] font-bold text-gray-300">ใบ</span>
+                     <span class="text-[10px] font-black mt-0.5 leading-none text-[#d31a1a]">${qty*6}</span>
+                     <span class="text-[6px] font-bold text-gray-300">ล้าน</span>
+                 </div>
+                 <div class="flex-1 flex overflow-hidden relative" style="${ticketBgStyle}">
+                     <div class="p-1 flex flex-col justify-between w-full bg-white/40 backdrop-blur-[0.5px]">
+                        <div class="flex justify-between items-start">
+                           <div class="text-[4px] text-[#d31a1a] font-bold leading-[1.1] pt-0.5 whitespace-nowrap">สลากกินแบ่งรัฐบาล</div>
+                           <div class="text-[15px] font-mono tracking-widest font-black text-gray-900 leading-none drop-shadow-sm ml-1">${numStr}</div>
+                        </div>
+                        <div class="flex justify-center mt-0.5"><div class="bg-white/95 border border-gray-300 rounded px-1 py-[1px] shadow-sm"><div class="text-[5px] font-bold text-gray-900">${drawName || currentDraw}</div></div></div>
+                        <div class="flex justify-between items-end mt-auto pt-0.5 opacity-90">
+                           <img src="${qrCodeUrl}" class="w-[12px] h-[12px] p-[1px] border border-gray-400 bg-white shadow-sm shrink-0">
+                           <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[12px] min-w-0">
+                               <span class="real-barcode text-[16px] text-gray-800">*${numStr}*</span>
+                           </div>
+                        </div>
+                     </div>
+                 </div>
+                 <div class="bg-[#d31a1a] text-white w-4 flex justify-center items-center shrink-0 border-l border-red-800 shadow-inner">
+                     <span style="writing-mode: vertical-rl; transform: rotate(180deg);" class="text-[7px] font-black tracking-widest text-white whitespace-nowrap drop-shadow-sm">ลอตเตอรี่</span>
+                 </div>
              </div>
-             <div class="ticket-main">
-                <div class="flex justify-between items-start shrink-0 pr-2.5 pl-1 w-full">
-                   <div class="text-[5.5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-800 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
-                   <div class="text-[21px] sm:text-[23px] font-mono tracking-widest font-black text-gray-900 leading-none shrink-0 drop-shadow-sm">${numStr}</div>
-                </div>
-                <div class="flex justify-center mt-0.5 shrink-0 w-full">
-                   <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
-                      <div class="text-[7.5px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div>
-                   </div>
-                </div>
-                <div class="flex justify-between items-end mt-auto pt-1 opacity-90 w-full min-w-0 shrink-0">
-                   <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm">
-                   <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[18px] min-w-0">
-                      <span class="real-barcode">*${numStr}*</span>
-                   </div>
-                </div>
-             </div>
+             ${bottomActionHTML}
           </div>
-          ${bottomActionHTML}
         </div>
       `;
     }
@@ -506,43 +551,34 @@
       startCountdownTimer(); 
     }
 
-    // ฟังก์ชันถอนเงินแบบรายคำสั่งซื้อ
-    function requestWithdrawal(orderId, amount, numStr) {
+    function requestWithdrawal(orderId, totalAmount, numStr) {
         if(!globalBankName || !globalBankAccountNumber) {
-            Swal.fire({
-                title: 'ยังไม่มีบัญชีรับเงิน',
-                text: 'กรุณาเพิ่มบัญชีธนาคารสำหรับรับเงินรางวัลก่อนครับ',
-                icon: 'warning',
-                confirmButtonText: 'ไปเพิ่มบัญชี',
-                confirmButtonColor: '#d31a1a'
-            }).then(() => switchTab('profile'));
-            return;
+            Swal.fire({ title: 'ยังไม่มีบัญชีรับเงิน', text: 'กรุณาเพิ่มบัญชีธนาคารสำหรับรับเงินรางวัลก่อนครับ', icon: 'warning', confirmButtonText: 'ไปเพิ่มบัญชี', confirmButtonColor: '#d31a1a' }).then(() => switchTab('profile')); return;
         }
+
+        // คำนวณค่าธรรมเนียม 2%
+        const fee = totalAmount * 0.02;
+        const netAmount = totalAmount - fee;
 
         Swal.fire({
             title: 'ยืนยันการถอนเงิน',
-            html: `รหัสคำสั่งซื้อ: <b>${orderId.substring(0,8)}</b><br>สลากเลข: <b>${numStr}</b><br>ยอดเงินรางวัล: <b>฿${amount.toLocaleString()}</b><br>ไปยังบัญชี: <b>${globalBankName}</b><br>เลขที่: <b>${globalBankAccountNumber}</b>`,
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonText: 'ยืนยันแจ้งถอน',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#d31a1a'
+            html: `รหัสคำสั่งซื้อ: <b>${orderId.substring(0,8)}</b><br>สลากเลข: <b>${numStr}</b><br><br>
+                   <div class="bg-gray-50 p-3 rounded-lg text-sm text-left border border-gray-200 shadow-inner">
+                       <div class="flex justify-between mb-1 text-gray-600 font-bold"><span>เงินรางวัลรวม:</span> <span>฿${totalAmount.toLocaleString()}</span></div>
+                       <div class="flex justify-between mb-1 text-rose-500 font-bold"><span>ค่าธรรมเนียม (2%):</span> <span>-฿${fee.toLocaleString()}</span></div>
+                       <hr class="my-2 border-gray-300">
+                       <div class="flex justify-between font-black text-emerald-600 text-lg"><span>ยอดรับสุทธิ:</span> <span>฿${netAmount.toLocaleString()}</span></div>
+                   </div><br>
+                   <div class="text-xs text-gray-500">โอนเข้าบัญชี: <b>${globalBankName}</b><br>เลขที่: <b>${globalBankAccountNumber}</b></div>`,
+            icon: 'info', showCancelButton: true, confirmButtonText: 'ยืนยันแจ้งถอน', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a'
         }).then((result) => {
             if (result.isConfirmed) {
                 db.collection('withdrawals').doc(orderId).set({
-                    userId: userProfile.userId,
-                    displayName: userProfile.displayName,
-                    draw: currentDraw,
-                    ticketNumber: numStr,
-                    amount: amount,
-                    bankName: globalBankName,
-                    bankAccountName: globalBankAccountName,
-                    bankAccountNumber: globalBankAccountNumber,
-                    status: 'รอโอน',
-                    createdAt: Date.now()
-                }).then(() => {
-                    Swal.fire('แจ้งถอนสำเร็จ', 'กรุณารอแอดมินตรวจสอบและทำรายการโอนเงินครับ', 'success');
-                });
+                    userId: userProfile.userId, displayName: userProfile.displayName, draw: currentDraw, ticketNumber: numStr, 
+                    amount: totalAmount, // บันทึกยอดเต็มไว้ (แอดมินจะไปหัก 2% โชว์เอง)
+                    bankName: globalBankName, bankAccountName: globalBankAccountName, bankAccountNumber: globalBankAccountNumber,
+                    status: 'รอโอน', createdAt: Date.now()
+                }).then(() => { Swal.fire('แจ้งถอนสำเร็จ', 'กรุณารอรับยอดโอน ฿' + netAmount.toLocaleString() + ' จากแอดมินครับ', 'success'); });
             }
         });
     }
