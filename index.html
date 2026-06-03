@@ -671,6 +671,26 @@
     }
 
     function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '' }); } }); }); }
+// ฟังก์ชันตรวจสอบการถูกรางวัล (ที่ขาดหายไป)
+    function checkWinningPrize(ticketNumber, qty, winData) {
+        if (!winData) return { won: false, total: 0, labels: [] };
+        let totalPrize = 0; let labels = []; let numStr = String(ticketNumber).padStart(6, '0');
+        qty = parseInt(qty) || 1;
+
+        if (winData.prize1 && numStr === winData.prize1) { totalPrize += 6000000; labels.push("รางวัลที่ 1"); }
+        if (winData.prize1 && numStr !== winData.prize1) {
+            let p1 = parseInt(winData.prize1, 10); let n = parseInt(numStr, 10);
+            if (n === p1 + 1 || n === p1 - 1) { totalPrize += 100000; labels.push("รางวัลข้างเคียง"); }
+        }
+        if (winData.last2 && numStr.slice(-2) === winData.last2) { totalPrize += 2000; labels.push("เลขท้าย 2 ตัว"); }
+        if (winData.front3 && winData.front3.includes(numStr.slice(0, 3))) { let count = winData.front3.filter(x => x === numStr.slice(0, 3)).length; totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขหน้า 3 ตัว"); }
+        if (winData.last3 && winData.last3.includes(numStr.slice(-3))) { let count = winData.last3.filter(x => x === numStr.slice(-3)).length; totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขท้าย 3 ตัว"); }
+        if (winData.prize2 && winData.prize2.includes(numStr)) { totalPrize += 200000; labels.push("รางวัลที่ 2"); }
+        if (winData.prize3 && winData.prize3.includes(numStr)) { totalPrize += 80000; labels.push("รางวัลที่ 3"); }
+        if (winData.prize4 && winData.prize4.includes(numStr)) { totalPrize += 40000; labels.push("รางวัลที่ 4"); }
+        if (winData.prize5 && winData.prize5.includes(numStr)) { totalPrize += 20000; labels.push("รางวัลที่ 5"); }
+        return { won: totalPrize > 0, total: totalPrize * qty, labels: [...new Set(labels)] };
+    }
     window.onload = function() { initLIFF(); loadShopLotteries(); };
   </script>
 </body>
