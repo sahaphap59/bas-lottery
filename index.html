@@ -456,10 +456,16 @@
       const grid = document.getElementById('my-orders-grid'); grid.innerHTML = '';
       
       let filteredList = [];
-      if (currentOrderTab === 'unpaid') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve'));
-      else if (currentOrderTab === 'pending') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'รอตรวจสอบสลิป' || t.status === 'pending'));
-      else if (currentOrderTab === 'success') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'ชำระสำเร็จ' || t.status === 'sold' || t.status === 'success'));
-      else if (currentOrderTab === 'history') filteredList = myTickets.filter(t => t.draw !== currentDraw);
+      // อัปเดตตัวกรองสถานะให้ครอบคลุมทุกคำที่อาจจะอยู่ในฐานข้อมูล
+      if (currentOrderTab === 'unpaid') {
+          filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ'));
+      } else if (currentOrderTab === 'pending') {
+          filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'รอตรวจสอบสลิป' || t.status === 'pending' || t.status === 'รอตรวจสอบ'));
+      } else if (currentOrderTab === 'success') {
+          filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'ชำระสำเร็จ' || t.status === 'sold' || t.status === 'success' || t.status === 'ชำระแล้ว'));
+      } else if (currentOrderTab === 'history') {
+          filteredList = myTickets.filter(t => t.draw !== currentDraw);
+      }
 
       if(filteredList.length === 0) { document.getElementById('no-orders-data').classList.remove('hidden'); updateBulkPayment(); return; }
       document.getElementById('no-orders-data').classList.add('hidden');
@@ -481,13 +487,15 @@
         }
 
         if (currentOrderTab === 'history') {
-             if(item.status === 'จอง' || item.status === 'reserve') statusBadge = '<span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-1 rounded font-bold">หมดอายุ/ไม่ชำระ</span>';
-             else if (item.status === 'รอตรวจสอบสลิป' || item.status === 'pending') statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold">รอยืนยัน</span>';
+             if(item.status === 'จอง' || item.status === 'reserve' || item.status === 'ยังไม่ชำระ') statusBadge = '<span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-1 rounded font-bold">หมดอายุ/ไม่ชำระ</span>';
+             else if (item.status === 'รอตรวจสอบสลิป' || item.status === 'pending' || item.status === 'รอตรวจสอบ') statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold">รอยืนยัน</span>';
              else statusBadge = '<span class="text-[11px] bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-md font-bold">✅ สำเร็จ</span>';
         }
         
         let prizeBoxHTML = '';
-        if(currentOrderTab === 'success' && currentWinData && (item.status === 'ชำระสำเร็จ' || item.status === 'sold' || item.status === 'success')){
+        const isSuccessStatus = (item.status === 'ชำระสำเร็จ' || item.status === 'sold' || item.status === 'success' || item.status === 'ชำระแล้ว');
+        
+        if(currentOrderTab === 'success' && currentWinData && isSuccessStatus){
              const prizeInfo = checkWinningPrize(item.number, item.quantity, currentWinData);
              if (prizeInfo.won) {
                  let wdBtn = ''; let wdInfo = myWithdrawals[item.id];
