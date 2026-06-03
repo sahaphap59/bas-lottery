@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=IBM+Plex+Sans+Thai:wght@600;700&family=Libre+Barcode+39&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
@@ -27,7 +26,6 @@
     .tab-btn { padding: 10px 18px; font-weight: 700; font-size: 13px; transition: 0.2s; border-radius: 8px; }
     .tab-active { background-color: #0f172a; color: white; }
     .gold-gradient { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
-    
     @keyframes goldShine { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
     .gold-gradient-anim { background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #bf953f); background-size: 200% auto; animation: goldShine 3s linear infinite; color: #0f172a; }
     .real-barcode { font-family: 'Libre Barcode 39', cursive; font-size: 24px; line-height: 1; color: #1e293b; transform: scaleY(0.7); transform-origin: bottom; white-space: nowrap; }
@@ -46,7 +44,7 @@
 
   <div class="premium-nav py-6 px-6 text-white shadow-md mb-8">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-      <div class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition" onclick="window.location.reload();" title="รีเฟรชหน้าเว็บ">
+      <div class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition" onclick="window.location.reload();">
         <div class="bg-amber-400 text-slate-900 font-black p-3 rounded-xl text-2xl shadow-md">BAS</div>
         <div>
           <h1 class="text-2xl font-extrabold text-amber-400 uppercase drop-shadow-sm">BAS LOTTERY ONLINE</h1>
@@ -61,7 +59,7 @@
           </div>
           <div class="flex items-center justify-between border-t border-slate-700 pt-1 mt-0.5">
             <span id="active-storefront-label" class="text-[10px] text-emerald-400 font-bold">🟢 หน้าร้าน: กำลังโหลด...</span>
-            <button onclick="setActiveStorefrontDraw()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] px-2 py-0.5 rounded shadow-sm font-bold ml-3 transition">📌 บังคับโชว์หน้าร้าน</button>
+            <button onclick="setActiveStorefrontDraw()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] px-2 py-0.5 rounded shadow-sm font-bold ml-3 transition">📌 บังคับโชว์</button>
           </div>
         </div>
         
@@ -69,6 +67,7 @@
         <button onclick="toggleSales()" id="btn-toggle-sales" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🛒 สถานะขาย: เปิด</button>
         <button onclick="openDesignModal()" class="bg-teal-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">🖼️ จัดการระบบร้าน</button>
         <button onclick="openPromoModal()" class="bg-fuchsia-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📣 โปรโมชัน</button>
+        <button onclick="openFlashSaleModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md">⚡ Flash Sale</button>
         <button onclick="addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
         <button onclick="openWinningModal()" class="gold-gradient text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md hover:opacity-90">🏆 บันทึกผลรางวัล</button>
         <button onclick="openModal()" class="bg-slate-700 border border-slate-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">➕ ลงทะเบียนสลาก</button>
@@ -138,10 +137,31 @@
           <input type="file" id="logoImageFile" accept="image/*" onchange="previewDesignImage('logo')" class="w-full border border-slate-300 p-2 rounded-lg text-xs outline-none bg-slate-50 cursor-pointer mb-2">
           <img id="logoPreview" class="max-h-16 rounded shadow-sm border border-slate-200 hidden bg-gray-100 p-1">
         </div>
-        <hr class="border-slate-100">
         
+        <hr class="border-slate-100">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+          <h3 class="text-xs font-black text-slate-700">✍️ แก้ไขข้อความทั่วไปในหน้าร้าน</h3>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">ข้อความวิ่งประกาศ (แถบบนสุด - เว้นว่างถ้าต้องการซ่อน)</label>
+            <input type="text" id="announcementInput" placeholder="เช่น ยินดีต้อนรับสู่ BAS ลอตเตอรี่... งวดนี้แจกจริง!" class="w-full border p-2 rounded text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">หัวข้อกล่องค้นหาเลข</label>
+            <input type="text" id="searchHeaderInput" placeholder="กรอกตัวเลข ค้นหารางวัลที่ 1" class="w-full border p-2 rounded text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">คำใบ้ในช่องพิมพ์ค้นหา</label>
+            <input type="text" id="searchPlaceholderInput" placeholder="ค้นหาเลข 6 หลัก..." class="w-full border p-2 rounded text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">หัวข้อเหนือแผงสลาก</label>
+            <input type="text" id="gridHeaderInput" placeholder="สลากบนแผง" class="w-full border p-2 rounded text-xs bg-white outline-none">
+          </div>
+        </div>
+        
+        <hr class="border-slate-100">
         <div class="bg-rose-50 p-4 rounded-xl border border-rose-100 shadow-inner">
-          <label class="block text-xs font-bold text-rose-600 mb-1">3. ข้อความเหนือเวลานับถอยหลัง</label>
+          <label class="block text-xs font-bold text-rose-600 mb-1">ข้อความเหนือเวลานับถอยหลัง</label>
           <input type="text" id="countdownTitleInput" placeholder="เช่น สลากรอบใหม่จะเปิดใน..." class="w-full border border-rose-200 p-2.5 rounded-lg text-sm mb-2 outline-none focus:border-rose-400">
           
           <div class="flex gap-3 mb-3">
@@ -161,15 +181,13 @@
              </div>
           </div>
           
-          <label class="block text-xs font-bold text-rose-600 mb-1">4. วัน/เวลา เปิดแผง (นับถอยหลัง)</label>
+          <label class="block text-xs font-bold text-rose-600 mb-1">วัน/เวลา เปิดแผง (นับถอยหลัง)</label>
           <input type="datetime-local" id="countdownInput" class="w-full border border-rose-300 p-2.5 rounded-lg text-sm font-bold outline-none text-rose-700">
-          <p class="text-[10px] text-rose-400 mt-1">ตั้งค่าเวลาเพื่อแสดงตัวเลขนับถอยหลังหน้าร้าน</p>
         </div>
 
         <hr class="border-slate-100">
-        
         <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-3">
-            <h3 class="text-xs font-black text-indigo-700">5. แบนเนอร์แคมเปญ (สไลด์อัตโนมัติ)</h3>
+            <h3 class="text-xs font-black text-indigo-700">แบนเนอร์แคมเปญ (สไลด์อัตโนมัติ)</h3>
             <div>
                 <div class="flex justify-between items-center mb-1">
                     <label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 1</label>
@@ -198,7 +216,7 @@
 
         <hr class="border-slate-100">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">6. ภาพพื้นหลังใบสลากดิจิทัล</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ภาพพื้นหลังใบสลากดิจิทัล</label>
           <input type="file" id="ticketBgImageFile" accept="image/*" onchange="previewDesignImage('ticket')" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none bg-slate-50 cursor-pointer mb-2">
           <img id="ticketPreview" class="max-h-20 rounded shadow-sm border border-slate-200 hidden">
         </div>
@@ -236,13 +254,17 @@
         </div>
         
         <div id="slip-management-area" class="border border-slate-200 p-3 rounded-xl bg-slate-50">
+           <div class="flex items-center gap-2 border border-amber-200 p-2.5 rounded-lg bg-amber-50 mb-3">
+              <input type="checkbox" id="formIsFlashSale" class="w-5 h-5 accent-amber-600 cursor-pointer">
+              <label for="formIsFlashSale" class="text-xs font-black text-amber-900 cursor-pointer select-none">⚡ บรรจุเข้าคลัง Flash Sale (ไฮไลท์เด่นหน้าร้าน)</label>
+           </div>
+           
            <label class="block text-xs font-bold text-slate-700 mb-2">📸 หลักฐานการโอนเงิน (สลิป)</label>
            <div id="slip-display" class="mb-3 hidden">
               <img id="adminSlipImg" src="" alt="Slip" class="w-full max-w-[200px] mx-auto rounded-lg shadow-sm border border-slate-300 cursor-pointer hover:opacity-90" onclick="window.open(this.src, '_blank')">
               <p class="text-[10px] text-center text-slate-500 mt-1">คลิกที่รูปเพื่อดูขนาดเต็ม</p>
            </div>
            <input type="file" id="adminSlipFile" accept="image/*" class="w-full text-xs text-slate-600 border border-slate-300 p-2 rounded-lg bg-white outline-none">
-           <p class="text-[10px] text-slate-500 mt-1">อัปโหลดสลิปใหม่จะทับของเดิมทันที</p>
         </div>
 
         <div class="flex justify-end pt-4 border-t border-slate-200">
@@ -276,7 +298,7 @@
             <div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 5 (100 รางวัล)</label><textarea id="win_prize5" rows="3" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none focus:border-yellow-500"></textarea></div>
         </div>
         <div class="flex justify-end pt-4 border-t border-yellow-200">
-          <button type="button" onclick="closeWinningModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2 hover:bg-slate-300">ยกเลิก</button>
+          <button type="button" onclick="closeWinningModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ยกเลิก</button>
           <button type="submit" class="px-6 py-2.5 gold-gradient text-slate-900 font-black rounded-lg text-sm shadow-md hover:scale-105 transition transform">ประกาศผลรางวัล 📢</button>
         </div>
       </form>
@@ -316,8 +338,37 @@
     </div>
   </div>
 
+  <div id="flashSaleModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div class="bg-gradient-to-r from-amber-500 to-rose-600 text-white px-6 py-4 flex justify-between items-center">
+        <h2 class="text-lg font-bold flex items-center gap-2">⚡ ตั้งค่าระบบ Flash Sale เลขสวย</h2>
+        <button onclick="closeFlashSaleModal()" class="text-white/70 text-2xl font-bold hover:text-white leading-none">&times;</button>
+      </div>
+      <form id="flashSaleForm" onsubmit="saveFlashSaleSettings(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">หัวข้อแถบ Flash Sale หน้าร้าน</label>
+          <input type="text" id="fsTitleInput" placeholder="เช่น ⚡ FLASH SALE เลขสวยประจำงวด ช้อปด่วนก่อนหมดเวลา!" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-rose-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">วัน/เวลา สิ้นสุด Flash Sale</label>
+          <input type="datetime-local" id="fsEndTimeInput" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-bold text-rose-600 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">สถานะระบบ Flash Sale</label>
+          <select id="fsStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none">
+            <option value="true">🟢 เปิดใช้งาน (ดึงเลขสวยขึ้นกล่องพิเศษ)</option>
+            <option value="false">🔴 ปิดใช้งาน (ซ่อนหมวด Flash Sale ทั้งหมด)</option>
+          </select>
+        </div>
+        <div class="flex justify-end pt-4 border-t border-slate-200">
+          <button type="button" onclick="closeFlashSaleModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button>
+          <button type="submit" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึกและเปิดระบบ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
-    // --- ตั้งค่า Firebase ของคุณที่นี่ ---
     const firebaseConfig = {
       apiKey: "AIzaSyCjlBUSa8LEL4j7ORix2p9piAnBU8hvvCY",
       authDomain: "bas-lottery.firebaseapp.com",
@@ -329,61 +380,32 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let allTicketsList = []; 
-    let currentTab = 'all'; 
-    let currentSelectedSheet = ""; 
-    let unsubListener = null;
-    let currentWinData = null; 
-    let isSalesOpen = true; 
+    let allTicketsList = []; let currentTab = 'all'; let currentSelectedSheet = ""; 
+    let unsubListener = null; let currentWinData = null; let isSalesOpen = true; 
     let tempPromoImageBase64 = ""; let tempLogoBase64 = ""; let tempTicketBgBase64 = "";
     let tempSlide1 = ""; let tempSlide2 = ""; let tempSlide3 = "";
     let globalTicketBg = "";
 
-    // ระบบจดจำตัวเลขแจ้งเตือน (Seen Count)
     let currentCounts = { all: 0, empty: 0, paid: 0, unpaid: 0, winners: 0, crm: 0, withdraw: 0 };
     let seenCounts = JSON.parse(localStorage.getItem('admin_seen_counts')) || { all: 0, empty: 0, paid: 0, unpaid: 0, winners: 0, crm: 0, withdraw: 0 };
 
-    function saveSeenCounts() {
-        localStorage.setItem('admin_seen_counts', JSON.stringify(seenCounts));
-    }
+    function saveSeenCounts() { localStorage.setItem('admin_seen_counts', JSON.stringify(seenCounts)); }
 
     function updateTabBadge(tabKey) {
         const el = document.getElementById('badge-' + tabKey);
         if(!el) return;
-        
-        if (currentTab === tabKey) {
-            seenCounts[tabKey] = currentCounts[tabKey];
-            saveSeenCounts();
-        }
-
+        if (currentTab === tabKey) { seenCounts[tabKey] = currentCounts[tabKey]; saveSeenCounts(); }
         let unread = currentCounts[tabKey] - seenCounts[tabKey];
-        if (unread < 0) {
-            seenCounts[tabKey] = currentCounts[tabKey];
-            saveSeenCounts();
-            unread = 0;
-        }
-
-        if(unread > 0) {
-            el.innerText = unread > 99 ? '99+' : unread;
-            el.classList.remove('hidden');
-            el.classList.add('flex', 'items-center', 'justify-center');
-        } else {
-            el.classList.add('hidden');
-            el.classList.remove('flex', 'items-center', 'justify-center');
-        }
+        if (unread < 0) { seenCounts[tabKey] = currentCounts[tabKey]; saveSeenCounts(); unread = 0; }
+        if(unread > 0) { el.innerText = unread > 99 ? '99+' : unread; el.classList.remove('hidden'); el.classList.add('flex', 'items-center', 'justify-center'); } 
+        else { el.classList.add('hidden'); el.classList.remove('flex', 'items-center', 'justify-center'); }
     }
 
     function checkAdminLogin() {
       if (document.getElementById('adminPin').value === '123456') { 
         document.getElementById('adminAuthOverlay').style.display = 'none';
-        loadInitialData();
-        listenToStorefrontSettings();
-        listenToWithdrawals(); 
-        listenToCustomersCount(); 
-      } else { 
-        Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); 
-        document.getElementById('adminPin').value = ''; 
-      }
+        loadInitialData(); listenToStorefrontSettings(); listenToWithdrawals(); listenToCustomersCount(); 
+      } else { Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('adminPin').value = ''; }
     }
     document.getElementById('adminPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAdminLogin(); });
 
@@ -413,23 +435,18 @@
 
     function toggleSales() {
         const newStatus = !isSalesOpen;
-        db.collection('settings').doc('storefront').set({ isSalesOpen: newStatus }, { merge: true }).then(() => {
-            Swal.fire({ toast: true, position: 'top-end', title: newStatus ? 'เปิดแผงขายแล้ว' : 'ปิดรับการซื้อสลากแล้ว', icon: 'success', timer: 2000, showConfirmButton: false });
-        });
+        db.collection('settings').doc('storefront').set({ isSalesOpen: newStatus }, { merge: true }).then(() => { Swal.fire({ toast: true, position: 'top-end', title: newStatus ? 'เปิดแผงขายแล้ว' : 'ปิดรับการซื้อสลากแล้ว', icon: 'success', timer: 2000, showConfirmButton: false }); });
     }
 
     function listenToStorefrontSettings() { 
         db.collection('settings').doc('design').onSnapshot(doc => {
-            if(doc.exists && doc.data().ticketBgUrl) { globalTicketBg = doc.data().ticketBgUrl; } 
-            else { globalTicketBg = ""; }
+            if(doc.exists && doc.data().ticketBgUrl) { globalTicketBg = doc.data().ticketBgUrl; } else { globalTicketBg = ""; }
             if(currentSelectedSheet && currentTab !== 'crm' && currentTab !== 'withdraw') renderTable(document.getElementById('search-input').value.trim());
         });
-
         db.collection('settings').doc('storefront').onSnapshot(doc => { 
             const data = doc.exists ? doc.data() : {};
             const activeDraw = data.activeDraw || "ยังไม่ได้ตั้งค่า"; 
             document.getElementById('active-storefront-label').innerText = `🟢 หน้าร้าน: ${activeDraw}`; 
-            
             isSalesOpen = data.isSalesOpen !== false;
             const btn = document.getElementById('btn-toggle-sales');
             if (isSalesOpen) { btn.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🛒 สถานะขาย: เปิด"; } 
@@ -438,28 +455,18 @@
     }
 
     function listenToWithdrawals() {
-        db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => {
-            currentCounts['withdraw'] = snap.size;
-            updateTabBadge('withdraw');
-            if(currentTab === 'withdraw') loadWithdrawalsCRM();
-        });
+        db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => { currentCounts['withdraw'] = snap.size; updateTabBadge('withdraw'); if(currentTab === 'withdraw') loadWithdrawalsCRM(); });
     }
-
     function listenToCustomersCount() {
-        db.collection('users').onSnapshot(snap => {
-            currentCounts['crm'] = snap.size;
-            updateTabBadge('crm');
-        });
+        db.collection('users').onSnapshot(snap => { currentCounts['crm'] = snap.size; updateTabBadge('crm'); });
     }
 
-    // ฟังก์ชันเปิด Modal จัดการระบบร้านค้า
     function openDesignModal() {
         tempLogoBase64 = ""; tempTicketBgBase64 = ""; tempSlide1 = ""; tempSlide2 = ""; tempSlide3 = "";
         document.getElementById('designForm').reset();
         ['logo','ticket','slide1','slide2','slide3'].forEach(id => { document.getElementById(id+'Preview').classList.add('hidden'); document.getElementById(id+'Preview').src = ""; });
-        document.getElementById('countdownTitleInput').value = ""; 
-        document.getElementById('countdownTitleSize').value = "text-base";
-        document.getElementById('countdownTitleColor').value = "#1f2937";
+        document.getElementById('countdownTitleInput').value = ""; document.getElementById('countdownTitleSize').value = "text-base"; document.getElementById('countdownTitleColor').value = "#1f2937";
+        document.getElementById('announcementInput').value = ""; document.getElementById('searchHeaderInput').value = ""; document.getElementById('searchPlaceholderInput').value = ""; document.getElementById('gridHeaderInput').value = "";
         
         db.collection('settings').doc('storefront').get().then(doc => {
             if(doc.exists) {
@@ -469,6 +476,10 @@
                 if(d.countdownTitleSize) document.getElementById('countdownTitleSize').value = d.countdownTitleSize;
                 if(d.countdownTitleColor) document.getElementById('countdownTitleColor').value = d.countdownTitleColor;
                 if(d.countdownTarget) document.getElementById('countdownInput').value = d.countdownTarget;
+                if(d.announcementText) document.getElementById('announcementInput').value = d.announcementText;
+                if(d.searchHeaderHTML) document.getElementById('searchHeaderInput').value = d.searchHeaderHTML;
+                if(d.searchPlaceholder) document.getElementById('searchPlaceholderInput').value = d.searchPlaceholder;
+                if(d.gridHeaderHTML) document.getElementById('gridHeaderInput').value = d.gridHeaderHTML;
                 if(d.logoUrl) { document.getElementById('logoPreview').src = d.logoUrl; document.getElementById('logoPreview').classList.remove('hidden'); tempLogoBase64 = d.logoUrl; }
                 if(d.ticketBgUrl) { document.getElementById('ticketPreview').src = d.ticketBgUrl; document.getElementById('ticketPreview').classList.remove('hidden'); tempTicketBgBase64 = d.ticketBgUrl; }
                 if(d.slide1) { document.getElementById('slide1Preview').src = d.slide1; document.getElementById('slide1Preview').classList.remove('hidden'); tempSlide1 = d.slide1; }
@@ -484,54 +495,48 @@
         if(type === 'logo') { fileInput = document.getElementById('logoImageFile'); previewImg = document.getElementById('logoPreview'); }
         else if(type === 'ticket') { fileInput = document.getElementById('ticketBgImageFile'); previewImg = document.getElementById('ticketPreview'); }
         else { fileInput = document.getElementById(type+'File'); previewImg = document.getElementById(type+'Preview'); }
-
         if (fileInput.files && fileInput.files[0]) {
             const base64 = await resizeImage(fileInput.files[0], 800, 800, 0.8);
-            if(type === 'logo') tempLogoBase64 = base64; 
-            else if(type === 'ticket') tempTicketBgBase64 = base64;
-            else if(type === 'slide1') tempSlide1 = base64;
-            else if(type === 'slide2') tempSlide2 = base64;
-            else if(type === 'slide3') tempSlide3 = base64;
+            if(type === 'logo') tempLogoBase64 = base64; else if(type === 'ticket') tempTicketBgBase64 = base64; else if(type === 'slide1') tempSlide1 = base64; else if(type === 'slide2') tempSlide2 = base64; else if(type === 'slide3') tempSlide3 = base64;
             previewImg.src = base64; previewImg.classList.remove('hidden');
         }
     }
     
-    // ฟังก์ชันลบรูปแบนเนอร์รายตัว
     function removeSlide(slideId) {
-        if(slideId === 'slide1') tempSlide1 = "";
-        if(slideId === 'slide2') tempSlide2 = "";
-        if(slideId === 'slide3') tempSlide3 = "";
-        document.getElementById(slideId + 'File').value = "";
-        document.getElementById(slideId + 'Preview').src = "";
-        document.getElementById(slideId + 'Preview').classList.add('hidden');
+        if(slideId === 'slide1') tempSlide1 = ""; if(slideId === 'slide2') tempSlide2 = ""; if(slideId === 'slide3') tempSlide3 = "";
+        document.getElementById(slideId + 'File').value = ""; document.getElementById(slideId + 'Preview').src = ""; document.getElementById(slideId + 'Preview').classList.add('hidden');
     }
-
     function closeDesignModal() { document.getElementById('designModal').classList.add('hidden'); }
 
-    // ฟังก์ชันเซฟระบบร้านค้าทั้งหมด
     async function saveDesignSettings(e) {
-        e.preventDefault();
-        Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+        e.preventDefault(); Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
         try {
             await db.collection('settings').doc('storefront').set({ 
                 storeName: document.getElementById('storeNameInput').value.trim(), 
-                countdownTitle: document.getElementById('countdownTitleInput').value.trim(), 
-                countdownTitleSize: document.getElementById('countdownTitleSize').value,
-                countdownTitleColor: document.getElementById('countdownTitleColor').value,
-                countdownTarget: document.getElementById('countdownInput').value,
-                logoUrl: tempLogoBase64, 
-                ticketBgUrl: tempTicketBgBase64,
-                slide1: tempSlide1, slide2: tempSlide2, slide3: tempSlide3
+                countdownTitle: document.getElementById('countdownTitleInput').value.trim(), countdownTitleSize: document.getElementById('countdownTitleSize').value, countdownTitleColor: document.getElementById('countdownTitleColor').value, countdownTarget: document.getElementById('countdownInput').value,
+                announcementText: document.getElementById('announcementInput').value.trim(), searchHeaderHTML: document.getElementById('searchHeaderInput').value.trim(), searchPlaceholder: document.getElementById('searchPlaceholderInput').value.trim(), gridHeaderHTML: document.getElementById('gridHeaderInput').value.trim(),
+                logoUrl: tempLogoBase64, ticketBgUrl: tempTicketBgBase64, slide1: tempSlide1, slide2: tempSlide2, slide3: tempSlide3
             }, { merge: true });
-            
-            await db.collection('settings').doc('design').set({
-                storeName: document.getElementById('storeNameInput').value.trim(),
-                logoUrl: tempLogoBase64, ticketBgUrl: tempTicketBgBase64
-            }, { merge: true });
-
-            Swal.fire({ title: 'อัปเดตข้อมูลสำเร็จ!', icon: 'success', confirmButtonColor: '#0d9488' });
-            closeDesignModal();
+            await db.collection('settings').doc('design').set({ storeName: document.getElementById('storeNameInput').value.trim(), logoUrl: tempLogoBase64, ticketBgUrl: tempTicketBgBase64 }, { merge: true });
+            Swal.fire({ title: 'อัปเดตข้อมูลสำเร็จ!', icon: 'success', confirmButtonColor: '#0d9488' }); closeDesignModal();
         } catch (error) { Swal.fire('เกิดข้อผิดพลาด', error.message, 'error'); }
+    }
+
+    // Flash Sale Modal logic
+    function openFlashSaleModal() {
+        document.getElementById('flashSaleForm').reset();
+        db.collection('settings').doc('flashsale').get().then(doc => {
+            if(doc.exists) { const d = doc.data(); document.getElementById('fsTitleInput').value = d.title || ""; document.getElementById('fsEndTimeInput').value = d.endTime || ""; document.getElementById('fsStatus').value = d.isActive ? "true" : "false"; }
+            document.getElementById('flashSaleModal').classList.remove('hidden');
+        });
+    }
+    function closeFlashSaleModal() { document.getElementById('flashSaleModal').classList.add('hidden'); }
+    async function saveFlashSaleSettings(e) {
+        e.preventDefault(); Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+            await db.collection('settings').doc('flashsale').set({ title: document.getElementById('fsTitleInput').value.trim(), endTime: document.getElementById('fsEndTimeInput').value, isActive: document.getElementById('fsStatus').value === "true" }, { merge: true });
+            Swal.fire('สำเร็จ', 'อัปเดตแผงเดล Flash Sale เรียบร้อย', 'success'); closeFlashSaleModal();
+        } catch(err) { Swal.fire('ข้อผิดพลาด', err.message, 'error'); }
     }
 
     function loadInitialData() {
@@ -539,12 +544,7 @@
         const sel = document.getElementById('sheet-selector'); sel.innerHTML = "";
         if(snapshot.empty) { db.collection('draws').add({ name: "งวดปัจจุบัน", createdAt: new Date() }); return; }
         snapshot.forEach(doc => { const opt = document.createElement('option'); opt.value = doc.data().name; opt.innerText = doc.data().name; sel.appendChild(opt); });
-        
-        db.collection('settings').doc('storefront').get().then(doc => {
-            if(doc.exists && doc.data().activeDraw) { currentSelectedSheet = doc.data().activeDraw; sel.value = currentSelectedSheet; } 
-            else { currentSelectedSheet = sel.value; }
-            onSheetChange(); 
-        });
+        db.collection('settings').doc('storefront').get().then(doc => { if(doc.exists && doc.data().activeDraw) { currentSelectedSheet = doc.data().activeDraw; sel.value = currentSelectedSheet; } else { currentSelectedSheet = sel.value; } onSheetChange(); });
       });
     }
 
@@ -552,23 +552,14 @@
       currentSelectedSheet = document.getElementById('sheet-selector').value; 
       if (currentTab === 'crm' || currentTab === 'withdraw') switchTab('all'); 
       document.getElementById('search-input').value = ""; 
-      
-      db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => {
-          currentWinData = doc.exists ? doc.data() : null;
-          loadLotteryDataFromServer(currentSelectedSheet);
-      });
+      db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => { currentWinData = doc.exists ? doc.data() : null; loadLotteryDataFromServer(currentSelectedSheet); });
     }
 
     function checkWinningPrize(ticketNumber, qty, winData) {
         if (!winData) return { won: false, total: 0, labels: [] };
-        let totalPrize = 0; let labels = []; let numStr = String(ticketNumber).padStart(6, '0');
-        qty = parseInt(qty) || 1;
-
+        let totalPrize = 0; let labels = []; let numStr = String(ticketNumber).padStart(6, '0'); qty = parseInt(qty) || 1;
         if (winData.prize1 && numStr === winData.prize1) { totalPrize += 6000000; labels.push("รางวัลที่ 1"); }
-        if (winData.prize1 && numStr !== winData.prize1) {
-            let p1 = parseInt(winData.prize1, 10); let n = parseInt(numStr, 10);
-            if (n === p1 + 1 || n === p1 - 1) { totalPrize += 100000; labels.push("รางวัลข้างเคียง"); }
-        }
+        if (winData.prize1 && numStr !== winData.prize1) { let p1 = parseInt(winData.prize1, 10); let n = parseInt(numStr, 10); if (n === p1 + 1 || n === p1 - 1) { totalPrize += 100000; labels.push("รางวัลข้างเคียง"); } }
         if (winData.last2 && numStr.slice(-2) === winData.last2) { totalPrize += 2000; labels.push("เลขท้าย 2 ตัว"); }
         if (winData.front3 && winData.front3.includes(numStr.slice(0, 3))) { let count = winData.front3.filter(x => x === numStr.slice(0, 3)).length; totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขหน้า 3 ตัว"); }
         if (winData.last3 && winData.last3.includes(numStr.slice(-3))) { let count = winData.last3.filter(x => x === numStr.slice(-3)).length; totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขท้าย 3 ตัว"); }
@@ -582,132 +573,48 @@
     function loadLotteryDataFromServer(drawName) {
       if(unsubListener) unsubListener();
       if(!drawName) return;
-      
       unsubListener = db.collection('lotteries').where('draw', '==', drawName).onSnapshot(snapshot => {
-          allTicketsList = []; let totalBuyers = 0, totalQty = 0, sumTotal = 0, sumPaid = 0, sumUnpaid = 0;
-          let cEmpty = 0, cPaid = 0, cUnpaid = 0, cWinners = 0; 
-
+          allTicketsList = []; let totalBuyers = 0, totalQty = 0, sumTotal = 0, sumPaid = 0, sumUnpaid = 0; let cEmpty = 0, cPaid = 0, cUnpaid = 0, cWinners = 0; 
           snapshot.forEach(doc => {
             const item = doc.data(); const ticket = { id: doc.id, ...item };
             if (item.status === 'available') ticket.status = 'ยังไม่ชำระ';
             if (item.status === 'sold' || item.status === 'ชำระแล้ว' || item.status === 'success') ticket.status = 'ชำระแล้ว';
             if (item.status === 'reserve' || item.status === 'จอง') ticket.status = 'จอง';
             if (item.status === 'รอตรวจสอบสลิป' || item.status === 'pending') ticket.status = 'รอตรวจสอบสลิป';
-            
             ticket.prizeInfo = checkWinningPrize(ticket.number, ticket.quantity, currentWinData);
             allTicketsList.push(ticket);
-
-            if(ticket.name === "-" || ticket.name === "") cEmpty++;
-            else if(ticket.status === "ชำระแล้ว") {
-                cPaid++;
-                if(ticket.prizeInfo && ticket.prizeInfo.won) cWinners++;
-            }
-            else cUnpaid++;
-            
+            if(ticket.name === "-" || ticket.name === "") cEmpty++; else if(ticket.status === "ชำระแล้ว") { cPaid++; if(ticket.prizeInfo && ticket.prizeInfo.won) cWinners++; } else cUnpaid++;
             const qty = parseInt(ticket.quantity) || 1; const price = qty * 100; totalQty += qty;
-            if (ticket.name && ticket.name !== '-' && ticket.name !== '') {
-              totalBuyers++; sumTotal += price;
-              if (ticket.status === 'ชำระแล้ว') sumPaid += price; else sumUnpaid += price;
-            }
+            if (ticket.name && ticket.name !== '-' && ticket.name !== '') { totalBuyers++; sumTotal += price; if (ticket.status === 'ชำระแล้ว') sumPaid += price; else sumUnpaid += price; }
           });
-
-          currentCounts['all'] = allTicketsList.length;
-          currentCounts['empty'] = cEmpty;
-          currentCounts['paid'] = cPaid;
-          currentCounts['unpaid'] = cUnpaid;
-          currentCounts['winners'] = cWinners;
-
+          currentCounts['all'] = allTicketsList.length; currentCounts['empty'] = cEmpty; currentCounts['paid'] = cPaid; currentCounts['unpaid'] = cUnpaid; currentCounts['winners'] = cWinners;
           ['all','empty','paid','unpaid','winners'].forEach(k => updateTabBadge(k));
-
-          document.getElementById('sum-buyers').innerText = totalBuyers + ' ท่าน';
-          document.getElementById('sum-qty').innerText = totalQty.toLocaleString('th-TH') + ' ใบ';
-          document.getElementById('sum-total').innerText = '฿' + sumTotal.toLocaleString('th-TH');
-          document.getElementById('sum-paid').innerText = '฿' + sumPaid.toLocaleString('th-TH');
-          document.getElementById('sum-unpaid').innerText = '฿' + sumUnpaid.toLocaleString('th-TH');
+          document.getElementById('sum-buyers').innerText = totalBuyers + ' ท่าน'; document.getElementById('sum-qty').innerText = totalQty.toLocaleString('th-TH') + ' ใบ'; document.getElementById('sum-total').innerText = '฿' + sumTotal.toLocaleString('th-TH'); document.getElementById('sum-paid').innerText = '฿' + sumPaid.toLocaleString('th-TH'); document.getElementById('sum-unpaid').innerText = '฿' + sumUnpaid.toLocaleString('th-TH');
           if(currentTab !== 'crm' && currentTab !== 'withdraw') renderTable(document.getElementById('search-input').value.trim());
-        }, error => {
-             console.error("🔥 Error ดึงข้อมูล:", error);
-             Swal.fire('ข้อผิดพลาดฐานข้อมูล', 'หากคุณเพิ่งเริ่มใช้งาน กรุณาเช็ค Error ใน Console (F12) ระบบอาจต้องการสร้าง Index ก่อนครับ', 'error');
-        });
+        }, error => { console.error("🔥 Error ดึงข้อมูล:", error); });
     }
 
     function renderTable(filterText = '') {
       const body = document.getElementById('table-body'); body.innerHTML = ''; let list = allTicketsList;
-      if(currentTab === 'empty') list = list.filter(x => x.name === "-" || x.name === "");
-      else if(currentTab === 'paid') list = list.filter(x => x.status === "ชำระแล้ว");
-      else if(currentTab === 'unpaid') list = list.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== "");
-      else if(currentTab === 'winners') list = list.filter(x => x.prizeInfo && x.prizeInfo.won === true && x.status === "ชำระแล้ว");
-
-      if (filterText) { 
-          const text = filterText.toLowerCase(); 
-          list = list.filter(item => 
-              String(item.number || "").includes(text) || 
-              String(item.name || "").toLowerCase().includes(text) ||
-              String(item.id || "").toLowerCase().includes(text) // ค้นหาจาก Order ID
-          ); 
-      }
+      if(currentTab === 'empty') list = list.filter(x => x.name === "-" || x.name === ""); else if(currentTab === 'paid') list = list.filter(x => x.status === "ชำระแล้ว"); else if(currentTab === 'unpaid') list = list.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== ""); else if(currentTab === 'winners') list = list.filter(x => x.prizeInfo && x.prizeInfo.won === true && x.status === "ชำระแล้ว");
+      if (filterText) { const text = filterText.toLowerCase(); list = list.filter(item => String(item.number || "").includes(text) || String(item.name || "").toLowerCase().includes(text) || String(item.id || "").toLowerCase().includes(text)); }
       let hasRows = false; let displayCounter = 1;
-      
       list.forEach((item) => {
         hasRows = true; const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
-        const isFree = item.name === "-" || item.name === "";
-        const safeNumStr = String(item.number || "000000").padStart(6, '0');
-        const qty = parseInt(item.quantity) || 1; const amount = qty * 100;
-
+        const isFree = item.name === "-" || item.name === ""; const safeNumStr = String(item.number || "000000").padStart(6, '0'); const qty = parseInt(item.quantity) || 1; const amount = qty * 100;
         const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${safeNumStr}&size=40x40`;
 
-        const ticketHtml = `
-        <div class="real-ticket mx-auto my-1 border border-gray-300 shadow-sm">
-          <div class="w-full h-full flex" style="${ticketBgStyle}">
-             <div class="rt-stub pr-1">
-                <span class="rt-stub-txt tracking-tighter text-[#dc2626]">สลากกินแบ่งรัฐบาล</span>
-                <div class="text-center mt-0.5">
-                   <div class="text-[15px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div>
-                   <div class="text-[10px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div>
-                </div>
-                <div class="text-center mt-1.5 leading-none">
-                   <div class="text-[22px] font-black text-[#dc2626] drop-shadow-md">80</div>
-                   <div class="text-[9px] font-black text-black drop-shadow-md">บาท</div>
-                </div>
-             </div>
-             <div class="rt-main">
-                <div class="flex justify-between items-start pr-3 pl-1 w-full shrink-0">
-                   <div class="text-[5.5px] text-[#dc2626] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-800 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div>
-                   <div class="rt-digits shrink-0 drop-shadow-sm text-gray-900">${safeNumStr}</div>
-                </div>
-                <div class="flex justify-center mt-0.5 shrink-0 w-full">
-                   <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm">
-                      <div class="text-[7.5px] font-bold text-gray-900 whitespace-nowrap">${currentSelectedSheet}</div>
-                   </div>
-                </div>
-                <div class="flex justify-between items-end mt-auto pt-0.5 opacity-90 w-full min-w-0 shrink-0">
-                   <img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm">
-                   <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[18px] min-w-0">
-                      <span class="real-barcode">*${safeNumStr}*</span>
-                   </div>
-                </div>
-             </div>
-          </div>
-        </div>`;
+        const ticketHtml = `<div class="real-ticket mx-auto my-1 border border-gray-300 shadow-sm"><div class="w-full h-full flex" style="${ticketBgStyle}"><div class="rt-stub pr-1"><span class="rt-stub-txt tracking-tighter text-[#dc2626]">สลากกินแบ่งรัฐบาล</span><div class="text-center mt-0.5"><div class="text-[15px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div><div class="text-[10px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div></div><div class="text-center mt-1.5 leading-none"><div class="text-[22px] font-black text-[#dc2626] drop-shadow-md">80</div><div class="text-[9px] font-black text-black drop-shadow-md">บาท</div></div></div><div class="rt-main"><div class="flex justify-between items-start pr-3 pl-1 w-full shrink-0"><div class="text-[5.5px] text-[#dc2626] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-800 font-medium">THAI<br>GOVERNMENT<br>LOTTERY</span></div><div class="rt-digits shrink-0 drop-shadow-sm text-gray-900">${safeNumStr}</div></div><div class="flex justify-center mt-0.5 shrink-0 w-full"><div class="bg-white/95 border border-gray-300 rounded px-1.5 py-0.5 shadow-sm"><div class="text-[7.5px] font-bold text-gray-900 whitespace-nowrap">${currentSelectedSheet}</div></div></div><div class="flex justify-between items-end mt-auto pt-0.5 opacity-90 w-full min-w-0 shrink-0"><img src="${qrCodeUrl}" alt="QR" class="w-[18px] h-[18px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm"><div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[18px] min-w-0"><span class="real-barcode">*${safeNumStr}*</span></div></div></div></div></div>`;
 
         let statusBadge = isFree ? `<span class="bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-md font-bold text-xs">✨ ว่างแผง</span>` : `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1 rounded-md font-bold text-xs">${item.status}</span>`;
         if(!isFree && item.status === "ชำระแล้ว") statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-md font-bold text-xs">🟢 ชำระแล้ว</span>`;
         if(item.status === 'รอตรวจสอบสลิป') statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 px-3 py-1 rounded-md font-black text-xs animate-pulse">⏳ รอตรวจสอบสลิป</span>`;
-
-        if(item.prizeInfo && item.prizeInfo.won && item.status === "ชำระแล้ว") {
-            statusBadge += `<br><div class="mt-2 inline-block gold-gradient-anim text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md border border-yellow-400">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`;
-        }
+        if(item.prizeInfo && item.prizeInfo.won && item.status === "ชำระแล้ว") { statusBadge += `<br><div class="mt-2 inline-block gold-gradient-anim text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md border border-yellow-400">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`; }
+        if(item.isFlashSale) { statusBadge += `<br><div class="mt-1 inline-block bg-amber-500 text-white px-2 py-0.5 rounded text-[10px] font-bold">⚡ Flash Sale</div>`; }
 
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
-        let action = `
-          <div class="flex gap-1.5 items-center justify-center">
-            <button onclick='editRow(${itemJson})' class="bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">📝 จัดการ</button>
-            <button onclick="clearTicket('${item.id}')" class="bg-rose-50 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">🔄 คืนแผง</button>
-            <button onclick="deleteTicket('${item.id}')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">🗑️ ลบ</button>
-          </div>
-          <div class="text-[10px] text-gray-400 text-center mt-1 w-full">ID: #${item.id.substring(0,8)}</div>
-          `;
+        let action = `<div class="flex gap-1.5 items-center justify-center"><button onclick='editRow(${itemJson})' class="bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">📝 จัดการ</button><button onclick="clearTicket('${item.id}')" class="bg-rose-50 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">🔄 คืนแผง</button><button onclick="deleteTicket('${item.id}')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">🗑️ ลบ</button></div><div class="text-[10px] text-gray-400 text-center mt-1 w-full">ID: #${item.id.substring(0,8)}</div>`;
 
         tr.innerHTML = `<td class="py-3 px-4 text-center text-slate-400 font-mono text-xs">${displayCounter++}</td><td class="py-1 px-2 text-center">${ticketHtml}</td><td class="py-3 px-6 font-bold text-slate-800 text-sm">${isFree ? '<span class="text-slate-400 font-normal italic">ยังไม่มีผู้ถือครอง</span>' : item.name}</td><td class="py-3 px-4 text-center font-bold text-slate-600">${item.quantity}</td><td class="py-3 px-6 text-right font-black text-rose-600 text-base">฿${amount.toLocaleString()}</td><td class="py-3 px-4 text-center">${statusBadge}</td><td class="py-3 px-4 text-center">${action}</td>`;
         body.appendChild(tr);
@@ -716,286 +623,72 @@
     }
 
     function switchTab(t) { 
-        currentTab = t; 
-        
-        seenCounts[t] = currentCounts[t];
-        updateTabBadge(t);
-        
-        ['all','empty','paid','unpaid','winners'].forEach(k => { 
-            const btn = document.getElementById('tab-'+k);
-            if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative"; } 
-            else { btn.className = (k===t) ? "tab-btn tab-active relative" : "tab-btn text-slate-600 hover:bg-slate-200 relative"; }
-        }); 
-        
-        document.getElementById('tab-crm').className = (t === 'crm') ? "tab-btn text-white bg-indigo-600 font-bold ml-2 shadow-inner relative" : "tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative";
-        document.getElementById('tab-withdraw').className = (t === 'withdraw') ? "tab-btn text-white bg-rose-600 font-bold ml-1 relative shadow-inner" : "tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative";
-
-        if(t === 'crm') {
-            loadCustomerCRM();
-        } else if (t === 'withdraw') {
-            loadWithdrawalsCRM();
-        } else {
-            document.getElementById('main-thead').innerHTML = `
-              <tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider">
-                <th class="py-4 px-4 text-center">No.</th>
-                <th class="py-4 px-4 text-center">สลากดิจิทัล</th>
-                <th class="py-4 px-6">ชื่อกรรมสิทธิ์ผู้ซื้อ</th>
-                <th class="py-4 px-4 text-center">จำนวน</th>
-                <th class="py-4 px-6 text-right">ยอดชำระ</th>
-                <th class="py-4 px-4 text-center">สถานะ</th>
-                <th class="py-4 px-4 text-center">แผงควบคุม</th>
-              </tr>`;
-            document.getElementById('search-input').placeholder = "🔍 ค้นหาเลขสลาก หรือ รหัสออเดอร์...";
-            document.getElementById('search-input').value = ""; 
-            renderTable(); 
-        }
+        currentTab = t; seenCounts[t] = currentCounts[t]; updateTabBadge(t);
+        ['all','empty','paid','unpaid','winners'].forEach(k => { const btn = document.getElementById('tab-'+k); if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative"; } else { btn.className = (k===t) ? "tab-btn tab-active relative" : "tab-btn text-slate-600 hover:bg-slate-200 relative"; } }); 
+        document.getElementById('tab-crm').className = (t === 'crm') ? "tab-btn text-white bg-indigo-600 font-bold ml-2 shadow-inner relative" : "tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative"; document.getElementById('tab-withdraw').className = (t === 'withdraw') ? "tab-btn text-white bg-rose-600 font-bold ml-1 relative shadow-inner" : "tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative";
+        if(t === 'crm') { loadCustomerCRM(); } else if (t === 'withdraw') { loadWithdrawalsCRM(); } else { document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">No.</th><th class="py-4 px-4 text-center">สลากดิจิทัล</th><th class="py-4 px-6">ชื่อกรรมสิทธิ์ผู้ซื้อ</th><th class="py-4 px-4 text-center">จำนวน</th><th class="py-4 px-6 text-right">ยอดชำระ</th><th class="py-4 px-4 text-center">สถานะ</th><th class="py-4 px-4 text-center">แผงควบคุม</th></tr>`; document.getElementById('search-input').placeholder = "🔍 ค้นหาเลขสลาก หรือ รหัสออเดอร์..."; document.getElementById('search-input').value = ""; renderTable(); }
     }
     
-    function filterData() { 
-        if (currentTab === 'crm' || currentTab === 'withdraw') {
-             const text = document.getElementById('search-input').value.trim().toLowerCase();
-             const rows = document.querySelectorAll('#table-body tr');
-             rows.forEach(row => {
-                 if(row.innerText.toLowerCase().includes(text)) row.style.display = ''; else row.style.display = 'none';
-             });
-        } else { renderTable(document.getElementById('search-input').value.trim()); }
-    }
+    function filterData() { if (currentTab === 'crm' || currentTab === 'withdraw') { const text = document.getElementById('search-input').value.trim().toLowerCase(); const rows = document.querySelectorAll('#table-body tr'); rows.forEach(row => { if(row.innerText.toLowerCase().includes(text)) row.style.display = ''; else row.style.display = 'none'; }); } else { renderTable(document.getElementById('search-input').value.trim()); } }
 
-    // ฟังก์ชันโหลดข้อมูลถอนเงิน 
     function loadWithdrawalsCRM() {
-      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อ หรือ รหัสออเดอร์...";
-      document.getElementById('search-input').value = "";
-      const body = document.getElementById('table-body');
-      body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดข้อมูลการถอน...</td></tr>';
-      document.getElementById('no-data').classList.add('hidden');
-
-      document.getElementById('main-thead').innerHTML = `
-        <tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider">
-            <th class="py-4 px-4">วันที่แจ้งถอน</th>
-            <th class="py-4 px-6">ข้อมูลสลาก / งวด</th>
-            <th class="py-4 px-4">ยอดรับสุทธิ (หัก 2%)</th>
-            <th class="py-4 px-6">ข้อมูลบัญชีธนาคาร</th>
-            <th class="py-4 px-4 text-center">สถานะ</th>
-            <th class="py-4 px-4 text-center">จัดการ</th>
-        </tr>`;
-
+      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อ หรือ รหัสออเดอร์..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดข้อมูลการถอน...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
+      document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4">วันที่แจ้งถอน</th><th class="py-4 px-6">ข้อมูลสลาก / งวด</th><th class="py-4 px-4">ยอดรับสุทธิ (หัก 2%)</th><th class="py-4 px-6">ข้อมูลบัญชีธนาคาร</th><th class="py-4 px-4 text-center">สถานะ</th><th class="py-4 px-4 text-center">จัดการ</th></tr>`;
       db.collection('withdrawals').orderBy('createdAt', 'desc').onSnapshot(snap => {
-        body.innerHTML = '';
-        if(snap.empty) { body.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-rose-500">ยังไม่มีรายการแจ้งถอนเงิน</td></tr>'; return; }
-        
+        body.innerHTML = ''; if(snap.empty) { body.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-rose-500">ยังไม่มีรายการแจ้งถอนเงิน</td></tr>'; return; }
         snap.forEach(doc => {
-          const data = doc.data();
-          const dateStr = data.createdAt ? new Date(data.createdAt).toLocaleString('th-TH') : '-';
-          
-          const totalAmount = data.amount || 0;
-          const fee = totalAmount * 0.02;
-          const netAmount = totalAmount - fee;
-          
+          const data = doc.data(); const dateStr = data.createdAt ? new Date(data.createdAt).toLocaleString('th-TH') : '-'; const totalAmount = data.amount || 0; const fee = totalAmount * 0.02; const netAmount = totalAmount - fee;
           let statusBadge = data.status === 'สำเร็จ' ? `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-emerald-200">✅ สำเร็จแล้ว</span>` : `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-sm border border-amber-300">⏳ รอแอดมินโอน</span>`;
-          
-          let actionBtn = data.status === 'สำเร็จ' ? `-` : `<button onclick="approveWithdrawal('${doc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">อนุมัติโอนแล้ว</button>`;
-          let deleteBtn = `<button onclick="deleteWithdrawal('${doc.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm ml-1">🗑️ ลบ</button>`;
-
-          body.insertAdjacentHTML('beforeend', `
-            <tr class="hover:bg-slate-50 border-b border-slate-100 text-sm">
-              <td class="py-3 px-4 text-slate-500 text-xs">${dateStr}</td>
-              <td class="py-3 px-6">
-                 <div class="font-bold text-[#dc2626] text-lg tracking-widest">${data.ticketNumber || 'รวบยอด'}</div>
-                 <div class="font-bold text-slate-800">${data.displayName}</div>
-                 <div class="text-[10px] text-gray-400 mt-0.5">งวด: ${data.draw} | รหัสออเดอร์: #${doc.id.substring(0,8)}</div>
-              </td>
-              <td class="py-3 px-4">
-                 <div class="font-black text-emerald-600 text-xl drop-shadow-sm">฿${netAmount.toLocaleString()}</div>
-                 <div class="text-[11px] text-gray-500 font-bold mt-0.5">หักค่าธรรมเนียม 2% (฿${fee.toLocaleString()})</div>
-                 <div class="text-[10px] text-gray-400">จากยอดเดิม: ฿${totalAmount.toLocaleString()}</div>
-              </td>
-              <td class="py-3 px-6">
-                 <div class="text-indigo-700 font-bold text-xs">${data.bankName}</div>
-                 <div class="text-gray-800 font-bold tracking-widest my-0.5 select-all">${data.bankAccountNumber}</div>
-                 <div class="text-gray-500 text-xs">ชื่อ: ${data.bankAccountName}</div>
-              </td>
-              <td class="py-3 px-4 text-center">${statusBadge}</td>
-              <td class="py-3 px-4 text-center">${actionBtn} ${deleteBtn}</td>
-            </tr>
-          `);
+          let actionBtn = data.status === 'สำเร็จ' ? `-` : `<button onclick="approveWithdrawal('${doc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">อนุมัติโอนแล้ว</button>`; let deleteBtn = `<button onclick="deleteWithdrawal('${doc.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm ml-1">🗑️ ลบ</button>`;
+          body.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50 border-b border-slate-100 text-sm"><td class="py-3 px-4 text-slate-500 text-xs">${dateStr}</td><td class="py-3 px-6"><div class="font-bold text-[#dc2626] text-lg tracking-widest">${data.ticketNumber || 'รวบยอด'}</div><div class="font-bold text-slate-800">${data.displayName}</div><div class="text-[10px] text-gray-400 mt-0.5">งวด: ${data.draw} | รหัสออเดอร์: #${doc.id.substring(0,8)}</div></td><td class="py-3 px-4"><div class="font-black text-emerald-600 text-xl drop-shadow-sm">฿${netAmount.toLocaleString()}</div><div class="text-[11px] text-gray-500 font-bold mt-0.5">หักค่าธรรมเนียม 2% (฿${fee.toLocaleString()})</div><div class="text-[10px] text-gray-400">จากยอดเดิม: ฿${totalAmount.toLocaleString()}</div></td><td class="py-3 px-6"><div class="text-indigo-700 font-bold text-xs">${data.bankName}</div><div class="text-gray-800 font-bold tracking-widest my-0.5 select-all">${data.bankAccountNumber}</div><div class="text-gray-500 text-xs">ชื่อ: ${data.bankAccountName}</div></td><td class="py-3 px-4 text-center">${statusBadge}</td><td class="py-3 px-4 text-center">${actionBtn} ${deleteBtn}</td></tr>`);
         });
       });
     }
 
-    function approveWithdrawal(docId) {
-        Swal.fire({
-            title: 'ยืนยันการโอนสำเร็จ?',
-            text: "หากกดอนุมัติ ระบบฝั่งลูกค้าจะเปลี่ยนเป็นโอนสำเร็จทันที",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'ใช่, ฉันโอนแล้ว'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => {
-                    Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success');
-                });
-            }
-        });
-    }
-
-    function deleteWithdrawal(docId) {
-        Swal.fire({
-            title: 'ยืนยันการลบรายการถอน?',
-            text: "ข้อมูลการแจ้งถอนนี้จะหายไปอย่างถาวร!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            confirmButtonText: 'ใช่, ลบทิ้งเลย'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                db.collection('withdrawals').doc(docId).delete().then(() => {
-                    Swal.fire('ลบสำเร็จ!', 'ข้อมูลการถอนถูกลบทิ้งแล้ว', 'success');
-                });
-            }
-        });
-    }
+    function approveWithdrawal(docId) { Swal.fire({ title: 'ยืนยันการโอนสำเร็จ?', text: "หากกดอนุมัติ ระบบฝั่งลูกค้าจะเปลี่ยนเป็นโอนสำเร็จทันที", icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'ใช่, ฉันโอนแล้ว' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => { Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success'); }); } }); }
+    function deleteWithdrawal(docId) { Swal.fire({ title: 'ยืนยันการลบรายการถอน?', text: "ข้อมูลการแจ้งถอนนี้จะหายไปอย่างถาวร!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ใช่, ลบทิ้งเลย' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลการถอนถูกลบทิ้งแล้ว', 'success'); }); } }); }
 
     function loadCustomerCRM() {
-      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร...";
-      document.getElementById('search-input').value = "";
-      const body = document.getElementById('table-body');
-      body.innerHTML = '<tr><td colspan="5" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>';
-      document.getElementById('no-data').classList.add('hidden');
-
-      document.getElementById('main-thead').innerHTML = `
-        <tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider">
-          <th class="py-4 px-4 text-center">โปรไฟล์</th>
-          <th class="py-4 px-6">ชื่อ (LINE)</th>
-          <th class="py-4 px-4">เบอร์ติดต่อ</th>
-          <th class="py-4 px-6">ข้อมูลบัญชีธนาคาร (รับเงิน)</th>
-          <th class="py-4 px-4 text-center">อัปเดตล่าสุด</th>
-        </tr>`;
-
+      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="5" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
+      document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">โปรไฟล์</th><th class="py-4 px-6">ชื่อ (LINE)</th><th class="py-4 px-4">เบอร์ติดต่อ</th><th class="py-4 px-6">ข้อมูลบัญชีธนาคาร (รับเงิน)</th><th class="py-4 px-4 text-center">อัปเดตล่าสุด</th></tr>`;
       db.collection('users').get().then(snap => {
-        body.innerHTML = '';
-        if(snap.empty) { body.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-rose-500">ยังไม่มีข้อมูลลูกค้าในระบบ</td></tr>'; return; }
-        
+        body.innerHTML = ''; if(snap.empty) { body.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-rose-500">ยังไม่มีข้อมูลลูกค้าในระบบ</td></tr>'; return; }
         snap.forEach(doc => {
-          const user = doc.data();
-          const dateStr = user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('th-TH') : '-';
-          const img = user.pictureUrl ? `<img src="${user.pictureUrl}" class="w-10 h-10 rounded-full mx-auto shadow-sm object-cover">` : '<div class="w-10 h-10 rounded-full bg-gray-200 mx-auto flex items-center justify-center text-xl">👤</div>';
-          
-          let bankInfo = `<span class="text-xs text-gray-400 italic">ยังไม่ผูกบัญชี</span>`;
-          if (user.bankName) {
-              bankInfo = `<div class="text-xs font-bold text-indigo-700">${user.bankName}</div><div class="text-sm font-mono tracking-widest text-gray-800">${user.bankAccountNumber}</div><div class="text-xs text-gray-500">ชื่อ: ${user.bankAccountName}</div>`;
-          }
-
-          body.insertAdjacentHTML('beforeend', `
-            <tr class="hover:bg-slate-50 border-b border-slate-100 text-sm">
-              <td class="py-3 px-4 text-center">${img}</td>
-              <td class="py-3 px-6 font-bold text-slate-800">${user.displayName || 'ไม่ระบุ'}</td>
-              <td class="py-3 px-4 text-indigo-600 font-bold">${user.phone || 'ยังไม่กรอก'}</td>
-              <td class="py-3 px-6">${bankInfo}</td>
-              <td class="py-3 px-4 text-center text-slate-400 text-xs">${dateStr}</td>
-            </tr>
-          `);
+          const user = doc.data(); const dateStr = user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('th-TH') : '-'; const img = user.pictureUrl ? `<img src="${user.pictureUrl}" class="w-10 h-10 rounded-full mx-auto shadow-sm object-cover">` : '<div class="w-10 h-10 rounded-full bg-gray-200 mx-auto flex items-center justify-center text-xl">👤</div>';
+          let bankInfo = `<span class="text-xs text-gray-400 italic">ยังไม่ผูกบัญชี</span>`; if (user.bankName) { bankInfo = `<div class="text-xs font-bold text-indigo-700">${user.bankName}</div><div class="text-sm font-mono tracking-widest text-gray-800">${user.bankAccountNumber}</div><div class="text-xs text-gray-500">ชื่อ: ${user.bankAccountName}</div>`; }
+          body.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50 border-b border-slate-100 text-sm"><td class="py-3 px-4 text-center">${img}</td><td class="py-3 px-6 font-bold text-slate-800">${user.displayName || 'ไม่ระบุ'}</td><td class="py-3 px-4 text-indigo-600 font-bold">${user.phone || 'ยังไม่กรอก'}</td><td class="py-3 px-6">${bankInfo}</td><td class="py-3 px-4 text-center text-slate-400 text-xs">${dateStr}</td></tr>`);
         });
       });
     }
 
     function editRow(item) { 
-        openModal(); 
-        document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์"; 
-        document.getElementById('formRowIndex').value = item.id; 
-        document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); 
-        document.getElementById('formQty').value = item.quantity; 
-        document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; 
-        document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); 
-        
+        openModal(); document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์"; document.getElementById('formRowIndex').value = item.id; document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); document.getElementById('formQty').value = item.quantity; document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); 
+        document.getElementById('formIsFlashSale').checked = item.isFlashSale === true;
         document.getElementById('adminSlipFile').value = ""; 
-        if(item.slip) {
-             document.getElementById('slip-display').classList.remove('hidden');
-             document.getElementById('adminSlipImg').src = item.slip;
-        } else {
-             document.getElementById('slip-display').classList.add('hidden');
-             document.getElementById('adminSlipImg').src = "";
-        }
+        if(item.slip) { document.getElementById('slip-display').classList.remove('hidden'); document.getElementById('adminSlipImg').src = item.slip; } else { document.getElementById('slip-display').classList.add('hidden'); document.getElementById('adminSlipImg').src = ""; }
         calculateAmount(); 
     }
 
     async function submitForm(e) { 
-        e.preventDefault(); 
-        const id = document.getElementById('formRowIndex').value; 
-        const num = document.getElementById('formNumberInput').value.trim().padStart(6, '0'); 
-        const qty = document.getElementById('formQty').value; 
-        let name = document.getElementById('formBuyerName').value.trim(); 
-        let statusUI = document.getElementById('formStatus').value; 
-        
-        let finalStatus = "available"; 
-        if(name === "") { name = "-"; } 
-        else {
-             if(statusUI === "ชำระแล้ว") finalStatus = "sold";
-             else if(statusUI === "รอตรวจสอบสลิป") finalStatus = "รอตรวจสอบสลิป";
-             else finalStatus = "reserve";
-        }
-        
-        const payload = { number: num, quantity: qty, amount: qty * 100, name: name, status: finalStatus, draw: currentSelectedSheet }; 
+        e.preventDefault(); const id = document.getElementById('formRowIndex').value; const num = document.getElementById('formNumberInput').value.trim().padStart(6, '0'); const qty = document.getElementById('formQty').value; let name = document.getElementById('formBuyerName').value.trim(); let statusUI = document.getElementById('formStatus').value; 
+        let finalStatus = "available"; if(name === "") { name = "-"; } else { if(statusUI === "ชำระแล้ว") finalStatus = "sold"; else if(statusUI === "รอตรวจสอบสลิป") finalStatus = "รอตรวจสอบสลิป"; else finalStatus = "reserve"; }
+        const payload = { number: num, quantity: qty, amount: qty * 100, name: name, status: finalStatus, draw: currentSelectedSheet, isFlashSale: document.getElementById('formIsFlashSale').checked }; 
         if (finalStatus === "available") { payload.userId = null; payload.expiresAt = null; payload.slip = null; } 
-
-        const slipFile = document.getElementById('adminSlipFile');
-        if (slipFile.files && slipFile.files[0]) {
-             Swal.fire({title: 'กำลังอัปโหลดสลิป...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-             payload.slip = await resizeImage(slipFile.files[0], 800, 800, 0.7);
-        }
-
-        if(id) { 
-            db.collection('lotteries').doc(id).update(payload).then(() => { Swal.close(); closeModal(); }); 
-        } else { 
-            const customId = currentSelectedSheet.replace(/\s+/g, '') + "_" + num; 
-            db.collection('lotteries').doc(customId).set(payload, { merge: true }).then(() => { Swal.close(); closeModal(); }); 
-        } 
+        const slipFile = document.getElementById('adminSlipFile'); if (slipFile.files && slipFile.files[0]) { Swal.fire({title: 'กำลังอัปโหลดสลิป...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); payload.slip = await resizeImage(slipFile.files[0], 800, 800, 0.7); }
+        if(id) { db.collection('lotteries').doc(id).update(payload).then(() => { Swal.close(); closeModal(); }); } else { const customId = currentSelectedSheet.replace(/\s+/g, '') + "_" + num; db.collection('lotteries').doc(customId).set(payload, { merge: true }).then(() => { Swal.close(); closeModal(); }); } 
     }
 
     function calculateAmount() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); }
     function openModal() { document.getElementById('formModal').classList.remove('hidden'); document.getElementById('lotteryForm').reset(); document.getElementById('formRowIndex').value = ""; document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; document.getElementById('slip-display').classList.add('hidden'); calculateAmount(); }
     function closeModal() { document.getElementById('formModal').classList.add('hidden'); }
-    
-    function clearTicket(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null }); } }); }
-    
-    function deleteTicket(id) {
-        Swal.fire({
-            title: 'ยืนยันการลบสลาก?',
-            text: "หากลบแล้วข้อมูลสลากใบนี้จะหายไปจากระบบอย่างถาวร ไม่สามารถกู้คืนได้!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'ใช่, ลบทิ้งเลย!',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-                db.collection('lotteries').doc(id).delete().then(() => {
-                    Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success');
-                }).catch(err => {
-                    Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
-                });
-            }
-        });
-    }
-
+    function clearTicket(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null, isFlashSale: false }); } }); }
+    function deleteTicket(id) { Swal.fire({ title: 'ยืนยันการลบสลาก?', text: "หากลบแล้วข้อมูลสลากใบนี้จะหายไปจากระบบอย่างถาวร ไม่สามารถกู้คืนได้!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#64748b', confirmButtonText: 'ใช่, ลบทิ้งเลย!', cancelButtonText: 'ยกเลิก' }).then((result) => { if (result.isConfirmed) { Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); db.collection('lotteries').doc(id).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success'); }).catch(err => { Swal.fire('เกิดข้อผิดพลาด', err.message, 'error'); }); } }); }
     function addNewMonthPopup() { Swal.fire({ title: "สร้างแผ่นงานงวดใหม่", input: "text", inputPlaceholder: "งวด 1 กรกฎาคม 2569", showCancelButton: true, confirmButtonColor: '#1e293b' }).then(r => { if(r.value) db.collection('draws').add({ name: r.value.trim(), createdAt: new Date() }); }); }
 
     function openWinningModal() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดสลากก่อนครับ', 'warning');
         db.collection('winning_results').doc(currentSelectedSheet).get().then(doc => {
-            if(doc.exists) {
-                const data = doc.data();
-                document.getElementById('win_prize1').value = data.prize1 || "";
-                document.getElementById('win_last2').value = data.last2 || "";
-                document.getElementById('win_front3').value = (data.front3 || []).join(' ');
-                document.getElementById('win_last3').value = (data.last3 || []).join(' ');
-                document.getElementById('win_prize2').value = (data.prize2 || []).join(' ');
-                document.getElementById('win_prize3').value = (data.prize3 || []).join(' ');
-                document.getElementById('win_prize4').value = (data.prize4 || []).join(' ');
-                document.getElementById('win_prize5').value = (data.prize5 || []).join(' ');
-            } else { document.getElementById('winningForm').reset(); }
+            if(doc.exists) { const data = doc.data(); document.getElementById('win_prize1').value = data.prize1 || ""; document.getElementById('win_last2').value = data.last2 || ""; document.getElementById('win_front3').value = (data.front3 || []).join(' '); document.getElementById('win_last3').value = (data.last3 || []).join(' '); document.getElementById('win_prize2').value = (data.prize2 || []).join(' '); document.getElementById('win_prize3').value = (data.prize3 || []).join(' '); document.getElementById('win_prize4').value = (data.prize4 || []).join(' '); document.getElementById('win_prize5').value = (data.prize5 || []).join(' '); } else { document.getElementById('winningForm').reset(); }
             document.getElementById('winningModal').classList.remove('hidden');
         });
     }
@@ -1003,73 +696,24 @@
     function parseNumberString(str) { return str.split(/[\s,]+/).filter(item => item.trim() !== ""); }
     function saveWinningData(e) {
         e.preventDefault();
-        const payload = {
-            prize1: document.getElementById('win_prize1').value.trim(),
-            last2: document.getElementById('win_last2').value.trim(),
-            front3: parseNumberString(document.getElementById('win_front3').value),
-            last3: parseNumberString(document.getElementById('win_last3').value),
-            prize2: parseNumberString(document.getElementById('win_prize2').value),
-            prize3: parseNumberString(document.getElementById('win_prize3').value),
-            prize4: parseNumberString(document.getElementById('win_prize4').value),
-            prize5: parseNumberString(document.getElementById('win_prize5').value),
-            updatedAt: new Date()
-        };
-        db.collection('winning_results').doc(currentSelectedSheet).set(payload, { merge: true })
-        .then(() => { Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', confirmButtonColor: '#b38728' }); closeWinningModal(); })
-        .catch(err => Swal.fire('เกิดข้อผิดพลาด', err.message, 'error'));
+        const payload = { prize1: document.getElementById('win_prize1').value.trim(), last2: document.getElementById('win_last2').value.trim(), front3: parseNumberString(document.getElementById('win_front3').value), last3: parseNumberString(document.getElementById('win_last3').value), prize2: parseNumberString(document.getElementById('win_prize2').value), prize3: parseNumberString(document.getElementById('win_prize3').value), prize4: parseNumberString(document.getElementById('win_prize4').value), prize5: parseNumberString(document.getElementById('win_prize5').value), updatedAt: new Date() };
+        db.collection('winning_results').doc(currentSelectedSheet).set(payload, { merge: true }).then(() => { Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', confirmButtonColor: '#b38728' }); closeWinningModal(); }).catch(err => Swal.fire('เกิดข้อผิดพลาด', err.message, 'error'));
     }
 
     function openPromoModal() {
-        tempPromoImageBase64 = "";
-        document.getElementById('promoImageFile').value = "";
+        tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = "";
         db.collection('settings').doc('promotion').get().then(doc => {
             if(doc.exists) {
                 document.getElementById('promoStatus').value = doc.data().isActive ? "true" : "false";
-                if(doc.data().imageUrl) {
-                    document.getElementById('promoPreview').src = doc.data().imageUrl;
-                    document.getElementById('promoPreview').classList.remove('hidden');
-                    document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
-                    document.getElementById('btn-remove-promo').classList.remove('hidden');
-                    tempPromoImageBase64 = doc.data().imageUrl;
-                } else {
-                    document.getElementById('promoPreview').classList.add('hidden');
-                    document.getElementById('promoPreviewPlaceholder').classList.remove('hidden');
-                    document.getElementById('btn-remove-promo').classList.add('hidden');
-                }
+                if(doc.data().imageUrl) { document.getElementById('promoPreview').src = doc.data().imageUrl; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); tempPromoImageBase64 = doc.data().imageUrl; } else { document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); }
             }
             document.getElementById('promoModal').classList.remove('hidden');
         });
     }
-    async function previewPromoImage() {
-        const fileInput = document.getElementById('promoImageFile');
-        if (fileInput.files && fileInput.files[0]) {
-            tempPromoImageBase64 = await resizeImage(fileInput.files[0], 800, 800, 0.75);
-            document.getElementById('promoPreview').src = tempPromoImageBase64;
-            document.getElementById('promoPreview').classList.remove('hidden');
-            document.getElementById('promoPreviewPlaceholder').classList.add('hidden');
-            document.getElementById('btn-remove-promo').classList.remove('hidden');
-        }
-    }
-    function removePromoImage() {
-        tempPromoImageBase64 = "";
-        document.getElementById('promoImageFile').value = "";
-        document.getElementById('promoPreview').src = "";
-        document.getElementById('promoPreview').classList.add('hidden');
-        document.getElementById('promoPreviewPlaceholder').classList.remove('hidden');
-        document.getElementById('btn-remove-promo').classList.add('hidden');
-    }
+    async function previewPromoImage() { const fileInput = document.getElementById('promoImageFile'); if (fileInput.files && fileInput.files[0]) { tempPromoImageBase64 = await resizeImage(fileInput.files[0], 800, 800, 0.75); document.getElementById('promoPreview').src = tempPromoImageBase64; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); } }
+    function removePromoImage() { tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = ""; document.getElementById('promoPreview').src = ""; document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); }
     function closePromoModal() { document.getElementById('promoModal').classList.add('hidden'); }
-    async function savePromotion(e) {
-        e.preventDefault();
-        Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-        const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" };
-        try {
-            await db.collection('settings').doc('promotion').set(payload);
-            Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' });
-            closePromoModal();
-        } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); }
-    }
-
+    async function savePromotion(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" }; try { await db.collection('settings').doc('promotion').set(payload); Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' }); closePromoModal(); } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); } }
   </script>
 </body>
 </html>
