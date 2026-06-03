@@ -260,12 +260,20 @@
     }
     let mainCountdownInterval = null;
 
+    // 1. ฟังก์ชันนับเวลา Flash Sale (อัปเดตให้รองรับกรณีแอดมินลืมใส่วันที่)
     function startFlashSaleCountdown() {
         if(flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
         const container = document.getElementById('flash-sale-container'); const timerEl = document.getElementById('fs-timer');
-        if(!flashSaleActive || !flashSaleEndTime) { container.classList.add('hidden'); return; }
-        const target = new Date(flashSaleEndTime).getTime(); if(isNaN(target)) { container.classList.add('hidden'); return; }
+        if(!flashSaleActive) { container.classList.add('hidden'); return; }
+        
+        // ถ้าไม่ได้ตั้งเวลาไว้ ให้โชว์คำว่า โปรโมชันพิเศษ แทน
+        if(!flashSaleEndTime) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; return; }
+        
+        const target = new Date(flashSaleEndTime).getTime(); 
+        if(isNaN(target)) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; return; }
+        
         if(target - Date.now() <= 0) { container.classList.add('hidden'); return; }
+        
         container.classList.remove('hidden');
         flashSaleTimerInterval = setInterval(() => {
             const distance = target - Date.now();
@@ -350,13 +358,17 @@
         </div>`;
     }
 
+// 2. ฟังก์ชันจัดเรียงสลาก (แก้ไม่ให้กล่องหายถ้าไม่ได้ตั้งเวลา)
     function filterData() {
       const search = document.getElementById('search-input').value.trim(); let list = availableTickets;
       if (currentLotteryType === 'single') list = list.filter(t => parseInt(t.quantity) === 1); else if (currentLotteryType === 'set') list = list.filter(t => parseInt(t.quantity) > 1);
       if (search) list = list.filter(item => String(item.number).includes(search));
       
       const flashSaleScroll = document.getElementById('flash-sale-scroll'); flashSaleScroll.innerHTML = '';
-      const now = Date.now(); const isFsExpired = flashSaleEndTime ? (new Date(flashSaleEndTime).getTime() - now <= 0) : true;
+      const now = Date.now(); 
+      // เปลี่ยนจาก true เป็น false เพื่อให้กล่องยังโชว์อยู่ถึงแม้แอดมินลืมใส่วันที่
+      const isFsExpired = flashSaleEndTime ? (new Date(flashSaleEndTime).getTime() - now <= 0) : false;
+      
       if (flashSaleActive && !isFsExpired) {
           const fsList = availableTickets.filter(t => t.isFlashSale === true);
           if (fsList.length > 0) {
@@ -491,22 +503,24 @@
 
     function handleFileSelection(fileInputId) { return new Promise((resolve) => { const fileInput = document.getElementById(fileInputId); if(fileInput.files.length === 0) { resolve(null); return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onloadend = function() { resolve(reader.result); }; reader.readAsDataURL(file); }); }
 
+   // 3. แจ้งชำระเงินรายใบ (ใส่ระบบเซ็นเซอร์เบอร์ XXX)
     function notifyPayment(docId, num, amount) {
         const qrUrl = `https://promptpay.io/1410400401805/${amount}.png`;
         Swal.fire({
             title: 'ชำระเงิน & อัปโหลดสลิป', 
-            html: `<div class="text-sm font-bold text-gray-500 mb-2">สลาก: <span class="text-[#d31a1a] text-lg">${num}</span><br>ยอดโอน: <span class="text-gray-900 text-2xl font-black">฿${amount.toLocaleString()}</span></div><div class="bg-white border-2 border-indigo-100 rounded-xl p-3 mb-3 text-center shadow-sm"><p class="text-[11px] font-black text-indigo-700 mb-2 bg-indigo-50 inline-block px-3 py-1 rounded-full">📱 สแกนจ่ายผ่านแอปธนาคาร</p><img src="${qrUrl}" alt="PromptPay QR" class="w-40 h-40 mx-auto border border-gray-200 rounded-xl p-1.5 shadow-sm"><p class="text-[11px] text-gray-500 mt-2 font-bold">พร้อมเพย์: 1410400401805</p></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 text-left"><div class="text-[11px] text-gray-700 font-medium space-y-1"><p class="text-xs font-bold text-gray-800 border-b border-emerald-200 pb-1 mb-1">ทางเลือกโอนเข้าเลขบัญชี:</p><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">📸 อัปโหลดสลิปที่นี่</label></div><input type="file" id="directSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
+            html: `<div class="text-sm font-bold text-gray-500 mb-2">สลาก: <span class="text-[#d31a1a] text-lg">${num}</span><br>ยอดโอน: <span class="text-gray-900 text-2xl font-black">฿${amount.toLocaleString()}</span></div><div class="bg-white border-2 border-indigo-100 rounded-xl p-3 mb-3 text-center shadow-sm"><p class="text-[11px] font-black text-indigo-700 mb-2 bg-indigo-50 inline-block px-3 py-1 rounded-full">📱 สแกนจ่ายผ่านแอปธนาคาร</p><img src="${qrUrl}" alt="PromptPay QR" class="w-40 h-40 mx-auto border border-gray-200 rounded-xl p-1.5 shadow-sm"><p class="text-[13px] text-gray-600 mt-2 font-black">พร้อมเพย์: <span class="tracking-widest">141-XXXXXX-805</span></p></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 text-left"><div class="text-[11px] text-gray-700 font-medium space-y-1"><p class="text-xs font-bold text-gray-800 border-b border-emerald-200 pb-1 mb-1">ทางเลือกโอนเข้าเลขบัญชี:</p><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">📸 อัปโหลดสลิปที่นี่</label></div><input type="file" id="directSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
             showCancelButton: true, confirmButtonText: 'ส่งสลิป', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
             preConfirm: async () => { const fileInput = document.getElementById('directSlipFile'); if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; } Swal.showLoading(); return await handleFileSelection('directSlipFile'); }
         }).then((result) => { if(result.isConfirmed) { db.collection('lotteries').doc(docId).update({ status: 'รอตรวจสอบสลิป', slip: result.value, expiresAt: null }).then(() => { Swal.fire('ส่งหลักฐานสำเร็จ', 'ระบบบันทึกรูปภาพสลิปเรียบร้อยแล้ว แอดมินจะรีบตรวจสอบให้ครับ', 'success').then(()=> { setOrderTab('pending'); }); }); } });
     }
 
+    // 4. แจ้งชำระเงินรวมยอด (ใส่ระบบเซ็นเซอร์เบอร์ XXX)
     window.processBulkPayment = function() {
         const btn = document.getElementById('btn-bulk-pay'); const ids = JSON.parse(btn.dataset.ids); const total = parseInt(btn.dataset.total);
         const qrUrl = `https://promptpay.io/1410400401805/${total}.png`;
         Swal.fire({
             title: 'โอนเงินรวบยอด', 
-            html: `<div class="text-sm font-bold text-gray-500 mb-2">จำนวน <span class="text-[#d31a1a]">${ids.length}</span> รายการ<br>ยอดโอนรวม: <span class="text-gray-900 text-2xl font-black">฿${total.toLocaleString()}</span></div><div class="bg-white border-2 border-indigo-100 rounded-xl p-3 mb-3 text-center shadow-sm"><p class="text-[11px] font-black text-indigo-700 mb-2 bg-indigo-50 inline-block px-3 py-1 rounded-full">📱 สแกนจ่ายผ่านแอปธนาคาร</p><img src="${qrUrl}" alt="PromptPay QR" class="w-40 h-40 mx-auto border border-gray-200 rounded-xl p-1.5 shadow-sm"><p class="text-[11px] text-gray-500 mt-2 font-bold">พร้อมเพย์: 1410400401805</p></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 text-left"><div class="text-[11px] text-gray-700 font-medium space-y-1"><p class="text-xs font-bold text-gray-800 border-b border-emerald-200 pb-1 mb-1">ทางเลือกโอนเข้าเลขบัญชี:</p><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">📸 อัปโหลดสลิปรวบยอดที่นี่</label></div><input type="file" id="bulkSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
+            html: `<div class="text-sm font-bold text-gray-500 mb-2">จำนวน <span class="text-[#d31a1a]">${ids.length}</span> รายการ<br>ยอดโอนรวม: <span class="text-gray-900 text-2xl font-black">฿${total.toLocaleString()}</span></div><div class="bg-white border-2 border-indigo-100 rounded-xl p-3 mb-3 text-center shadow-sm"><p class="text-[11px] font-black text-indigo-700 mb-2 bg-indigo-50 inline-block px-3 py-1 rounded-full">📱 สแกนจ่ายผ่านแอปธนาคาร</p><img src="${qrUrl}" alt="PromptPay QR" class="w-40 h-40 mx-auto border border-gray-200 rounded-xl p-1.5 shadow-sm"><p class="text-[13px] text-gray-600 mt-2 font-black">พร้อมเพย์: <span class="tracking-widest">141-XXXXXX-805</span></p></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 text-left"><div class="text-[11px] text-gray-700 font-medium space-y-1"><p class="text-xs font-bold text-gray-800 border-b border-emerald-200 pb-1 mb-1">ทางเลือกโอนเข้าเลขบัญชี:</p><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">📸 อัปโหลดสลิปรวบยอดที่นี่</label></div><input type="file" id="bulkSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none">`,
             showCancelButton: true, confirmButtonText: 'ส่งสลิปชำระทั้งหมด', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
             preConfirm: async () => { const fileInput = document.getElementById('bulkSlipFile'); if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; } Swal.showLoading(); return await handleFileSelection('bulkSlipFile'); }
         }).then((result) => { if(result.isConfirmed) { Swal.fire({title: 'กำลังอัปเดตระบบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); const batch = db.batch(); ids.forEach(id => { const ref = db.collection('lotteries').doc(id); batch.update(ref, { status: 'รอตรวจสอบสลิป', slip: result.value, expiresAt: null }); }); batch.commit().then(() => { Swal.fire('สำเร็จ', 'แจ้งโอนเงินเรียบร้อยแล้ว แอดมินจะตรวจสอบยอดทั้งหมดให้ครับ', 'success'); setOrderTab('pending'); }).catch(err => { Swal.fire('ข้อผิดพลาด', err.message, 'error'); }); } });
