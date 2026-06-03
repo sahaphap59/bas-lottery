@@ -293,7 +293,7 @@
               if(data.logoUrl) { document.getElementById('main-store-logo').src = data.logoUrl; document.getElementById('main-store-logo').classList.remove('hidden'); }
               if(data.ticketBgUrl) globalTicketBg = data.ticketBgUrl; else globalTicketBg = "";
               
-              // โหลดแบนเนอร์สไลด์
+              // แบนเนอร์สลิปแคมเปญ
               clearTimeout(slideInterval);
               let hasSlide = false;
               ['slide1','slide2','slide3'].forEach(k => {
@@ -304,7 +304,7 @@
               if(hasSlide) { document.getElementById('promo-carousel').classList.remove('hidden'); showSlides(); } 
               else { document.getElementById('promo-carousel').classList.add('hidden'); }
               
-              // แสดงข้อความและเริ่มนับถอยหลัง (ใช้ Setting จาก Admin)
+              // แสดงข้อความและนับถอยหลัง
               if(data.countdownTarget) {
                   const titleEl = document.getElementById('countdown-title');
                   if(data.countdownTitle) {
@@ -347,7 +347,7 @@
       });
     }
 
-    // สร้างสลากแบบดั้งเดิม 2 ช่องพอดี คมชัด ตัวลอย
+   // ฟังก์ชันสร้างฉลากเวอร์ชันแก้ไขตัวเลขตกขอบ (ปรับเป็น text-[15px] และ tracking-wide ให้แสดงครบ 6 หลัก)
     function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
       const numStr = String(number).padStart(6, '0');
       const amount = qty * 100;
@@ -376,10 +376,11 @@
                    <div class="text-[10px] font-black text-black drop-shadow-md">บาท</div>
                 </div>
              </div>
+             
              <div class="ticket-main">
-                <div class="flex justify-between items-start shrink-0 pr-2 pl-1 w-full">
-                   <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm pt-0.5">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-700 font-medium">GOVERNMENT</span></div>
-                   <div class="text-[19px] font-mono tracking-widest font-black text-gray-900 leading-none shrink-0 drop-shadow-md">${numStr}</div>
+                <div class="flex justify-between items-center shrink-0 pr-1.5 pl-1 w-full gap-1">
+                   <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm pt-0.5 shrink-0">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-700 font-medium">GOVERNMENT</span></div>
+                   <div class="text-[15px] font-mono tracking-wide font-black text-gray-900 leading-none shrink-0 drop-shadow-md">${numStr}</div>
                 </div>
                 <div class="flex justify-center mt-0.5 shrink-0 w-full">
                    <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-[1px] shadow-sm">
