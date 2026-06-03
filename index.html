@@ -347,7 +347,7 @@
       });
     }
 
-   // ฟังก์ชันสร้างฉลาก (ปรับแก้ขนาดและระยะห่างให้พอดีจอมือถือทุกรุ่น ป้องกันเลขตกขอบ)
+   // ฟังก์ชันสร้างฉลาก (ปรับขยับเลขมาทางซ้าย และเพิ่มระยะห่างระหว่างตัวเลข)
     function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
       const numStr = String(number).padStart(6, '0');
       const amount = qty * 100;
@@ -378,15 +378,17 @@
              </div>
              
              <div class="ticket-main">
-                <div class="flex justify-between items-center shrink-0 px-1 w-full">
+                <div class="flex justify-start items-center shrink-0 pl-1 w-full gap-2">
                    <div class="text-[4.5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm pt-0.5 shrink-0">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-700 font-medium">GOVERNMENT</span></div>
-                   <div class="text-[13px] font-mono tracking-tighter font-black text-gray-900 leading-none shrink-0 drop-shadow-md">${numStr}</div>
+                   <div class="text-[14px] font-mono tracking-[0.5px] font-black text-gray-900 leading-none shrink-0 drop-shadow-md">${numStr}</div>
                 </div>
+
                 <div class="flex justify-center mt-0.5 shrink-0 w-full">
                    <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-[1px] shadow-sm">
-                      <div class="text-[6px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div>
+                      <div class="text-[6.5px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div>
                    </div>
                 </div>
+
                 <div class="flex justify-between items-end mt-auto pt-0.5 opacity-95 w-full min-w-0 shrink-0">
                    <img src="${qrCodeUrl}" alt="QR" class="w-[13px] h-[13px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm">
                    <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end h-[13px] min-w-0">
