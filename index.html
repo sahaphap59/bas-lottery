@@ -347,7 +347,7 @@
       });
     }
 
-   // ฟังก์ชันสร้างฉลาก (ปรับขยับเลขมาทางซ้าย และเพิ่มระยะห่างระหว่างตัวเลข)
+   // ฟังก์ชันสร้างฉลากเวอร์ชันฉลาด (Auto-Responsive รองรับมือถือทุกขนาดหน้าจอ ป้องกันเลขตกขอบถาวร)
     function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
       const numStr = String(number).padStart(6, '0');
       const amount = qty * 100;
@@ -378,9 +378,14 @@
              </div>
              
              <div class="ticket-main">
-                <div class="flex justify-start items-center shrink-0 pl-1 w-full gap-2">
-                   <div class="text-[4.5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm pt-0.5 shrink-0">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3px] text-gray-700 font-medium">GOVERNMENT</span></div>
-                   <div class="text-[20px] font-mono tracking-[0.5px] font-black text-gray-900 leading-none shrink-0 drop-shadow-md">${numStr}</div>
+                <div class="relative flex items-center justify-end w-full h-5 pr-1">
+                   <div class="absolute left-0 text-[9px] scale-[0.68] origin-left text-[#d31a1a] font-bold leading-none pt-0.5 whitespace-nowrap pointer-events-none">
+                      สลากกินแบ่งรัฐบาล<br><span class="text-[6.5px] text-gray-600 font-medium">GOVERNMENT</span>
+                   </div>
+                   <div class="font-mono font-black text-gray-950 text-right tracking-[0.5px] drop-shadow-sm" 
+                        style="font-size: clamp(13px, 4.3vw, 17px);">
+                      ${numStr}
+                   </div>
                 </div>
 
                 <div class="flex justify-center mt-0.5 shrink-0 w-full">
