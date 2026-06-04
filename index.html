@@ -324,7 +324,7 @@
       const now = Date.now(); const isFsExpired = flashSaleEndTime ? (new Date(flashSaleEndTime).getTime() - now <= 0) : false;
       if (flashSaleActive && !isFsExpired) {
           const fsList = availableTickets.filter(t => t.isFlashSale === true);
-          if (fsList.length > 0) { document.getElementById('flash-sale-container').classList.remove('hidden'); fsList.forEach(item => { const ticketHtml = buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store'); flashSaleScroll.insertAdjacentHTML('beforeend', `<div class="snap-start shrink-0" style="min-w:162px; max-w:162px;">${ticketHtml}</div>`); }); } else { document.getElementById('flash-sale-container').classList.add('hidden'); }
+          if (fsList.length > 0) { document.getElementById('flash-sale-container').classList.remove('hidden'); fsList.forEach(item => { const ticketHtml = buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store'); flashSaleScroll.insertAdjacentHTML('beforeend', `<div class="snap-start shrink-0" style="min-w: 185px; max-w: 185px;">${ticketHtml}</div>`); }); } else { document.getElementById('flash-sale-container').classList.add('hidden'); }
           list = list.filter(t => t.isFlashSale !== true);
       } else { document.getElementById('flash-sale-container').classList.add('hidden'); }
       document.getElementById('ticket-count').innerText = list.length; const grid = document.getElementById('lottery-grid'); grid.innerHTML = '';
