@@ -204,15 +204,10 @@
           <div><label class="block text-xs font-bold text-slate-700 mb-1">ยอดเงินสุทธิ</label><input type="text" id="formAmount" readonly class="w-full bg-slate-100 border border-slate-200 p-3 rounded-lg text-lg font-black text-rose-600 text-right outline-none"></div>
         </div>
         
-        <div class="border border-amber-200 p-3 rounded-lg bg-amber-50 mb-3">
-              <div class="flex items-center gap-2">
-                  <input type="checkbox" id="formIsFlashSale" onchange="toggleFlashSalePrice()" class="w-5 h-5 accent-amber-600 cursor-pointer">
-                  <label for="formIsFlashSale" class="text-xs font-black text-amber-900 cursor-pointer select-none">⚡ บรรจุเข้าคลัง Flash Sale</label>
-              </div>
-              <div id="fsPriceDiv" class="mt-3 hidden border-t border-amber-200 pt-2">
-                  <label class="block text-[10px] font-bold text-amber-800 mb-1">💰 ราคาพิเศษ (บาท)</label>
-                  <input type="number" id="formFsPrice" placeholder="เช่น 80" class="w-full border border-amber-300 p-2 rounded-lg text-sm font-bold outline-none focus:border-amber-500 bg-white">
-              </div>
+        <div id="slip-management-area" class="border border-slate-200 p-3 rounded-xl bg-slate-50">
+           <div class="flex items-center gap-2 border border-amber-200 p-2.5 rounded-lg bg-amber-50 mb-3">
+              <input type="checkbox" id="formIsFlashSale" class="w-5 h-5 accent-amber-600 cursor-pointer">
+              <label for="formIsFlashSale" class="text-xs font-black text-amber-900 cursor-pointer select-none">⚡ บรรจุเข้าคลัง Flash Sale</label>
            </div>
            <label class="block text-xs font-bold text-slate-700 mb-2">📸 หลักฐานการโอนเงิน (สลิป)</label>
            <div id="slip-display" class="mb-3 hidden"><img id="adminSlipImg" src="" alt="Slip" class="w-full max-w-[200px] mx-auto rounded-lg shadow-sm border border-slate-300 cursor-pointer hover:opacity-90" onclick="window.open(this.src, '_blank')"></div>
@@ -518,7 +513,6 @@
     function approveWithdrawal(docId) { Swal.fire({ title: 'ยืนยันการโอนสำเร็จ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'โอนแล้ว' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => { Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success'); }); } }); }
     function deleteWithdrawal(docId) { Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ลบทิ้ง' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลถูกลบแล้ว', 'success'); }); } }); }
 
-    // หน้าจอ CRM: เพิ่มปุ่มแก้ไขข้อมูลลูกค้า
     function loadCustomerCRM() {
       document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
       document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">โปรไฟล์</th><th class="py-4 px-6">ชื่อ (LINE)</th><th class="py-4 px-4">เบอร์ติดต่อ</th><th class="py-4 px-6">ข้อมูลบัญชีธนาคาร (รับเงิน)</th><th class="py-4 px-4 text-center">อัปเดตล่าสุด</th><th class="py-4 px-4 text-center">จัดการ</th></tr>`;
@@ -540,87 +534,34 @@
       });
     }
 
-    // ฟังก์ชันให้แอดมินแก้ไขข้อมูลลูกค้า
     window.editCustomerProfile = function(userId, phone, bankName, bankAccName, bankAccNum) {
         Swal.fire({
             title: 'แก้ไขข้อมูลลูกค้า',
-            html: `
-                <div class="text-left space-y-3 mt-2">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์</label>
-                        <input type="text" id="crmEditPhone" value="${phone || ''}" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-indigo-500">
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">ธนาคาร</label>
-                        <input type="text" id="crmEditBankName" value="${bankName || ''}" placeholder="เช่น กสิกรไทย" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อบัญชี</label>
-                        <input type="text" id="crmEditBankAccName" value="${bankAccName || ''}" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">เลขบัญชี</label>
-                        <input type="number" id="crmEditBankAccNum" value="${bankAccNum || ''}" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none focus:border-indigo-500 tracking-widest">
-                    </div>
-                </div>
-            `,
-            showCancelButton: true,
-            confirmButtonText: '💾 บันทึกข้อมูล',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#4f46e5',
-            preConfirm: () => {
-                return {
-                    phone: document.getElementById('crmEditPhone').value.trim(),
-                    bankName: document.getElementById('crmEditBankName').value.trim(),
-                    bankAccountName: document.getElementById('crmEditBankAccName').value.trim(),
-                    bankAccountNumber: document.getElementById('crmEditBankAccNum').value.trim()
-                };
-            }
+            html: `<div class="text-left space-y-3 mt-2"><div><label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์</label><input type="text" id="crmEditPhone" value="${phone || ''}" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-indigo-500"></div><div class="pt-2 border-t border-slate-100"><label class="block text-xs font-bold text-slate-700 mb-1">ธนาคาร</label><input type="text" id="crmEditBankName" value="${bankName || ''}" placeholder="เช่น กสิกรไทย" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-indigo-500"></div><div><label class="block text-xs font-bold text-slate-700 mb-1">ชื่อบัญชี</label><input type="text" id="crmEditBankAccName" value="${bankAccName || ''}" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-indigo-500"></div><div><label class="block text-xs font-bold text-slate-700 mb-1">เลขบัญชี</label><input type="number" id="crmEditBankAccNum" value="${bankAccNum || ''}" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none focus:border-indigo-500 tracking-widest"></div></div>`,
+            showCancelButton: true, confirmButtonText: '💾 บันทึกข้อมูล', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#4f46e5',
+            preConfirm: () => { return { phone: document.getElementById('crmEditPhone').value.trim(), bankName: document.getElementById('crmEditBankName').value.trim(), bankAccountName: document.getElementById('crmEditBankAccName').value.trim(), bankAccountNumber: document.getElementById('crmEditBankAccNum').value.trim() }; }
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-                db.collection('users').doc(userId).set({
-                    phone: result.value.phone,
-                    bankName: result.value.bankName,
-                    bankAccountName: result.value.bankAccountName,
-                    bankAccountNumber: result.value.bankAccountNumber,
-                    updatedAt: Date.now()
-                }, { merge: true }).then(() => {
-                    Swal.fire('สำเร็จ!', 'อัปเดตข้อมูลลูกค้าเรียบร้อยแล้ว', 'success');
-                    loadCustomerCRM(); // รีเฟรชตาราง
-                }).catch((error) => { Swal.fire('เกิดข้อผิดพลาด', error.message, 'error'); });
+                db.collection('users').doc(userId).set({ phone: result.value.phone, bankName: result.value.bankName, bankAccountName: result.value.bankAccountName, bankAccountNumber: result.value.bankAccountNumber, updatedAt: Date.now() }, { merge: true }).then(() => { Swal.fire('สำเร็จ!', 'อัปเดตข้อมูลลูกค้าเรียบร้อยแล้ว', 'success'); loadCustomerCRM(); }).catch((error) => { Swal.fire('เกิดข้อผิดพลาด', error.message, 'error'); });
             }
         });
     }
 
-    // เพิ่มฟังก์ชันเปิด/ปิดช่องใส่ราคา
-    function toggleFlashSalePrice() {
-        document.getElementById('fsPriceDiv').style.display = document.getElementById('formIsFlashSale').checked ? 'block' : 'none';
-    }
-
     function editRow(item) { 
-        openModal(); document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์"; document.getElementById('formRowIndex').value = item.id; document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); document.getElementById('formQty').value = item.quantity; document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); 
-        // อัปเดตราคา Flash sale
-        document.getElementById('formIsFlashSale').checked = item.isFlashSale === true;
-        document.getElementById('formFsPrice').value = item.amount ? item.amount : (item.quantity * 100);
-        toggleFlashSalePrice();
-        document.getElementById('adminSlipFile').value = ""; 
+        openModal(); document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์"; document.getElementById('formRowIndex').value = item.id; document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); document.getElementById('formQty').value = item.quantity; document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); document.getElementById('formIsFlashSale').checked = item.isFlashSale === true; document.getElementById('adminSlipFile').value = ""; 
         if(item.slip) { document.getElementById('slip-display').classList.remove('hidden'); document.getElementById('adminSlipImg').src = item.slip; } else { document.getElementById('slip-display').classList.add('hidden'); document.getElementById('adminSlipImg').src = ""; } calculateAmount(); 
     }
 
     async function submitForm(e) { 
         e.preventDefault(); const id = document.getElementById('formRowIndex').value; const num = document.getElementById('formNumberInput').value.trim().padStart(6, '0'); const qty = document.getElementById('formQty').value; let name = document.getElementById('formBuyerName').value.trim(); let statusUI = document.getElementById('formStatus').value; let finalStatus = "available"; if(name === "") { name = "-"; } else { if(statusUI === "ชำระแล้ว") finalStatus = "sold"; else if(statusUI === "รอตรวจสอบสลิป") finalStatus = "รอตรวจสอบสลิป"; else finalStatus = "reserve"; }
-        // คำนวณราคาพิเศษ
-        const isFs = document.getElementById('formIsFlashSale').checked;
-        const finalAmount = isFs && document.getElementById('formFsPrice').value ? parseInt(document.getElementById('formFsPrice').value) : qty * 100;
-
-        const payload = { number: num, quantity: qty, amount: finalAmount, name: name, status: finalStatus, draw: currentSelectedSheet, isFlashSale: isFs }; if (finalStatus === "available") { payload.userId = null; payload.expiresAt = null; payload.slip = null; } 
+        const payload = { number: num, quantity: qty, amount: qty * 100, name: name, status: finalStatus, draw: currentSelectedSheet, isFlashSale: document.getElementById('formIsFlashSale').checked }; if (finalStatus === "available") { payload.userId = null; payload.expiresAt = null; payload.slip = null; } 
         const slipFile = document.getElementById('adminSlipFile'); if (slipFile.files && slipFile.files[0]) { Swal.fire({title: 'กำลังอัปโหลดสลิป...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); payload.slip = await resizeImage(slipFile.files[0], 800, 800, 0.7); }
         if(id) { db.collection('lotteries').doc(id).update(payload).then(() => { Swal.close(); closeModal(); }); } else { const customId = currentSelectedSheet.replace(/\s+/g, '') + "_" + num; db.collection('lotteries').doc(customId).set(payload, { merge: true }).then(() => { Swal.close(); closeModal(); }); } 
     }
 
     function calculateAmount() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); }
-    function openModal() { document.getElementById('formModal').classList.remove('hidden'); document.getElementById('lotteryForm').reset(); document.getElementById('formRowIndex').value = ""; document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; document.getElementById('slip-display').classList.add('hidden'); document.getElementById('formIsFlashSale').checked = false; toggleFlashSalePrice(); calculateAmount(); }
+    function openModal() { document.getElementById('formModal').classList.remove('hidden'); document.getElementById('lotteryForm').reset(); document.getElementById('formRowIndex').value = ""; document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; document.getElementById('slip-display').classList.add('hidden'); calculateAmount(); }
     function closeModal() { document.getElementById('formModal').classList.add('hidden'); }
     function clearTicket(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null, isFlashSale: false }); } }); }
     function deleteTicket(id) { Swal.fire({ title: 'ยืนยันการลบสลาก?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#64748b', confirmButtonText: 'ใช่, ลบทิ้งเลย!', cancelButtonText: 'ยกเลิก' }).then((result) => { if (result.isConfirmed) { Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); db.collection('lotteries').doc(id).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success'); }); } }); }
