@@ -40,6 +40,44 @@
     #floating-cart { position: fixed; bottom: 85px; right: 16px; background-color: #d31a1a; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(211,26,26,0.4); cursor: pointer; z-index: 45; transition: transform 0.2s; }
     #floating-cart:active { transform: scale(0.9); }
     #cart-badge { position: absolute; top: 0; right: 0; background-color: white; color: #d31a1a; font-size: 11px; font-weight: 900; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d31a1a; }
+/* =========================================
+       ✨ 2.1 EFFECT วิ้งๆ (ถูกรางวัล & Flash Sale) 
+       ========================================= */
+       
+    /* 1. เอฟเฟกต์แสงออร่าสีทองกระพริบ (สำหรับสลากถูกรางวัล) */
+    @keyframes goldSparkle {
+      0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); transform: scale(1); }
+      50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.9), inset 0 0 10px rgba(255, 215, 0, 0.5); transform: scale(1.02); }
+    }
+    .win-sparkle-effect {
+      animation: goldSparkle 2s infinite ease-in-out;
+      border: 2px solid #F59E0B !important;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* 2. เอฟเฟกต์แสงสีขาววิ่งพาดผ่าน (สไตล์แอปช้อปปิ้ง) */
+    @keyframes shimmerSweep {
+      0% { transform: translateX(-150%) skewX(-20deg); }
+      100% { transform: translateX(200%) skewX(-20deg); }
+    }
+    .shimmer-sweep::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      animation: shimmerSweep 3s infinite;
+      pointer-events: none; /* ไม่ให้กวนการกดปุ่ม */
+    }
+
+    /* 3. เอฟเฟกต์ป้ายราคา Flash Sale เด้งดึ๋ง */
+    @keyframes priceBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    .price-bounce {
+      animation: priceBounce 1.5s infinite ease-in-out;
+    }
   </style>
 </head>
 <body class="pb-32">
