@@ -937,16 +937,27 @@
                  let wdBtn = ''; 
                  let wdInfo = myWithdrawals[item.id];
                  if(wdInfo) { 
-                     if(wdInfo.status === 'สำเร็จ') wdBtn = `<div class="mt-2 bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-3 rounded-lg border border-emerald-300 shadow-sm">✅ โอนเงินรางวัลให้คุณสำเร็จแล้ว</div>`; 
-                     else wdBtn = `<div class="mt-2 bg-amber-100 text-amber-700 text-xs font-bold py-2.5 px-3 rounded-lg border border-amber-300 animate-pulse shadow-sm">⏳ รอแอดมินโอนเงิน</div>`; 
+                     if(wdInfo.status === 'สำเร็จ') wdBtn = `<div class="mt-4 w-full bg-gradient-to-r from-[#dcfce7] to-[#bbf7d0] text-[#166534] text-[13px] font-black py-3 px-4 rounded-xl border border-[#86efac] shadow-sm text-center">✅ โอนเงินรางวัลให้คุณสำเร็จแล้ว</div>`; 
+                     else wdBtn = `<div class="mt-4 w-full bg-gradient-to-r from-[#fef3c7] to-[#fde68a] text-[#92400e] text-[13px] font-black py-3 px-4 rounded-xl border border-[#fcd34d] animate-pulse shadow-sm text-center">⏳ รอแอดมินโอนเงิน</div>`; 
                  } else { 
-                     wdBtn = `<button onclick="requestWithdrawal('${item.id}', ${prizeInfo.total}, '${numStr}')" class="mt-2 w-full bg-[#111] text-white font-bold py-2.5 px-4 rounded-lg shadow-md hover:bg-gray-800 transition border border-gray-900">💸 แจ้งถอนเงินรางวัลนี้</button>`; 
+                     wdBtn = `<button onclick="requestWithdrawal('${item.id}', ${prizeInfo.total}, '${numStr}')" class="mt-4 w-full bg-gradient-to-r from-[#ab813e] to-[#c79a4a] text-white font-black py-3.5 px-4 rounded-xl shadow-md hover:opacity-90 transition border border-[#8e682e] text-[13px]">แจ้งถอนเงินรางวัลนี้</button>`; 
                  }
+                 
+                 // โค้ดสร้าง UI กล่องถูกรางวัลแบบหรูหรา โทนสีครีม-ทอง
                  prizeBoxHTML = `
-                    <div class="bg-gradient-to-b from-[#fffce8] to-[#ffed99] border-t-2 border-[#f5c200] p-4 text-center rounded-b-xl relative overflow-hidden mt-2">
-                        <p class="text-[13px] font-bold text-[#b38000] mb-1">🎉 ยินดีด้วย! สลากใบนี้ถูกรางวัล</p>
-                        <p class="text-base font-black text-[#8a6300] drop-shadow-sm">${prizeInfo.labels.join(', ')}</p>
-                        <p class="text-[#d31a1a] font-black text-[22px] mt-1 drop-shadow-sm tracking-wide bg-white/80 inline-block px-3 py-1 rounded-lg">รับเงิน: ฿${prizeInfo.total.toLocaleString()}</p>
+                    <div class="bg-gradient-to-b from-[#fdfbf7] to-[#f4ead5] p-5 text-center relative overflow-hidden mt-4 rounded-2xl border border-[#e8d5a5] shadow-lg">
+                        <p class="text-[14px] font-bold text-[#5c4a21] mb-1 flex items-center justify-center gap-1">
+                            <span>🎉</span> ยินดีด้วย สลากใบนี้ถูกรางวัล <span>🎉</span>
+                        </p>
+                        <p class="text-[17px] font-black text-[#8a6a28] drop-shadow-sm mb-4">
+                            ${prizeInfo.labels.join(', ')}
+                        </p>
+                        <div class="bg-gradient-to-r from-[#e7c98c] via-[#f8e1ab] to-[#e7c98c] rounded-xl py-3.5 px-4 shadow-inner border border-[#d4b067]">
+                            <p class="text-[12px] font-bold text-[#684f1d] mb-0.5">รับเงิน</p>
+                            <p class="text-[#b43224] font-black text-3xl tracking-wider drop-shadow-sm">
+                                ฿${prizeInfo.total.toLocaleString()}
+                            </p>
+                        </div>
                         ${wdBtn}
                     </div>`;
              } else if (currentWinData.prize1) { 
@@ -956,16 +967,18 @@
         
         const ticketDesignHTML = buildProTicketHTML(item.id, item.number, item.quantity, item.draw, 'order');
         const html = `
-            <div class="bg-white rounded-xl shadow-md border ${isWin ? 'win-sparkle-effect' : 'border-gray-200'} flex flex-col">
-                <div class="flex justify-between items-center p-3 border-b border-gray-100 bg-gray-50 rounded-t-xl gap-2 mb-2">
+            <div class="bg-white rounded-2xl shadow-md border ${isWin ? 'border-[#F59E0B] win-sparkle-effect' : 'border-gray-200'} flex flex-col p-1.5 pb-3">
+                <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl gap-2 mb-3 border border-gray-100">
                     <div class="flex items-center gap-2">${checkboxHTML}<span class="text-[11px] font-bold text-gray-500">รหัส: #${item.id.substring(0,8)}</span></div>
                     ${statusBadge}
                 </div>
                 ${timerHTML}
-                <div class="p-4 pb-3 flex justify-center bg-[#f8fafc]" onclick="toggleCheckbox('${item.id}')">
+                <div class="px-2 flex justify-center bg-white" onclick="toggleCheckbox('${item.id}')">
                     <div class="w-full max-w-[260px] pointer-events-none">${ticketDesignHTML}</div>
                 </div>
-                ${prizeBoxHTML}
+                <div class="px-2">
+                    ${prizeBoxHTML}
+                </div>
                 ${actionHTML}
             </div>`;
         grid.insertAdjacentHTML('beforeend', html);
