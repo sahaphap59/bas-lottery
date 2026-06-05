@@ -22,7 +22,6 @@
     @keyframes goldShine { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
     .gold-gradient-anim { background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #bf953f); background-size: 200% auto; animation: goldShine 3s linear infinite; color: #0f172a; }
     
-    /* สไตล์สำหรับรูปใบสลากของจริงในหน้าแอดมิน */
     .real-ticket { position: relative; width: 260px; height: 92px; background: #fffdf5; border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; overflow: hidden; border: 1px solid #cbd5e1; }
     .rt-stub { width: 28%; border-right: 1.5px dashed #94a3b8; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; background: rgba(255,255,255,0.2); }
     .rt-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #dc2626; font-weight: 800; font-size: 8px; position: absolute; left: 2px; }
@@ -93,7 +92,6 @@
             <button onclick="switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white relative">🟢 ชำระแล้ว <span id="badge-paid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white relative">🔴 ค้างชำระ/จอง <span id="badge-unpaid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm animate-pulse flex items-center justify-center">0</span></button>
             <button onclick="switchTab('winners')" id="tab-winners" class="tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative">🎉 คนที่ถูกรางวัล <span id="badge-winners" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-yellow-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
-            
             <button onclick="switchTab('flashsale')" id="tab-flashsale" class="tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2">⚡ คลัง Flash Sale <span id="badge-flashsale" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-amber-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="switchTab('crm')" id="tab-crm" class="tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative">👥 ลูกค้า <span id="badge-crm" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-indigo-900 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="switchTab('withdraw')" id="tab-withdraw" class="tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative">💸 แจ้งถอนเงิน <span id="badge-withdraw" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-white text-rose-600 rounded-full text-[10px] font-black border border-rose-300 shadow-sm animate-bounce flex items-center justify-center">0</span></button>
@@ -325,6 +323,7 @@
       if (document.getElementById('adminPin').value === '123456') { 
         document.getElementById('adminAuthOverlay').style.display = 'none';
         loadInitialData(); listenToStorefrontSettings(); listenToWithdrawals(); listenToCustomersCount(); 
+        startAdminCountdown(); // เรียกใช้งานตัวนับเวลาในหน้าแอดมิน
       } else { Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('adminPin').value = ''; }
     }
     document.getElementById('adminPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAdminLogin(); });
@@ -526,6 +525,7 @@
         if(!isFree && item.status === "ชำระแล้ว") statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-md font-bold text-xs">🟢 ชำระแล้ว</span>`;
         if(item.status === 'รอตรวจสอบสลิป') statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 px-3 py-1 rounded-md font-black text-xs animate-pulse">⏳ รอตรวจสอบสลิป</span>`;
         if(item.prizeInfo && item.prizeInfo.won && item.status === "ชำระแล้ว") { statusBadge += `<br><div class="mt-2 inline-block gold-gradient-anim text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md border border-yellow-400">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`; }
+        if(item.status === 'จอง' && item.expiresAt) { statusBadge += `<br><span class="admin-timer text-[10px] text-rose-500 font-bold block mt-1" data-expire="${item.expiresAt}">กำลังคำนวณเวลา...</span>`; }
         if(item.isFlashSale) { statusBadge += `<br><div class="mt-1 inline-block bg-amber-500 text-white px-2 py-0.5 rounded text-[10px] font-bold">⚡ Flash Sale</div>`; }
 
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
@@ -535,6 +535,26 @@
         body.appendChild(tr);
       });
       document.getElementById('no-data').className = hasRows ? "hidden" : "block";
+    }
+
+    // ฟังก์ชันนาฬิกานับถอยหลังของแอดมิน
+    function startAdminCountdown() {
+        setInterval(() => {
+            const now = Date.now();
+            document.querySelectorAll('.admin-timer').forEach(el => {
+                const expire = parseInt(el.dataset.expire);
+                const diff = expire - now;
+                if (diff <= 0) {
+                    el.innerText = 'หมดเวลา (รอคืนแผง)';
+                    el.classList.remove('text-rose-500');
+                    el.classList.add('text-gray-400');
+                } else {
+                    const m = Math.floor(diff / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    el.innerText = `เหลือ ${m} นาที ${s} วินาที`;
+                }
+            });
+        }, 1000);
     }
 
     function switchTab(t) { 

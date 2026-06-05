@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ระบบลอตเตอรี่ออนไลน์</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Prompt:wght@300;400;500;600;700;800&family=Libre+Barcode+39&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -76,7 +77,9 @@
             <div class="cd-item"><div class="cd-num" id="cd-secs">00</div><div class="cd-label">วินาที</div></div>
         </div>
         <div id="promo-carousel" class="carousel-container hidden">
-            <img id="slide1" class="carousel-slide active-slide"><img id="slide2" class="carousel-slide active-slide"><img id="slide3" class="carousel-slide active-slide">
+            <img id="slide1" class="carousel-slide active-slide">
+            <img id="slide2" class="carousel-slide active-slide">
+            <img id="slide3" class="carousel-slide active-slide">
         </div>
     </div>
 
@@ -87,36 +90,58 @@
         <div class="filter-btn" id="type-single" onclick="setLotteryType('single')">หวยเดี่ยว</div>
         <div class="filter-btn" id="type-set" onclick="setLotteryType('set')">หวยชุด</div>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 mb-3">
         <button onclick="randomizeNumber()" class="bg-gray-800 text-white px-4 rounded-xl font-bold flex items-center gap-1 text-sm shadow-sm active:scale-95 transition">✨ สุ่ม</button>
         <input type="number" id="search-input" oninput="filterData()" maxlength="6" placeholder="ค้นหาเลข 6 หลัก..." class="flex-1 border border-gray-300 bg-gray-50 text-gray-800 py-3 px-4 rounded-xl outline-none text-center text-[17px] font-bold tracking-[0.2em] focus:border-[#d31a1a] focus:ring-1 focus:ring-[#d31a1a] transition">
       </div>
+      
+      <div class="bg-rose-50 border border-rose-100 rounded-xl p-3 mb-2">
+          <h3 class="text-[12px] font-bold text-rose-600 mb-2 flex items-center gap-1">🔥 5 อันดับเลขฮิตมาแรง</h3>
+          <div class="flex flex-wrap gap-2" id="trending-numbers-container"></div>
+      </div>
+
       <p class="text-xs text-gray-500 mt-3 text-center font-medium">พบสลากว่าง <span id="ticket-count" class="font-bold text-[#d31a1a]">0</span> ใบ (งวด: <span id="storefront-draw-name">...</span>)</p>
     </div>
 
     <div id="flash-sale-container" class="hidden mx-3 my-4 bg-gradient-to-br from-amber-500 via-rose-500 to-red-600 p-3.5 rounded-2xl text-white shadow-xl border border-amber-300 relative overflow-hidden">
        <div class="flex justify-between items-center mb-2.5 border-b border-white/20 pb-2 relative z-10">
-          <div class="flex items-center gap-1.5"><span class="text-xl animate-bounce">⚡</span><h3 id="fs-display-title" class="font-black text-[13px] tracking-wide drop-shadow-md">FLASH SALE เลขสวย</h3></div>
+          <div class="flex items-center gap-1.5">
+              <span class="text-xl animate-bounce">⚡</span>
+              <h3 id="fs-display-title" class="font-black text-[13px] tracking-wide drop-shadow-md">FLASH SALE เลขสวย</h3>
+          </div>
           <div id="fs-timer" class="bg-black/30 px-2.5 py-1 rounded-lg font-mono text-[11px] font-black tracking-wider border border-white/10 text-yellow-300 animate-pulse">⏱️ เหลือเวลา: --:--:--</div>
        </div>
        <div id="flash-sale-scroll" class="flex overflow-x-auto gap-3 pt-1 pb-1 hide-scrollbar snap-x snap-mandatory relative z-10"></div>
     </div>
 
     <main class="px-3">
-      <div class="flex items-center justify-between mb-3 px-1"><h3 class="font-black text-gray-800 text-lg" id="grid-header-text">สลากบนแผง</h3></div>
+      <div class="flex items-center justify-between mb-3 px-1">
+          <h3 class="font-black text-gray-800 text-lg" id="grid-header-text">สลากบนแผง</h3>
+      </div>
       <div id="lottery-grid" class="grid grid-cols-2 gap-2.5"></div>
-      <div id="no-data" class="hidden text-center py-12 bg-white rounded-2xl shadow-sm mt-2"><div class="text-4xl mb-2">🕵️‍♂️</div><h3 class="text-gray-500 font-bold">ไม่พบเลขที่คุณค้นหา</h3></div>
+      <div id="no-data" class="hidden text-center py-12 bg-white rounded-2xl shadow-sm mt-2">
+          <div class="text-4xl mb-2">🕵️‍♂️</div>
+          <h3 class="text-gray-500 font-bold">ไม่พบเลขที่คุณค้นหา</h3>
+      </div>
     </main>
   </div>
 
   <div id="orders-section" class="hidden max-w-md mx-auto">
-    <div class="bg-[#d31a1a] text-white p-4 shadow-sm text-center relative rounded-b-2xl mb-4"><h2 class="text-xl font-black">คำสั่งซื้อของฉัน</h2></div>
+    <div class="bg-[#d31a1a] text-white p-4 shadow-sm text-center relative rounded-b-2xl mb-4">
+        <h2 class="text-xl font-black">คำสั่งซื้อของฉัน</h2>
+    </div>
     <div class="bg-white mx-3 rounded-xl shadow-sm border border-gray-100 flex overflow-x-auto mb-4 hide-scrollbar">
-      <div class="order-tab active px-3" id="tab-unpaid" onclick="setOrderTab('unpaid')">ยังไม่ชำระ</div><div class="order-tab px-3" id="tab-pending" onclick="setOrderTab('pending')">รอตรวจสอบ</div><div class="order-tab px-3" id="tab-success" onclick="setOrderTab('success')">สำเร็จ</div><div class="order-tab px-3" id="tab-history" onclick="setOrderTab('history')">ประวัติงวดก่อน</div>
+      <div class="order-tab active px-3" id="tab-unpaid" onclick="setOrderTab('unpaid')">ยังไม่ชำระ</div>
+      <div class="order-tab px-3" id="tab-pending" onclick="setOrderTab('pending')">รอตรวจสอบ</div>
+      <div class="order-tab px-3" id="tab-success" onclick="setOrderTab('success')">สำเร็จ</div>
+      <div class="order-tab px-3" id="tab-history" onclick="setOrderTab('history')">ประวัติงวดก่อน</div>
     </div>
     <main class="px-3 relative">
       <div id="my-orders-grid" class="space-y-4"></div>
-      <div id="no-orders-data" class="hidden text-center py-12 bg-rose-50 rounded-2xl border border-dashed border-rose-200"><div class="text-4xl mb-2 text-rose-300">📭</div><h3 class="text-rose-400 font-bold text-sm">ไม่มีคำสั่งซื้อในหมวดหมู่นี้</h3></div>
+      <div id="no-orders-data" class="hidden text-center py-12 bg-rose-50 rounded-2xl border border-dashed border-rose-200">
+          <div class="text-4xl mb-2 text-rose-300">📭</div>
+          <h3 class="text-rose-400 font-bold text-sm">ไม่มีคำสั่งซื้อในหมวดหมู่นี้</h3>
+      </div>
     </main>
   </div>
 
@@ -129,28 +154,49 @@
     <div class="bg-[#d31a1a] px-4 pt-6 pb-12 rounded-b-[32px] shadow-sm text-white">
       <div class="flex items-center gap-4">
         <img id="page-profile-img" src="https://via.placeholder.com/150" alt="Profile" class="w-16 h-16 rounded-full border-2 border-white/80 shadow-md object-cover bg-white">
-        <div><h2 id="page-profile-name" class="text-xl font-bold">กำลังโหลด...</h2><span class="text-[11px] bg-black/20 px-2.5 py-0.5 rounded-full mt-1 inline-block font-medium" id="page-profile-id">รหัสสมาชิก: ...</span></div>
+        <div>
+            <h2 id="page-profile-name" class="text-xl font-bold">กำลังโหลด...</h2>
+            <span class="text-[11px] bg-black/20 px-2.5 py-0.5 rounded-full mt-1 inline-block font-medium" id="page-profile-id">รหัสสมาชิก: ...</span>
+        </div>
       </div>
     </div>
     <div class="mt-4 px-4">
       <h3 class="text-sm font-bold text-gray-800 mb-2 px-1">ข้อมูลส่วนตัว / รับเงินรางวัล</h3>
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-100">
-        <div onclick="editProfileField('phone')" class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"><div class="flex items-center gap-3"><div class="text-xl">📱</div><div><div class="text-sm font-bold text-gray-700">เบอร์โทรศัพท์</div><div class="text-xs text-gray-400" id="display-phone">เพิ่มเบอร์โทร...</div></div></div><span class="text-gray-300 font-bold">❯</span></div>
-        <div onclick="editProfileField('address')" class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"><div class="flex items-center gap-3"><div class="text-xl">🚚</div><div><div class="text-sm font-bold text-gray-700">ที่อยู่จัดส่ง</div><div class="text-xs text-gray-400 truncate w-44" id="display-address">เพิ่มที่อยู่...</div></div></div><span class="text-gray-300 font-bold">❯</span></div>
-        <div onclick="editBankInfo()" class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"><div class="flex items-center gap-3"><div class="text-xl">🏦</div><div><div class="text-sm font-bold text-gray-700">บัญชีรับเงินรางวัล</div><div class="text-xs text-amber-500 font-bold" id="display-bank">กดเพื่อเพิ่มบัญชีรับเงิน</div></div></div><span class="text-gray-300 font-bold">❯</span></div>
+        <div onclick="editProfileField('phone')" class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50">
+            <div class="flex items-center gap-3"><div class="text-xl">📱</div><div><div class="text-sm font-bold text-gray-700">เบอร์โทรศัพท์</div><div class="text-xs text-gray-400" id="display-phone">เพิ่มเบอร์โทร...</div></div></div><span class="text-gray-300 font-bold">❯</span>
+        </div>
+        <div onclick="editProfileField('address')" class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50">
+            <div class="flex items-center gap-3"><div class="text-xl">🚚</div><div><div class="text-sm font-bold text-gray-700">ที่อยู่จัดส่ง</div><div class="text-xs text-gray-400 truncate w-44" id="display-address">เพิ่มที่อยู่...</div></div></div><span class="text-gray-300 font-bold">❯</span>
+        </div>
+        <div onclick="editBankInfo()" class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50">
+            <div class="flex items-center gap-3"><div class="text-xl">🏦</div><div><div class="text-sm font-bold text-gray-700">บัญชีรับเงินรางวัล</div><div class="text-xs text-amber-500 font-bold" id="display-bank">กดเพื่อเพิ่มบัญชีรับเงิน</div></div></div><span class="text-gray-300 font-bold">❯</span>
+        </div>
       </div>
-      <div onclick="switchTab('orders'); setOrderTab('success');" class="bg-white rounded-xl shadow-sm border border-[#f5c200] p-4 cursor-pointer hover:bg-yellow-50 flex items-center justify-between mt-4"><div class="flex items-center gap-3"><div class="text-xl">💸</div><div><div class="text-sm font-bold text-gray-800">แจ้งถอนเงินรางวัล</div><div class="text-xs text-gray-500">เช็คยอดและถอนเงินเขัาบัญชี</div></div></div><span class="text-[#f5c200] font-bold">❯</span></div>
+      <div onclick="switchTab('orders'); setOrderTab('success');" class="bg-white rounded-xl shadow-sm border border-[#f5c200] p-4 cursor-pointer hover:bg-yellow-50 flex items-center justify-between mt-4">
+          <div class="flex items-center gap-3"><div class="text-xl">💸</div><div><div class="text-sm font-bold text-gray-800">แจ้งถอนเงินรางวัล</div><div class="text-xs text-gray-500">เช็คยอดและถอนเงินเขัาบัญชี</div></div></div><span class="text-[#f5c200] font-bold">❯</span>
+      </div>
       <h3 class="text-sm font-bold text-gray-800 mt-6 mb-2 px-1">โอนเงินค่าสลากมาที่</h3>
-      <div onclick="showShopBankInfo()" class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between"><div class="flex items-center gap-3"><div class="text-xl">🏪</div><div><div class="text-sm font-bold text-gray-700">บัญชีร้านค้า (สำหรับโอนจ่าย)</div><div class="text-xs text-rose-500 font-bold">คลิกดูเลขบัญชีร้าน</div></div></div><span class="text-gray-300 font-bold">❯</span></div>
+      <div onclick="showShopBankInfo()" class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+          <div class="flex items-center gap-3"><div class="text-xl">🏪</div><div><div class="text-sm font-bold text-gray-700">บัญชีร้านค้า (สำหรับโอนจ่าย)</div><div class="text-xs text-rose-500 font-bold">คลิกดูเลขบัญชีร้าน</div></div></div><span class="text-gray-300 font-bold">❯</span>
+      </div>
     </div>
   </div>
 
   <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe z-40 max-w-md left-1/2 transform -translate-x-1/2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
     <div class="flex justify-between items-center px-2">
-      <div class="nav-item active" id="nav-home" onclick="switchTab('home')"><span class="text-2xl mb-0.5">🏠</span><span class="text-[10px] font-bold">หน้าแรก</span></div>
-      <div class="nav-item" id="nav-orders" onclick="switchTab('orders')"><span class="text-2xl mb-0.5">📋</span><span class="text-[10px] font-bold">คำสั่งซื้อ</span></div>
-      <a href="https://www.glo.or.th/mission/reward-payment/check-reward" target="_blank" class="nav-item hover:text-[#d31a1a]"><span class="text-2xl mb-0.5">🏆</span><span class="text-[10px] font-bold">ตรวจรางวัล</span></a>
-      <div class="nav-item" id="nav-profile" onclick="switchTab('profile')"><span class="text-2xl mb-0.5">👤</span><span class="text-[10px] font-bold">สมาชิก</span></div>
+      <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
+          <span class="text-2xl mb-0.5">🏠</span><span class="text-[10px] font-bold">หน้าแรก</span>
+      </div>
+      <div class="nav-item" id="nav-orders" onclick="switchTab('orders')">
+          <span class="text-2xl mb-0.5">📋</span><span class="text-[10px] font-bold">คำสั่งซื้อ</span>
+      </div>
+      <a href="https://www.glo.or.th/mission/reward-payment/check-reward" target="_blank" class="nav-item hover:text-[#d31a1a]">
+          <span class="text-2xl mb-0.5">🏆</span><span class="text-[10px] font-bold">ตรวจรางวัล</span>
+      </a>
+      <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+          <span class="text-2xl mb-0.5">👤</span><span class="text-[10px] font-bold">สมาชิก</span>
+      </div>
     </div>
   </div>
 
@@ -167,11 +213,27 @@
     const db = firebase.firestore();
     const LIFF_ID = "2010226176-jm6lSL41"; 
 
-    let availableTickets = [], myTickets = [], userProfile = null, currentDraw = "", currentLotteryType = 'all', currentOrderTab = 'unpaid'; 
-    let globalSavedPhone = "", globalSavedAddress = "", globalBankName = "", globalBankAccountName = "", globalBankAccountNumber = "";
-    let currentWinData = null, globalSalesOpen = true, globalTicketBg = "";
-    let countdownInterval = null, slideInterval = null, slideIndex = 0;
-    let flashSaleActive = false, flashSaleEndTime = "", flashSaleTimerInterval = null, myWithdrawals = {};
+    let availableTickets = []; 
+    let myTickets = []; 
+    let userProfile = null; 
+    let currentDraw = ""; 
+    let currentLotteryType = 'all'; 
+    let currentOrderTab = 'unpaid'; 
+    let globalSavedPhone = ""; 
+    let globalSavedAddress = ""; 
+    let globalBankName = ""; 
+    let globalBankAccountName = ""; 
+    let globalBankAccountNumber = "";
+    let currentWinData = null; 
+    let globalSalesOpen = true; 
+    let globalTicketBg = "";
+    let countdownInterval = null; 
+    let slideInterval = null; 
+    let slideIndex = 0;
+    let flashSaleActive = false; 
+    let flashSaleEndTime = ""; 
+    let flashSaleTimerInterval = null; 
+    let myWithdrawals = {};
     let mainCountdownInterval = null;
 
     async function initLIFF() {
@@ -183,13 +245,19 @@
               document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="switchTab('profile')" class="w-8 h-8 rounded-full border border-white shadow-sm object-cover cursor-pointer">`;
               document.getElementById('page-profile-img').src = userProfile.pictureUrl;
           }
-          await checkUserConsent(); fetchUserProfileData(); loadMyTickets();
-        } else { if (liff.isInClient()) liff.login(); }
+          await checkUserConsent(); 
+          fetchUserProfileData(); 
+          loadMyTickets();
+        } else { 
+            if (liff.isInClient()) liff.login(); 
+        }
       } catch (err) { console.error('LIFF Init Error:', err); }
       setInterval(releaseExpiredReservations, 5000); 
     }
 
-    function forceLineLogin() { if(!liff.isLoggedIn()) liff.login({ redirectUri: window.location.origin }); }
+    function forceLineLogin() { 
+        if(!liff.isLoggedIn()) liff.login({ redirectUri: window.location.origin }); 
+    }
 
     async function checkUserConsent() {
         const userRef = db.collection('users').doc(userProfile.userId);
@@ -199,52 +267,85 @@
                 title: 'ข้อตกลงและเงื่อนไขการใช้บริการ',
                 html: `<div class="text-left text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200"><p class="font-bold text-rose-600">กรุณาอ่านและกดยอมรับก่อนใช้งาน</p><p class="flex items-start gap-2"><span>1.</span><span>ข้าพเจ้ายืนยันว่ามีอายุ <strong>20 ปีบริบูรณ์ขึ้นไป</strong></span></p><p class="flex items-start gap-2"><span>2.</span><span>ข้าพเจ้ารับทราบและยินยอมให้คิดราคาสลาก <strong>80 บาท</strong> และมีค่าบริการฝากจัดเก็บ/ดำเนินการ <strong>20 บาท</strong> (รวมชำระ 100 บาท/ใบ)</span></p><p class="flex items-start gap-2"><span>3.</span><span>ข้าพเจ้ายินยอมให้ระบบบันทึกข้อมูลเพื่อใช้ในการขึ้นเงินรางวัล</span></p></div>`,
                 icon: 'info', confirmButtonText: 'ฉันยอมรับเงื่อนไขทั้งหมด', confirmButtonColor: '#d31a1a', allowOutsideClick: false, allowEscapeKey: false
-            }).then(() => { userRef.set({ consentGiven: true, consentDate: Date.now(), displayName: userProfile.displayName, pictureUrl: userProfile.pictureUrl }, { merge: true }); });
+            }).then(() => { 
+                userRef.set({ consentGiven: true, consentDate: Date.now(), displayName: userProfile.displayName, pictureUrl: userProfile.pictureUrl }, { merge: true }); 
+            });
         }
     }
 
     function switchTab(tab) {
-      if ((tab === 'orders' || tab === 'profile') && (!liff || !liff.isLoggedIn())) { Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE ก่อนครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin()); return; }
-      document.getElementById('home-section').style.display = tab === 'home' ? 'block' : 'none'; document.getElementById('orders-section').style.display = tab === 'orders' ? 'block' : 'none'; document.getElementById('profile-section').style.display = tab === 'profile' ? 'block' : 'none';
-      document.getElementById('nav-home').className = tab === 'home' ? 'nav-item active' : 'nav-item'; document.getElementById('nav-orders').className = tab === 'orders' ? 'nav-item active' : 'nav-item'; document.getElementById('nav-profile').className = tab === 'profile' ? 'nav-item active' : 'nav-item';
-      if(tab === 'orders' && currentOrderTab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); else document.getElementById('bulk-pay-bar').classList.add('hidden');
+      if ((tab === 'orders' || tab === 'profile') && (!liff || !liff.isLoggedIn())) { 
+          Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE ก่อนครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin()); return; 
+      }
+      document.getElementById('home-section').style.display = tab === 'home' ? 'block' : 'none'; 
+      document.getElementById('orders-section').style.display = tab === 'orders' ? 'block' : 'none'; 
+      document.getElementById('profile-section').style.display = tab === 'profile' ? 'block' : 'none';
+      document.getElementById('nav-home').className = tab === 'home' ? 'nav-item active' : 'nav-item'; 
+      document.getElementById('nav-orders').className = tab === 'orders' ? 'nav-item active' : 'nav-item'; 
+      document.getElementById('nav-profile').className = tab === 'profile' ? 'nav-item active' : 'nav-item';
+      
+      if(tab === 'orders' && currentOrderTab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); 
+      else document.getElementById('bulk-pay-bar').classList.add('hidden');
       window.scrollTo(0, 0);
     }
 
-    function setLotteryType(type) { currentLotteryType = type; ['all','single','set'].forEach(t => document.getElementById('type-'+t).className = (t === type) ? 'filter-btn active' : 'filter-btn'); filterData(); }
-    function randomizeNumber() { const randomNum = Math.floor(100000 + Math.random() * 900000); document.getElementById('search-input').value = randomNum.toString().substring(0, 2); filterData(); }
+    function setLotteryType(type) { 
+        currentLotteryType = type; 
+        ['all','single','set'].forEach(t => { document.getElementById('type-'+t).className = (t === type) ? 'filter-btn active' : 'filter-btn'; }); 
+        filterData(); 
+    }
+
+    function randomizeNumber() { 
+        const randomNum = Math.floor(100000 + Math.random() * 900000); 
+        document.getElementById('search-input').value = randomNum.toString().substring(0, 2); 
+        filterData(); 
+    }
 
     function showSlides() {
-        const slides = document.querySelectorAll('.carousel-slide.active-slide'); if(slides.length === 0) return;
+        const slides = document.querySelectorAll('.carousel-slide.active-slide'); 
+        if(slides.length === 0) return;
         for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";
-        slideIndex++; if (slideIndex > slides.length) slideIndex = 1; slides[slideIndex - 1].style.display = "block"; slideInterval = setTimeout(showSlides, 3000);
+        slideIndex++; 
+        if (slideIndex > slides.length) slideIndex = 1; 
+        slides[slideIndex - 1].style.display = "block"; 
+        slideInterval = setTimeout(showSlides, 3000);
     }
 
     function startMainCountdown(targetDateStr) {
         if(mainCountdownInterval) clearInterval(mainCountdownInterval);
         const cdBox = document.getElementById('countdown-display');
         if(!targetDateStr) { cdBox.classList.add('hidden'); return; }
-        const target = new Date(targetDateStr).getTime(); if(isNaN(target)) { cdBox.classList.add('hidden'); return; }
+        const target = new Date(targetDateStr).getTime(); 
+        if(isNaN(target)) { cdBox.classList.add('hidden'); return; }
+        
         cdBox.classList.remove('hidden');
         mainCountdownInterval = setInterval(() => {
             const distance = target - new Date().getTime();
             if (distance < 0) { clearInterval(mainCountdownInterval); cdBox.classList.add('hidden'); return; }
-            document.getElementById('cd-days').innerText = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0'); document.getElementById('cd-hours').innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'); document.getElementById('cd-mins').innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'); document.getElementById('cd-secs').innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+            document.getElementById('cd-days').innerText = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0'); 
+            document.getElementById('cd-hours').innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'); 
+            document.getElementById('cd-mins').innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'); 
+            document.getElementById('cd-secs').innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
         }, 1000);
     }
 
     function startFlashSaleCountdown() {
         if(flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
-        const container = document.getElementById('flash-sale-container'); const timerEl = document.getElementById('fs-timer');
+        const container = document.getElementById('flash-sale-container'); 
+        const timerEl = document.getElementById('fs-timer');
         if(!flashSaleActive) { container.classList.add('hidden'); return; }
         if(!flashSaleEndTime) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; container.classList.remove('hidden'); return; }
-        const target = new Date(flashSaleEndTime).getTime(); if(isNaN(target)) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; container.classList.remove('hidden'); return; }
+        const target = new Date(flashSaleEndTime).getTime(); 
+        if(isNaN(target)) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; container.classList.remove('hidden'); return; }
         if(target - Date.now() <= 0) { container.classList.add('hidden'); return; }
+        
         container.classList.remove('hidden');
         flashSaleTimerInterval = setInterval(() => {
             const distance = target - Date.now();
             if(distance <= 0) { clearInterval(flashSaleTimerInterval); container.classList.add('hidden'); filterData(); return; }
-            const hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'); const mins = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'); const secs = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+            const hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'); 
+            const mins = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'); 
+            const secs = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
             timerEl.innerHTML = `⏱️ สิ้นสุดใน: ${hours}:${mins}:${secs}`;
         }, 1000);
     }
@@ -259,20 +360,33 @@
               if(data.searchHeaderHTML) document.getElementById('search-header-text').innerText = data.searchHeaderHTML;
               if(data.searchPlaceholder) document.getElementById('search-input').placeholder = data.searchPlaceholder;
               if(data.gridHeaderHTML) document.getElementById('grid-header-text').innerText = data.gridHeaderHTML;
-              const announceBar = document.getElementById('announcement-bar'); const announceTxt = document.getElementById('announcement-text');
+              
+              const announceBar = document.getElementById('announcement-bar'); 
+              const announceTxt = document.getElementById('announcement-text');
               if(data.announcementText && data.announcementText.trim() !== "") { announceTxt.innerText = data.announcementText; announceBar.classList.remove('hidden'); } else { announceBar.classList.add('hidden'); }
+
               clearTimeout(slideInterval); let hasSlide = false;
-              ['slide1','slide2','slide3'].forEach(k => { const el = document.getElementById(k); if(data[k]) { el.src = data[k]; el.classList.add('active-slide'); hasSlide = true; } else { el.classList.remove('active-slide'); el.style.display = "none"; } });
+              ['slide1','slide2','slide3'].forEach(k => { 
+                  const el = document.getElementById(k); 
+                  if(data[k]) { el.src = data[k]; el.classList.add('active-slide'); hasSlide = true; } else { el.classList.remove('active-slide'); el.style.display = "none"; } 
+              });
               if(hasSlide) { document.getElementById('promo-carousel').classList.remove('hidden'); showSlides(); } else { document.getElementById('promo-carousel').classList.add('hidden'); }
+              
               if(data.countdownTarget) {
                   const titleEl = document.getElementById('countdown-title');
                   if(data.countdownTitle) { titleEl.innerText = data.countdownTitle; titleEl.className = `font-bold mb-2 drop-shadow-sm block ${data.countdownTitleSize || 'text-base'}`; titleEl.style.color = data.countdownTitleColor || '#1f2937'; } else { titleEl.className = 'hidden'; }
                   startMainCountdown(data.countdownTarget);
               } else { document.getElementById('countdown-title').className = 'hidden'; document.getElementById('countdown-display').classList.add('hidden'); }
+
               if(data.activeDraw) {
                   currentDraw = data.activeDraw; globalSalesOpen = data.isSalesOpen !== false; document.getElementById('storefront-draw-name').innerText = currentDraw;
                   db.collection('winning_results').doc(currentDraw).onSnapshot(wDoc => { currentWinData = wDoc.exists ? wDoc.data() : null; filterData(); if(userProfile && currentOrderTab !== '') renderMyOrders(); });
-                  db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => { availableTickets = []; s.forEach(tk => availableTickets.push({ id: tk.id, ...tk.data() })); filterData(); });
+                  db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => { 
+                      availableTickets = []; 
+                      s.forEach(tk => availableTickets.push({ id: tk.id, ...tk.data() })); 
+                      updateTrendingNumbers();
+                      filterData(); 
+                  });
               }
           }
       });
@@ -281,9 +395,20 @@
       });
     }
 
+    function updateTrendingNumbers() {
+        const container = document.getElementById('trending-numbers-container');
+        let hot = ['09', '85', '14', '79', '23'];
+        if(availableTickets.length > 5) {
+            hot = availableTickets.slice(0, 5).map(t => t.number.substring(4,6));
+        }
+        container.innerHTML = hot.map(num => `<span onclick="document.getElementById('search-input').value='${num}'; filterData();" class="bg-white text-rose-600 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-black cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">เลข ${num}</span>`).join('');
+    }
+
     function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
       const numStr = String(number).padStart(6, '0'); 
-      let tk = availableTickets.find(t=>t.id===id); if(!tk && mode === 'order') tk = myTickets.find(t=>t.id===id);
+      let tk = availableTickets.find(t=>t.id===id); 
+      if(!tk && mode === 'order') tk = myTickets.find(t=>t.id===id);
+      
       let isFs = tk ? (tk.isFlashSale === true) : false;
       let baseAmount = qty * 100; let displayAmount = baseAmount; let priceLabel = `(฿${displayAmount})`;
       
@@ -293,7 +418,11 @@
       }
 
       let bottomActionHTML = '';
-      if (mode === 'store') { bottomActionHTML = globalSalesOpen ? `<button onclick="openCheckout('${id}', '${numStr}', ${displayAmount})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-sm rounded-b-lg border-t border-red-800"><span class="text-xs">🛒</span> หยิบใส่ตะกร้า ${priceLabel}</button>` : `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed rounded-b-lg">🚫 ปิดรับการซื้อ</button>`; } 
+      if (mode === 'store') { 
+          bottomActionHTML = globalSalesOpen ? 
+          `<button onclick="openCheckout('${id}', '${numStr}', ${displayAmount})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-sm rounded-b-lg border-t border-red-800"><span class="text-xs">🛒</span> หยิบใส่ตะกร้า ${priceLabel}</button>` : 
+          `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed rounded-b-lg">🚫 ปิดรับการซื้อ</button>`; 
+      } 
       
       const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${numStr}&size=35x35`;
@@ -312,11 +441,11 @@
                         <div class="text-[8.5px] font-black text-black drop-shadow-md">บาท</div>
                     </div>
                 </div>
-                <div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1">
+                <div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1" style="container-type: inline-size;">
                     <div class="flex justify-between items-center w-full min-w-0">
                         <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm shrink-0 mr-1">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">GOVERNMENT</span></div>
                         <div class="flex-1 text-right min-w-0 overflow-hidden">
-                            <span class="font-mono font-black text-gray-900 drop-shadow-sm tracking-tighter whitespace-nowrap" style="font-size: clamp(14px, 4vw, 18px); line-height: 1;">${numStr}</span>
+                            <span class="font-mono font-black text-gray-900 drop-shadow-sm tracking-tighter whitespace-nowrap" style="font-size: clamp(14px, 16cqi, 20px); line-height: 1;">${numStr}</span>
                         </div>
                     </div>
                     <div class="flex justify-center shrink-0 w-full">
@@ -337,42 +466,75 @@
     }
 
     function filterData() {
-      const search = document.getElementById('search-input').value.trim(); let list = availableTickets;
-      if (currentLotteryType === 'single') list = list.filter(t => parseInt(t.quantity) === 1); else if (currentLotteryType === 'set') list = list.filter(t => parseInt(t.quantity) > 1);
+      const search = document.getElementById('search-input').value.trim(); 
+      let list = availableTickets;
+      if (currentLotteryType === 'single') list = list.filter(t => parseInt(t.quantity) === 1); 
+      else if (currentLotteryType === 'set') list = list.filter(t => parseInt(t.quantity) > 1);
       if (search) list = list.filter(item => String(item.number).includes(search));
       
       const flashSaleScroll = document.getElementById('flash-sale-scroll'); flashSaleScroll.innerHTML = '';
       const now = Date.now(); const isFsExpired = flashSaleEndTime ? (new Date(flashSaleEndTime).getTime() - now <= 0) : false;
+      
       if (flashSaleActive && !isFsExpired) {
           const fsList = availableTickets.filter(t => t.isFlashSale === true);
           if (fsList.length > 0) { 
               document.getElementById('flash-sale-container').classList.remove('hidden'); 
               fsList.forEach(item => { 
                   const ticketHtml = buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store'); 
-                  // 🌟 แก้ไข Flash Sale Width ให้ยาว 100% ตรงตามแผงกริดปกติเป๊ะๆ!
-                  flashSaleScroll.insertAdjacentHTML('beforeend', `<div class="snap-start shrink-0 w-[calc(50%-6px)] min-w-[165px]">${ticketHtml}</div>`); 
+                  // ขยายความกว้าง Flash Sale เป็น 260px โชว์ครบสวยงาม
+                  flashSaleScroll.insertAdjacentHTML('beforeend', `<div class="snap-start shrink-0" style="min-w:260px; max-w:260px;">${ticketHtml}</div>`); 
               }); 
           } else { document.getElementById('flash-sale-container').classList.add('hidden'); }
           list = list.filter(t => t.isFlashSale !== true);
       } else { document.getElementById('flash-sale-container').classList.add('hidden'); }
       
-      document.getElementById('ticket-count').innerText = list.length; const grid = document.getElementById('lottery-grid'); grid.innerHTML = '';
+      document.getElementById('ticket-count').innerText = list.length; 
+      const grid = document.getElementById('lottery-grid'); grid.innerHTML = '';
+      
       if(list.length === 0) { document.getElementById('no-data').classList.remove('hidden'); return; }
-      document.getElementById('no-data').classList.add('hidden'); list.forEach((item) => { grid.insertAdjacentHTML('beforeend', buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store')); });
+      document.getElementById('no-data').classList.add('hidden'); 
+      list.forEach((item) => { grid.insertAdjacentHTML('beforeend', buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store')); });
     }
 
-    function setOrderTab(tab) { currentOrderTab = tab; ['unpaid', 'pending', 'success', 'history'].forEach(t => { document.getElementById('tab-'+t).className = (t === tab) ? 'order-tab active whitespace-nowrap px-3' : 'order-tab whitespace-nowrap px-3'; }); if(tab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); else document.getElementById('bulk-pay-bar').classList.add('hidden'); renderMyOrders(); }
+    function setOrderTab(tab) { 
+        currentOrderTab = tab; 
+        ['unpaid', 'pending', 'success', 'history'].forEach(t => { document.getElementById('tab-'+t).className = (t === tab) ? 'order-tab active whitespace-nowrap px-3' : 'order-tab whitespace-nowrap px-3'; }); 
+        if(tab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); 
+        else document.getElementById('bulk-pay-bar').classList.add('hidden'); 
+        renderMyOrders(); 
+    }
 
-    function updateCartBadge(unpaidCount) { const cart = document.getElementById('floating-cart'); const badge = document.getElementById('cart-badge'); if (unpaidCount > 0) { cart.classList.remove('hidden'); badge.innerText = unpaidCount; } else { cart.classList.add('hidden'); } }
+    function updateCartBadge(unpaidCount) { 
+        const cart = document.getElementById('floating-cart'); const badge = document.getElementById('cart-badge'); 
+        if (unpaidCount > 0) { cart.classList.remove('hidden'); badge.innerText = unpaidCount; } else { cart.classList.add('hidden'); } 
+    }
 
     function loadMyTickets() {
       if(!userProfile) return;
-      db.collection('withdrawals').where('userId', '==', userProfile.userId).onSnapshot(ws => { myWithdrawals = {}; ws.forEach(d => { myWithdrawals[d.id] = d.data(); });
-          db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => { myTickets = []; s.forEach(doc => { const data = doc.data(); if(data.status !== 'available') myTickets.push({ id: doc.id, ...data }); }); renderMyOrders(); });
+      db.collection('withdrawals').where('userId', '==', userProfile.userId).onSnapshot(ws => { 
+          myWithdrawals = {}; ws.forEach(d => { myWithdrawals[d.id] = d.data(); });
+          db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => { 
+              myTickets = []; s.forEach(doc => { const data = doc.data(); if(data.status !== 'available') myTickets.push({ id: doc.id, ...data }); }); renderMyOrders(); 
+          });
       });
     }
 
-    function startCountdownTimer() { if(countdownInterval) clearInterval(countdownInterval); countdownInterval = setInterval(() => { const now = Date.now(); document.querySelectorAll('.timer-display').forEach(el => { const expiresAt = parseInt(el.dataset.expire); const diff = expiresAt - now; if(diff <= 0) { el.innerHTML = "🚫 หมดเวลาจองแล้ว ระบบกำลังดึงสลากคืนแผง..."; el.className = "timer-display text-[11px] text-gray-500 font-bold bg-gray-100 text-center py-2 rounded-lg border border-gray-200 mb-3 shadow-inner mx-3"; } else { const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); const seconds = Math.floor((diff % (1000 * 60)) / 1000); el.innerHTML = `⏱️ ต้องชำระเงินภายใน: <span class="text-[#d31a1a]">${minutes} นาที ${seconds} วินาที</span>`; } }); }, 1000); }
+    function startCountdownTimer() { 
+        if(countdownInterval) clearInterval(countdownInterval); 
+        countdownInterval = setInterval(() => { 
+            const now = Date.now(); 
+            document.querySelectorAll('.timer-display').forEach(el => { 
+                const expiresAt = parseInt(el.dataset.expire); const diff = expiresAt - now; 
+                if(diff <= 0) { 
+                    el.innerHTML = "🚫 หมดเวลาจองแล้ว ระบบกำลังดึงสลากคืนแผง..."; 
+                    el.className = "timer-display text-[11px] text-gray-500 font-bold bg-gray-100 text-center py-2 rounded-lg border border-gray-200 mb-3 shadow-inner mx-3"; 
+                } else { 
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); const seconds = Math.floor((diff % (1000 * 60)) / 1000); 
+                    el.innerHTML = `⏱️ ต้องชำระเงินภายใน: <span class="text-[#d31a1a]">${minutes} นาที ${seconds} วินาที</span>`; 
+                } 
+            }); 
+        }, 1000); 
+    }
 
     function checkWinningPrize(ticketNumber, qty, winData) {
         if (!winData) return { won: false, total: 0, labels: [] }; let totalPrize = 0; let labels = []; let numStr = String(ticketNumber).padStart(6, '0'); qty = parseInt(qty) || 1;
@@ -391,6 +553,7 @@
     function renderMyOrders() {
       const grid = document.getElementById('my-orders-grid'); grid.innerHTML = ''; let filteredList = []; let unpaidTotalCount = 0;
       myTickets.forEach(t => { if (t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ')) { unpaidTotalCount++; } }); updateCartBadge(unpaidTotalCount);
+      
       if (currentOrderTab === 'unpaid') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ'));
       else if (currentOrderTab === 'pending') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'รอตรวจสอบสลิป' || t.status === 'pending' || t.status === 'รอตรวจสอบ'));
       else if (currentOrderTab === 'success') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'ชำระสำเร็จ' || t.status === 'sold' || t.status === 'success' || t.status === 'ชำระแล้ว'));
@@ -402,8 +565,11 @@
       filteredList.forEach((item) => {
         const numStr = String(item.number).padStart(6, '0'); const qty = item.quantity || 1; const amount = item.flashSalePrice ? parseInt(item.flashSalePrice) : qty * 100;
         let statusBadge = ''; let actionHTML = ''; let checkboxHTML = ''; let timerHTML = '';
+        
         if (currentOrderTab === 'unpaid') {
-            statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>'; actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="w-full bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl text-xs font-bold hover:bg-red-50 transition mt-3">ชำระเฉพาะใบนี้</button>`; checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
+            statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>'; 
+            actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="w-full bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl text-xs font-bold hover:bg-red-50 transition mt-3">ชำระเฉพาะใบนี้</button>`; 
+            checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
             if (item.expiresAt) timerHTML = `<div class="timer-display mx-3 text-[11px] text-rose-600 font-bold bg-rose-50 text-center py-2 rounded-lg border border-rose-200 mb-3 shadow-inner" data-expire="${item.expiresAt}">⏱️ กำลังคำนวณเวลา...</div>`;
         } else if (currentOrderTab === 'pending') { statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold border border-amber-200 shadow-sm">⏳ รอตรวจสอบสลิป</span>'; } else { statusBadge = '<span class="text-[11px] bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-md font-bold border border-[#bbf7d0] shadow-sm">✅ ชำระสำเร็จ</span>'; }
         if (currentOrderTab === 'history') { if(item.status === 'จอง' || item.status === 'reserve' || item.status === 'ยังไม่ชำระ') statusBadge = '<span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-1 rounded font-bold">หมดอายุ/ไม่ชำระ</span>'; else if (item.status === 'รอตรวจสอบสลิป' || item.status === 'pending' || item.status === 'รอตรวจสอบ') statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold">รอยืนยัน</span>'; else statusBadge = '<span class="text-[11px] bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-md font-bold">✅ สำเร็จ</span>'; }
@@ -413,11 +579,16 @@
              const prizeInfo = checkWinningPrize(item.number, item.quantity, currentWinData);
              if (prizeInfo.won) {
                  isWin = true; let wdBtn = ''; let wdInfo = myWithdrawals[item.id];
-                 if(wdInfo) { if(wdInfo.status === 'สำเร็จ') wdBtn = `<div class="mt-4 w-full bg-gradient-to-r from-[#dcfce7] to-[#bbf7d0] text-[#166534] text-[13px] font-black py-3 px-4 rounded-xl border border-[#86efac] shadow-sm text-center">✅ โอนเงินรางวัลให้คุณสำเร็จแล้ว</div>`; else wdBtn = `<div class="mt-4 w-full bg-gradient-to-r from-[#fef3c7] to-[#fde68a] text-[#92400e] text-[13px] font-black py-3 px-4 rounded-xl border border-[#fcd34d] animate-pulse shadow-sm text-center">⏳ รอแอดมินโอนเงิน</div>`; } 
-                 else { wdBtn = `<button onclick="requestWithdrawal('${item.id}', ${prizeInfo.total}, '${numStr}')" class="mt-4 w-full bg-gradient-to-r from-[#ab813e] to-[#c79a4a] text-white font-black py-3.5 px-4 rounded-xl shadow-md hover:opacity-90 transition border border-[#8e682e] text-[13px]">แจ้งถอนเงินรางวัลนี้</button>`; }
+                 if(wdInfo) { 
+                     if(wdInfo.status === 'สำเร็จ') wdBtn = `<div class="mt-4 w-full bg-gradient-to-r from-[#dcfce7] to-[#bbf7d0] text-[#166534] text-[13px] font-black py-3 px-4 rounded-xl border border-[#86efac] shadow-sm text-center">✅ โอนเงินรางวัลให้คุณสำเร็จแล้ว</div>`; 
+                     else wdBtn = `<div class="mt-4 w-full bg-gradient-to-r from-[#fef3c7] to-[#fde68a] text-[#92400e] text-[13px] font-black py-3 px-4 rounded-xl border border-[#fcd34d] animate-pulse shadow-sm text-center">⏳ รอแอดมินโอนเงิน</div>`; 
+                 } else { 
+                     wdBtn = `<button onclick="requestWithdrawal('${item.id}', ${prizeInfo.total}, '${numStr}')" class="mt-4 w-full bg-gradient-to-r from-[#ab813e] to-[#c79a4a] text-white font-black py-3.5 px-4 rounded-xl shadow-md hover:opacity-90 transition border border-[#8e682e] text-[13px]">แจ้งถอนเงินรางวัลนี้</button>`; 
+                 }
                  prizeBoxHTML = `<div class="bg-gradient-to-b from-[#fdfbf7] to-[#f4ead5] p-5 text-center relative overflow-hidden mt-4 rounded-2xl border border-[#e8d5a5] shadow-lg"><p class="text-[14px] font-bold text-[#5c4a21] mb-1 flex items-center justify-center gap-1"><span>🎉</span> ยินดีด้วย สลากใบนี้ถูกรางวัล <span>🎉</span></p><p class="text-[17px] font-black text-[#8a6a28] drop-shadow-sm mb-4">${prizeInfo.labels.join(', ')}</p><div class="bg-gradient-to-r from-[#e7c98c] via-[#f8e1ab] to-[#e7c98c] rounded-xl py-3.5 px-4 shadow-inner border border-[#d4b067]"><p class="text-[12px] font-bold text-[#684f1d] mb-0.5">รับเงิน</p><p class="text-[#b43224] font-black text-3xl tracking-wider drop-shadow-sm">฿${prizeInfo.total.toLocaleString()}</p></div>${wdBtn}</div>`;
              } else if (currentWinData.prize1) { prizeBoxHTML = `<div class="bg-gray-50 border-t border-gray-200 p-2.5 text-center rounded-b-xl mt-2"><p class="text-sm font-black text-gray-500">❌ ไม่ถูกรางวัล</p></div>`; }
         }
+        
         const ticketDesignHTML = buildProTicketHTML(item.id, item.number, item.quantity, item.draw, 'order');
         const html = `<div class="bg-white rounded-2xl shadow-md border ${isWin ? 'border-[#F59E0B] win-sparkle-effect' : 'border-gray-200'} flex flex-col p-1.5 pb-3"><div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl gap-2 mb-3 border border-gray-100"><div class="flex items-center gap-2">${checkboxHTML}<span class="text-[11px] font-bold text-gray-500">รหัส: #${item.id.substring(0,8)}</span></div>${statusBadge}</div>${timerHTML}<div class="px-2 flex justify-center bg-white" onclick="toggleCheckbox('${item.id}')"><div class="w-full max-w-[260px] pointer-events-none">${ticketDesignHTML}</div></div><div class="px-2">${prizeBoxHTML}</div>${actionHTML}</div>`;
         grid.insertAdjacentHTML('beforeend', html);
@@ -473,6 +644,7 @@
     }
 
     function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false }); } }); }); }
+    
     window.onload = function() { initLIFF(); loadShopLotteries(); };
   </script>
 </body>
