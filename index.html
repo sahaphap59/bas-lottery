@@ -35,17 +35,15 @@
     
     /* ตัวเลขสลาก (ป้องกันการตกขอบ 100%) */
     .ticket-number-text {
-        font-family: monospace;
-        font-weight: 900;
+        font-family: 'Prompt', sans-serif;
+        font-weight: 800;
         color: #111827;
-        /* ใช้ Container Queries (cqi) หรือ vw เพื่อให้ปรับตามกล่องเสมอ */
-        font-size: clamp(14px, 15cqi, 20px); 
-        letter-spacing: clamp(-0.5px, 0.5cqi, 2px); /* บีบช่องไฟนิดหน่อยกันล้น */
+        font-size: clamp(12px, 11cqi, 18px); 
+        letter-spacing: 0px;
         line-height: 1;
         text-shadow: 0px 1px 1px rgba(0,0,0,0.1);
-        white-space: nowrap; /* ห้ามขึ้นบรรทัดใหม่เด็ดขาด */
+        white-space: nowrap;
         display: inline-block;
-        transform-origin: right center;
     }
 
     .order-tab { flex: 1; text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 600; color: #6b7280; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.2s; white-space: nowrap; }
@@ -638,10 +636,10 @@
                         <div class="text-[8.5px] font-black text-black drop-shadow-md">บาท</div>
                     </div>
                 </div>
-                <div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1">
+                <div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1" style="container-type: inline-size;">
                     <div class="flex justify-between items-center w-full min-w-0">
                         <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm shrink-0 mr-1">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">GOVERNMENT</span></div>
-                        <div class="flex-1 text-right min-w-0 overflow-hidden flex justify-end">
+                        <div class="flex-1 text-right min-w-0 overflow-hidden">
                             <span class="ticket-number-text">${numStr}</span>
                         </div>
                     </div>
