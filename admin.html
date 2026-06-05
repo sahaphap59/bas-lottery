@@ -32,6 +32,7 @@
 </head>
 <body>
 
+  <!-- Overlay ล็อกอิน -->
   <div id="adminAuthOverlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm">
     <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full mx-4 text-center border-t-4 border-amber-400">
       <div class="bg-amber-100 text-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔒</div>
@@ -41,6 +42,7 @@
     </div>
   </div>
 
+  <!-- Navbar -->
   <div class="premium-nav py-6 px-6 text-white shadow-md mb-8">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
       <div class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition" onclick="window.location.reload();">
@@ -92,6 +94,7 @@
             <button onclick="switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white relative">🟢 ชำระแล้ว <span id="badge-paid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white relative">🔴 ค้างชำระ/จอง <span id="badge-unpaid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm animate-pulse flex items-center justify-center">0</span></button>
             <button onclick="switchTab('winners')" id="tab-winners" class="tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative">🎉 คนที่ถูกรางวัล <span id="badge-winners" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-yellow-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            
             <button onclick="switchTab('flashsale')" id="tab-flashsale" class="tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2">⚡ คลัง Flash Sale <span id="badge-flashsale" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-amber-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="switchTab('crm')" id="tab-crm" class="tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative">👥 ลูกค้า <span id="badge-crm" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-indigo-900 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="switchTab('withdraw')" id="tab-withdraw" class="tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative">💸 แจ้งถอนเงิน <span id="badge-withdraw" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-white text-rose-600 rounded-full text-[10px] font-black border border-rose-300 shadow-sm animate-bounce flex items-center justify-center">0</span></button>
@@ -120,6 +123,7 @@
     </div>
   </div>
 
+  <!-- Modal จัดการระบบร้านค้า & รูปแบนเนอร์เมนู -->
   <div id="designModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-8">
       <div class="bg-teal-600 text-white px-6 py-4 flex justify-between items-center rounded-t-2xl">
@@ -163,6 +167,16 @@
             <div><div class="flex justify-between items-center mb-1"><label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 2</label><button type="button" onclick="removeSlide('slide2')" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-200 transition">🗑️ ลบรูปนี้</button></div><input type="file" id="slide2File" accept="image/*" onchange="previewDesignImage('slide2')" class="w-full border border-indigo-200 p-1.5 rounded text-xs bg-white mb-1 outline-none"><img id="slide2Preview" class="max-h-16 rounded shadow-sm hidden"></div>
             <div><div class="flex justify-between items-center mb-1"><label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 3</label><button type="button" onclick="removeSlide('slide3')" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-200 transition">🗑️ ลบรูปนี้</button></div><input type="file" id="slide3File" accept="image/*" onchange="previewDesignImage('slide3')" class="w-full border border-indigo-200 p-1.5 rounded text-xs bg-white mb-1 outline-none"><img id="slide3Preview" class="max-h-16 rounded shadow-sm hidden"></div>
         </div>
+        
+        <!-- 🌟 โซนใหม่ บลัดอัปโหลดรูป 3 เมนูแบนเนอร์หน้าแรก 🌟 -->
+        <hr class="border-slate-100">
+        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-3">
+            <h3 class="text-xs font-black text-amber-800">📸 จัดการรูปแบนเนอร์เมนู 3 ช่อง (หน้าแรก)</h3>
+            <div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 1: สุ่มหยิบโชค (ซ้ายแนวตั้ง)</label><input type="file" id="mbMascotFile" accept="image/*" onchange="previewMenuBanner('mascot')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbMascotPreview" class="max-h-16 rounded mt-1 hidden"></div>
+            <div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 2: 10 อันดับเลขดัง (ขวาบน)</label><input type="file" id="mbTop10File" accept="image/*" onchange="previewMenuBanner('top10')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbTop10Preview" class="max-h-16 rounded mt-1 hidden"></div>
+            <div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 3: แบนเนอร์เสริม/ทำนายฝัน (ขวาล่าง)</label><input type="file" id="mbExtraFile" accept="image/*" onchange="previewMenuBanner('extra')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbExtraPreview" class="max-h-16 rounded mt-1 hidden"></div>
+        </div>
+
         <hr class="border-slate-100">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">ภาพพื้นหลังใบสลากดิจิทัล</label>
@@ -177,6 +191,7 @@
     </div>
   </div>
 
+  <!-- Modal ลงทะเบียนสลาก & จัดการราคา Flash Sale -->
   <div id="formModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
       <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center border-b-4 border-amber-400">
@@ -227,6 +242,7 @@
     </div>
   </div>
 
+  <!-- Modal ประกาศผลรางวัล -->
   <div id="winningModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8 border-2 border-yellow-400">
       <div class="gold-gradient text-slate-900 px-6 py-4 flex justify-between items-center border-b border-yellow-500">
@@ -256,6 +272,7 @@
     </div>
   </div>
 
+  <!-- Modal โปรโมชัน -->
   <div id="promoModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
       <div class="bg-fuchsia-600 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2">📣 โปรโมชัน Pop-up</h2><button onclick="closePromoModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
@@ -271,18 +288,6 @@
         </div>
         <div><label class="block text-xs font-bold text-slate-700 mb-1">สถานะ</label><select id="promoStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none"><option value="true">🟢 เปิดใช้งาน</option><option value="false">🔴 ปิดใช้งาน</option></select></div>
         <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="closePromoModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-fuchsia-600 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
-      </form>
-    </div>
-  </div>
-
-  <div id="flashSaleModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-      <div class="bg-gradient-to-r from-amber-500 to-rose-600 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2">⚡ ตั้งค่าระบบ Flash Sale</h2><button onclick="closeFlashSaleModal()" class="text-white/70 text-2xl font-bold hover:text-white leading-none">&times;</button></div>
-      <form id="flashSaleForm" onsubmit="saveFlashSaleSettings(event)" class="p-6 space-y-4">
-        <div><label class="block text-xs font-bold text-slate-700 mb-1">หัวข้อแถบ Flash Sale หน้าร้าน</label><input type="text" id="fsTitleInput" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-rose-500"></div>
-        <div><label class="block text-xs font-bold text-slate-700 mb-1">วัน/เวลา สิ้นสุด Flash Sale</label><input type="datetime-local" id="fsEndTimeInput" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-bold text-rose-600 outline-none"></div>
-        <div><label class="block text-xs font-bold text-slate-700 mb-1">สถานะ</label><select id="fsStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none"><option value="true">🟢 เปิดใช้งาน</option><option value="false">🔴 ปิดใช้งาน</option></select></div>
-        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="closeFlashSaleModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-rose-600 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
       </form>
     </div>
   </div>
@@ -304,6 +309,8 @@
     let tempPromoImageBase64 = ""; let tempLogoBase64 = ""; let tempTicketBgBase64 = "";
     let tempSlide1 = ""; let tempSlide2 = ""; let tempSlide3 = "";
     let globalTicketBg = "";
+    
+    let tempMascot = "", tempTop10 = "", tempExtra = "";
 
     let currentCounts = { all: 0, empty: 0, paid: 0, unpaid: 0, winners: 0, crm: 0, withdraw: 0, flashsale: 0 };
     let seenCounts = JSON.parse(localStorage.getItem('admin_seen_counts')) || { all: 0, empty: 0, paid: 0, unpaid: 0, winners: 0, crm: 0, withdraw: 0, flashsale: 0 };
@@ -323,7 +330,7 @@
       if (document.getElementById('adminPin').value === '123456') { 
         document.getElementById('adminAuthOverlay').style.display = 'none';
         loadInitialData(); listenToStorefrontSettings(); listenToWithdrawals(); listenToCustomersCount(); 
-        startAdminCountdown(); // เรียกใช้งานตัวนับเวลาในหน้าแอดมิน
+        startAdminCountdown();
       } else { Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('adminPin').value = ''; }
     }
     document.getElementById('adminPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAdminLogin(); });
@@ -367,6 +374,26 @@
             if (isSalesOpen) { btn.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🛒 สถานะขาย: เปิด"; } 
             else { btn.className = "bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🚫 สถานะขาย: ปิด"; }
         }); 
+        db.collection('settings').doc('menu_banners').onSnapshot(doc => {
+            if(doc.exists) {
+                let d = doc.data();
+                if(d.mascot) { document.getElementById('mbMascotPreview').src = d.mascot; document.getElementById('mbMascotPreview').classList.remove('hidden'); tempMascot = d.mascot; }
+                if(d.top10) { document.getElementById('mbTop10Preview').src = d.top10; document.getElementById('mbTop10Preview').classList.remove('hidden'); tempTop10 = d.top10; }
+                if(d.extra) { document.getElementById('mbExtraPreview').src = d.extra; document.getElementById('mbExtraPreview').classList.remove('hidden'); tempExtra = d.extra; }
+            }
+        });
+    }
+
+    async function previewMenuBanner(type) {
+        let input = document.getElementById(`mb${type.charAt(0).toUpperCase() + type.slice(1)}File`);
+        let preview = document.getElementById(`mb${type.charAt(0).toUpperCase() + type.slice(1)}Preview`);
+        if(input.files && input.files[0]) {
+            let base64 = await resizeImage(input.files[0], 600, 600, 0.85);
+            if(type === 'mascot') tempMascot = base64;
+            if(type === 'top10') tempTop10 = base64;
+            if(type === 'extra') tempExtra = base64;
+            preview.src = base64; preview.classList.remove('hidden');
+        }
     }
 
     function listenToWithdrawals() { db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => { currentCounts['withdraw'] = snap.size; updateTabBadge('withdraw'); if(currentTab === 'withdraw') loadWithdrawalsCRM(); }); }
@@ -374,9 +401,10 @@
 
     function openDesignModal() {
         tempLogoBase64 = ""; tempTicketBgBase64 = ""; tempSlide1 = ""; tempSlide2 = ""; tempSlide3 = ""; document.getElementById('designForm').reset();
-        ['logo','ticket','slide1','slide2','slide3'].forEach(id => { document.getElementById(id+'Preview').classList.add('hidden'); document.getElementById(id+'Preview').src = ""; });
-        document.getElementById('countdownTitleInput').value = ""; document.getElementById('countdownTitleSize').value = "text-base"; document.getElementById('countdownTitleColor').value = "#1f2937";
-        document.getElementById('announcementInput').value = ""; document.getElementById('searchHeaderInput').value = ""; document.getElementById('searchPlaceholderInput').value = ""; document.getElementById('gridHeaderInput').value = "";
+        ['logo','ticket','slide1','slide2','slide3','mbMascot','mbTop10','mbExtra'].forEach(id => { 
+            let el = document.getElementById(id+'Preview');
+            if(el) { el.classList.add('hidden'); el.src = ""; }
+        });
         
         db.collection('settings').doc('storefront').get().then(doc => {
             if(doc.exists) {
@@ -390,18 +418,17 @@
                 if(d.slide2) { document.getElementById('slide2Preview').src = d.slide2; document.getElementById('slide2Preview').classList.remove('hidden'); tempSlide2 = d.slide2; }
                 if(d.slide3) { document.getElementById('slide3Preview').src = d.slide3; document.getElementById('slide3Preview').classList.remove('hidden'); tempSlide3 = d.slide3; }
             }
-            document.getElementById('designModal').classList.remove('hidden');
+            db.collection('settings').doc('menu_banners').get().then(mbDoc => {
+                if(mbDoc.exists) {
+                    let m = mbDoc.data();
+                    if(m.mascot) { document.getElementById('mbMascotPreview').src = m.mascot; document.getElementById('mbMascotPreview').classList.remove('hidden'); tempMascot = m.mascot; }
+                    if(m.top10) { document.getElementById('mbTop10Preview').src = m.top10; document.getElementById('mbTop10Preview').classList.remove('hidden'); tempTop10 = m.top10; }
+                    if(m.extra) { document.getElementById('mbExtraPreview').src = m.extra; document.getElementById('mbExtraPreview').classList.remove('hidden'); tempExtra = m.extra; }
+                }
+                document.getElementById('designModal').classList.remove('hidden');
+            });
         });
     }
-
-    async function previewDesignImage(type) {
-        let fileInput, previewImg;
-        if(type === 'logo') { fileInput = document.getElementById('logoImageFile'); previewImg = document.getElementById('logoPreview'); } else if(type === 'ticket') { fileInput = document.getElementById('ticketBgImageFile'); previewImg = document.getElementById('ticketPreview'); } else { fileInput = document.getElementById(type+'File'); previewImg = document.getElementById(type+'Preview'); }
-        if (fileInput.files && fileInput.files[0]) { const base64 = await resizeImage(fileInput.files[0], 800, 800, 0.8); if(type === 'logo') tempLogoBase64 = base64; else if(type === 'ticket') tempTicketBgBase64 = base64; else if(type === 'slide1') tempSlide1 = base64; else if(type === 'slide2') tempSlide2 = base64; else if(type === 'slide3') tempSlide3 = base64; previewImg.src = base64; previewImg.classList.remove('hidden'); }
-    }
-    
-    function removeSlide(slideId) { if(slideId === 'slide1') tempSlide1 = ""; if(slideId === 'slide2') tempSlide2 = ""; if(slideId === 'slide3') tempSlide3 = ""; document.getElementById(slideId + 'File').value = ""; document.getElementById(slideId + 'Preview').src = ""; document.getElementById(slideId + 'Preview').classList.add('hidden'); }
-    function closeDesignModal() { document.getElementById('designModal').classList.add('hidden'); }
 
     async function saveDesignSettings(e) {
         e.preventDefault(); Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
@@ -412,13 +439,10 @@
                 logoUrl: tempLogoBase64, ticketBgUrl: tempTicketBgBase64, slide1: tempSlide1, slide2: tempSlide2, slide3: tempSlide3
             }, { merge: true });
             await db.collection('settings').doc('design').set({ storeName: document.getElementById('storeNameInput').value.trim(), logoUrl: tempLogoBase64, ticketBgUrl: tempTicketBgBase64 }, { merge: true });
+            await db.collection('settings').doc('menu_banners').set({ mascot: tempMascot, top10: tempTop10, extra: tempExtra });
             Swal.fire({ title: 'อัปเดตข้อมูลสำเร็จ!', icon: 'success', confirmButtonColor: '#0d9488' }); closeDesignModal();
         } catch (error) { Swal.fire('เกิดข้อผิดพลาด', error.message, 'error'); }
     }
-
-    function openFlashSaleModal() { document.getElementById('flashSaleForm').reset(); db.collection('settings').doc('flashsale').get().then(doc => { if(doc.exists) { const d = doc.data(); document.getElementById('fsTitleInput').value = d.title || ""; document.getElementById('fsEndTimeInput').value = d.endTime || ""; document.getElementById('fsStatus').value = d.isActive ? "true" : "false"; } document.getElementById('flashSaleModal').classList.remove('hidden'); }); }
-    function closeFlashSaleModal() { document.getElementById('flashSaleModal').classList.add('hidden'); }
-    async function saveFlashSaleSettings(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() }); try { await db.collection('settings').doc('flashsale').set({ title: document.getElementById('fsTitleInput').value.trim(), endTime: document.getElementById('fsEndTimeInput').value, isActive: document.getElementById('fsStatus').value === "true" }, { merge: true }); Swal.fire('สำเร็จ', 'อัปเดตแผงเดล Flash Sale เรียบร้อย', 'success'); closeFlashSaleModal(); } catch(err) { Swal.fire('ข้อผิดพลาด', err.message, 'error'); } }
 
     function loadInitialData() {
       db.collection('draws').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
@@ -430,21 +454,6 @@
     }
 
     function onSheetChange() { currentSelectedSheet = document.getElementById('sheet-selector').value; if (currentTab === 'crm' || currentTab === 'withdraw') switchTab('all'); document.getElementById('search-input').value = ""; db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => { currentWinData = doc.exists ? doc.data() : null; loadLotteryDataFromServer(currentSelectedSheet); }); }
-
-    function checkWinningPrize(ticketNumber, qty, winData) {
-        if (!winData) return { won: false, total: 0, labels: [] };
-        let totalPrize = 0; let labels = []; let numStr = String(ticketNumber).padStart(6, '0'); qty = parseInt(qty) || 1;
-        if (winData.prize1 && numStr === winData.prize1) { totalPrize += 6000000; labels.push("รางวัลที่ 1"); }
-        if (winData.prize1 && numStr !== winData.prize1) { let p1 = parseInt(winData.prize1, 10); let n = parseInt(numStr, 10); if (n === p1 + 1 || n === p1 - 1) { totalPrize += 100000; labels.push("รางวัลข้างเคียง"); } }
-        if (winData.last2 && numStr.slice(-2) === winData.last2) { totalPrize += 2000; labels.push("เลขท้าย 2 ตัว"); }
-        if (winData.front3 && winData.front3.includes(numStr.slice(0, 3))) { let count = winData.front3.filter(x => x === numStr.slice(0, 3)).length; totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขหน้า 3 ตัว"); }
-        if (winData.last3 && winData.last3.includes(numStr.slice(-3))) { let count = winData.last3.filter(x => x === numStr.slice(-3)).length; totalPrize += (4000 * count); for(let i=0; i<count; i++) labels.push("เลขท้าย 3 ตัว"); }
-        if (winData.prize2 && winData.prize2.includes(numStr)) { totalPrize += 200000; labels.push("รางวัลที่ 2"); }
-        if (winData.prize3 && winData.prize3.includes(numStr)) { totalPrize += 80000; labels.push("รางวัลที่ 3"); }
-        if (winData.prize4 && winData.prize4.includes(numStr)) { totalPrize += 40000; labels.push("รางวัลที่ 4"); }
-        if (winData.prize5 && winData.prize5.includes(numStr)) { totalPrize += 20000; labels.push("รางวัลที่ 5"); }
-        return { won: totalPrize > 0, total: totalPrize * qty, labels: [...new Set(labels)] };
-    }
 
     function loadLotteryDataFromServer(drawName) {
       if(unsubListener) unsubListener(); if(!drawName) return;
@@ -466,7 +475,6 @@
         }, error => { console.error("Error:", error); });
     }
 
-    // ฟังก์ชันสร้าง UI ใบสลากที่ถูกต้อง
     function renderTable(filterText = '') {
       const body = document.getElementById('table-body'); body.innerHTML = ''; let list = allTicketsList;
       if(currentTab === 'empty') list = list.filter(x => x.name === "-" || x.name === ""); else if(currentTab === 'paid') list = list.filter(x => x.status === "ชำระแล้ว"); else if(currentTab === 'unpaid') list = list.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== ""); else if(currentTab === 'winners') list = list.filter(x => x.prizeInfo && x.prizeInfo.won === true && x.status === "ชำระแล้ว"); else if(currentTab === 'flashsale') list = list.filter(x => x.isFlashSale === true);
@@ -481,7 +489,7 @@
         let showAmountStr = `฿${amount.toLocaleString()}`;
         if(item.isFlashSale && item.flashSalePrice) {
             amount = parseInt(item.flashSalePrice);
-            showAmountStr = `<span class="line-through text-gray-400 text-xs mr-1">฿${(qty*100)}</span><span class="text-rose-600">฿${amount.toLocaleString()}</span>`;
+            showAmountStr = `<span class="line-through text-gray-400 text-xs mr-1">฿${(qty*100)}</span><span class="text-rose-600 font-bold">฿${amount.toLocaleString()}</span>`;
         }
 
         const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
@@ -525,7 +533,7 @@
         if(!isFree && item.status === "ชำระแล้ว") statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-md font-bold text-xs">🟢 ชำระแล้ว</span>`;
         if(item.status === 'รอตรวจสอบสลิป') statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 px-3 py-1 rounded-md font-black text-xs animate-pulse">⏳ รอตรวจสอบสลิป</span>`;
         if(item.prizeInfo && item.prizeInfo.won && item.status === "ชำระแล้ว") { statusBadge += `<br><div class="mt-2 inline-block gold-gradient-anim text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md border border-yellow-400">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`; }
-        if(item.status === 'จอง' && item.expiresAt) { statusBadge += `<br><span class="admin-timer text-[10px] text-rose-500 font-bold block mt-1" data-expire="${item.expiresAt}">กำลังคำนวณเวลา...</span>`; }
+        if(item.status === 'จอง' && item.expiresAt) { statusBadge += `<br><span class="admin-timer text-[10px] text-rose-500 font-bold block mt-1" data-expire="${item.expiresAt}">กำลังโหลดเวลา...</span>`; }
         if(item.isFlashSale) { statusBadge += `<br><div class="mt-1 inline-block bg-amber-500 text-white px-2 py-0.5 rounded text-[10px] font-bold">⚡ Flash Sale</div>`; }
 
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
@@ -537,7 +545,6 @@
       document.getElementById('no-data').className = hasRows ? "hidden" : "block";
     }
 
-    // ฟังก์ชันนาฬิกานับถอยหลังของแอดมิน
     function startAdminCountdown() {
         setInterval(() => {
             const now = Date.now();
@@ -545,13 +552,10 @@
                 const expire = parseInt(el.dataset.expire);
                 const diff = expire - now;
                 if (diff <= 0) {
-                    el.innerText = 'หมดเวลา (รอคืนแผง)';
-                    el.classList.remove('text-rose-500');
-                    el.classList.add('text-gray-400');
+                    el.innerText = '⏱️ หมดเวลาจอง'; el.className = 'admin-timer text-[10px] text-gray-400 block mt-1';
                 } else {
-                    const m = Math.floor(diff / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    el.innerText = `เหลือ ${m} นาที ${s} วินาที`;
+                    const m = Math.floor(diff / 60000); const s = Math.floor((diff % 60000) / 1000);
+                    el.innerText = `⏱️ เหลือ ${m}น. ${s}ว.`;
                 }
             });
         }, 1000);
@@ -560,8 +564,7 @@
     function switchTab(t) { 
         currentTab = t; seenCounts[t] = currentCounts[t]; updateTabBadge(t);
         ['all','empty','paid','unpaid','winners','flashsale'].forEach(k => { 
-            const btn = document.getElementById('tab-'+k); 
-            if(!btn) return;
+            const btn = document.getElementById('tab-'+k); if(!btn) return;
             if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative"; } 
             else if (k === 'flashsale') { btn.className = (k===t) ? "tab-btn text-amber-900 bg-amber-200 border border-amber-400 shadow-inner relative ml-2" : "tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2"; }
             else { btn.className = (k===t) ? "tab-btn tab-active relative" : "tab-btn text-slate-600 hover:bg-slate-200 relative"; } 
@@ -586,9 +589,6 @@
       });
     }
 
-    function approveWithdrawal(docId) { Swal.fire({ title: 'ยืนยันการโอนสำเร็จ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'โอนแล้ว' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => { Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success'); }); } }); }
-    function deleteWithdrawal(docId) { Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ลบทิ้ง' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลถูกลบแล้ว', 'success'); }); } }); }
-
     function loadCustomerCRM() {
       document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
       document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">โปรไฟล์</th><th class="py-4 px-6">ชื่อ (LINE)</th><th class="py-4 px-4">เบอร์ติดต่อ</th><th class="py-4 px-6">ข้อมูลบัญชีธนาคาร (รับเงิน)</th><th class="py-4 px-4 text-center">อัปเดตล่าสุด</th><th class="py-4 px-4 text-center">จัดการ</th></tr>`;
@@ -597,9 +597,9 @@
         snap.forEach(doc => {
           const user = doc.data(); const userId = doc.id; const dateStr = user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('th-TH') : '-'; const img = user.pictureUrl ? `<img src="${user.pictureUrl}" class="w-10 h-10 rounded-full mx-auto shadow-sm object-cover">` : '<div class="w-10 h-10 rounded-full bg-gray-200 mx-auto flex items-center justify-center text-xl">👤</div>';
           let bankInfo = `<span class="text-xs text-gray-400 italic">ยังไม่ผูกบัญชี</span>`; if (user.bankName) { bankInfo = `<div class="text-xs font-bold text-indigo-700">${user.bankName}</div><div class="text-sm font-mono tracking-widest text-gray-800">${user.bankAccountNumber}</div><div class="text-xs text-gray-500">ชื่อ: ${user.bankAccountName}</div>`; }
-          const safePhone = user.phone ? user.phone.replace(/'/g, "\\'") : ''; const safeBankName = user.bankName ? user.bankName.replace(/'/g, "\\'") : ''; const safeBankAccName = user.bankAccountName ? user.bankAccountName.replace(/'/g, "\\'") : ''; const safeBankAccNum = user.bankAccountNumber ? user.bankAccountNumber.replace(/'/g, "\\'") : '';
+          const safePhone = user.phone ? user.phone.replace(/'/g, "\'") : ''; const safeBankName = user.bankName ? user.bankName.replace(/'/g, "\'") : ''; const safeBankAccName = user.bankAccountName ? user.bankAccountName.replace(/'/g, "\'") : ''; const safeBankAccNum = user.bankAccountNumber ? user.bankAccountNumber.replace(/'/g, "\'") : '';
           let editBtn = `<button onclick="editCustomerProfile('${userId}', '${safePhone}', '${safeBankName}', '${safeBankAccName}', '${safeBankAccNum}')" class="bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-300 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">📝 แก้ไข</button>`;
-          body.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50 border-b border-slate-100 text-sm"><td class="py-3 px-4 text-center">${img}</td><td class="py-3 px-6 font-bold text-slate-800"><div class="flex items-center gap-1">${user.displayName || 'ไม่ระบุ'} ${user.consentGiven ? '<span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200" title="ยอมรับเงื่อนไข 80+20 บาทแล้ว">✅ ยืนยันแล้ว</span>' : '<span class="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded border border-red-200" title="ยังไม่เคยกดยอมรับข้อตกลง">รอการยืนยัน</span>'}</div></td><td class="py-3 px-4 text-indigo-600 font-bold">${user.phone || 'ยังไม่กรอก'}</td><td class="py-3 px-6">${bankInfo}</td><td class="py-3 px-4 text-center text-slate-400 text-xs">${dateStr}</td><td class="py-3 px-4 text-center">${editBtn}</td></tr>`);
+          body.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50 border-b border-slate-100 text-sm"><td class="py-3 px-4 text-center">${img}</td><td class="py-3 px-6 font-bold text-slate-800"><div class="flex items-center gap-1">${user.displayName || 'ไม่ระบุ'} ${user.consentGiven ? '<span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200">✅ ยืนยันแล้ว</span>' : '<span class="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded border border-red-200">รอการยืนยัน</span>'}</div></td><td class="py-3 px-4 text-indigo-600 font-bold">${user.phone || 'ยังไม่กรอก'}</td><td class="py-3 px-6">${bankInfo}</td><td class="py-3 px-4 text-center text-slate-400 text-xs">${dateStr}</td><td class="py-3 px-4 text-center">${editBtn}</td></tr>`);
         });
       });
     }

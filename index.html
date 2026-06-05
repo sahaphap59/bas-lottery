@@ -13,41 +13,247 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
   <style>
-    body { font-family: 'Prompt', sans-serif; background-color: #f4f6f9; color: #1f2937; }
-    .brand-header { background: #d31a1a; color: white; position: sticky; top: 0; z-index: 50; }
-    .premium-logo { font-family: 'Kanit', sans-serif; font-style: italic; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-    .filter-btn { border: 1px solid #d31a1a; color: #d31a1a; background: white; padding: 6px 0; border-radius: 8px; font-weight: 600; font-size: 13px; text-align: center; transition: 0.2s; cursor: pointer; }
-    .filter-btn.active { background: #d31a1a; color: white; }
-    .carousel-container { position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 12px; aspect-ratio: 16/9; background-color: #f8fafc; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; }
-    .carousel-slide { display: none; width: 100%; height: 100%; object-fit: cover; object-position: center; animation: fadeEffect 1.5s; border-radius: 12px; }
-    @keyframes fadeEffect { from {opacity: 0.4} to {opacity: 1} }
-    .countdown-box { display: flex; justify-content: center; gap: 8px; margin-top: 8px; margin-bottom: 16px; }
-    .cd-item { background: #d31a1a; color: white; padding: 8px 12px; border-radius: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 65px; }
-    .cd-num { font-size: 22px; font-weight: 900; line-height: 1; }
-    .cd-label { font-size: 10px; font-weight: 600; margin-top: 2px; }
+    body { 
+        font-family: 'Prompt', sans-serif; 
+        background-color: #f4f6f9; 
+        color: #1f2937; 
+    }
+    .brand-header { 
+        background: #d31a1a; 
+        color: white; 
+        position: sticky; 
+        top: 0; 
+        z-index: 50; 
+    }
+    .premium-logo { 
+        font-family: 'Kanit', sans-serif; 
+        font-style: italic; 
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3); 
+    }
+    .filter-btn { 
+        border: 1px solid #d31a1a; 
+        color: #d31a1a; 
+        background: white; 
+        padding: 6px 0; 
+        border-radius: 8px; 
+        font-weight: 600; 
+        font-size: 13px; 
+        text-align: center; 
+        transition: 0.2s; 
+        cursor: pointer; 
+    }
+    .filter-btn.active { 
+        background: #d31a1a; 
+        color: white; 
+    }
+    .carousel-container { 
+        position: relative; 
+        overflow: hidden; 
+        border-radius: 12px; 
+        margin-bottom: 12px; 
+        aspect-ratio: 16/9; 
+        background-color: #f8fafc; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        width: 100%; 
+    }
+    .carousel-slide { 
+        display: none; 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+        object-position: center; 
+        animation: fadeEffect 1.5s; 
+        border-radius: 12px; 
+    }
+    @keyframes fadeEffect { 
+        from { opacity: 0.4 } 
+        to { opacity: 1 } 
+    }
+    .countdown-box { 
+        display: flex; 
+        justify-content: center; 
+        gap: 8px; 
+        margin-top: 8px; 
+        margin-bottom: 16px; 
+    }
+    .cd-item { 
+        background: #d31a1a; 
+        color: white; 
+        padding: 8px 12px; 
+        border-radius: 8px; 
+        text-align: center; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        min-width: 65px; 
+    }
+    .cd-num { 
+        font-size: 22px; 
+        font-weight: 900; 
+        line-height: 1; 
+    }
+    .cd-label { 
+        font-size: 10px; 
+        font-weight: 600; 
+        margin-top: 2px; 
+    }
     
-    .pro-ticket-card { background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .ticket-body-wrap { display: flex; height: 85px; width: 100%; position: relative; }
-    .ticket-stub { width: 28%; border-right: 1px dashed #94a3b8; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 4px 0; background: rgba(255,255,255,0.1); }
-    .ticket-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #d31a1a; font-weight: 800; font-size: 6px; position: absolute; left: 2px; top: 5px; letter-spacing: 0.5px;}
-    .ticket-main { width: 72%; padding: 4px 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.1); }
+    .pro-ticket-card { 
+        background: white; 
+        border-radius: 8px; 
+        overflow: hidden; 
+        display: flex; 
+        flex-direction: column; 
+        position: relative; 
+        border: 1px solid #cbd5e1; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+        width: 100%;
+    }
+    .ticket-body-wrap { 
+        display: flex; 
+        height: 85px; 
+        width: 100%; 
+        position: relative; 
+    }
+    .ticket-stub { 
+        width: 28%; 
+        border-right: 1px dashed #94a3b8; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center; 
+        align-items: center; 
+        position: relative; 
+        padding: 4px 0; 
+        background: rgba(255,255,255,0.1); 
+    }
+    .ticket-stub-txt { 
+        writing-mode: vertical-rl; 
+        transform: rotate(180deg); 
+        color: #d31a1a; 
+        font-weight: 800; 
+        font-size: 6px; 
+        position: absolute; 
+        left: 2px; 
+        top: 5px; 
+        letter-spacing: 0.5px;
+    }
+    .ticket-main { 
+        width: 72%; 
+        padding: 4px 6px; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        background: rgba(255,255,255,0.1); 
+    }
     
-    .order-tab { flex: 1; text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 600; color: #6b7280; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-    .order-tab.active { color: #d31a1a; border-bottom-color: #d31a1a; }
-    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px 0; color: #9ca3af; transition: 0.2s; cursor: pointer; }
-    .nav-item.active { color: #d31a1a; }
-    .real-barcode { font-family: 'Libre Barcode 39', cursive; font-size: 26px; line-height: 1; color: #1f2937; transform: scaleY(0.7); transform-origin: bottom; white-space: nowrap; }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .order-tab { 
+        flex: 1; 
+        text-align: center; 
+        padding: 10px 4px; 
+        font-size: 12px; 
+        font-weight: 600; 
+        color: #6b7280; 
+        border-bottom: 2px solid transparent; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        white-space: nowrap; 
+    }
+    .order-tab.active { 
+        color: #d31a1a; 
+        border-bottom-color: #d31a1a; 
+    }
+    .nav-item { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        text-align: center; 
+        padding: 8px 0; 
+        color: #9ca3af; 
+        transition: 0.2s; 
+        cursor: pointer; 
+    }
+    .nav-item.active { 
+        color: #d31a1a; 
+    }
+    .real-barcode { 
+        font-family: 'Libre Barcode 39', cursive; 
+        font-size: 26px; 
+        line-height: 1; 
+        color: #1f2937; 
+        transform: scaleY(0.7); 
+        transform-origin: bottom; 
+        white-space: nowrap; 
+    }
+    .hide-scrollbar::-webkit-scrollbar { 
+        display: none; 
+    }
+    .hide-scrollbar { 
+        -ms-overflow-style: none; 
+        scrollbar-width: none; 
+    }
 
-    #floating-cart { position: fixed; bottom: 85px; right: 16px; background-color: #d31a1a; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(211,26,26,0.4); cursor: pointer; z-index: 45; transition: transform 0.2s; }
-    #floating-cart:active { transform: scale(0.9); }
-    #cart-badge { position: absolute; top: 0; right: 0; background-color: white; color: #d31a1a; font-size: 11px; font-weight: 900; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d31a1a; }
+    #floating-cart { 
+        position: fixed; 
+        bottom: 85px; 
+        right: 16px; 
+        background-color: #d31a1a; 
+        color: white; 
+        width: 56px; 
+        height: 56px; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        box-shadow: 0 4px 10px rgba(211,26,26,0.4); 
+        cursor: pointer; 
+        z-index: 45; 
+        transition: transform 0.2s; 
+    }
+    #floating-cart:active { 
+        transform: scale(0.9); 
+    }
+    #cart-badge { 
+        position: absolute; 
+        top: 0; 
+        right: 0; 
+        background-color: white; 
+        color: #d31a1a; 
+        font-size: 11px; 
+        font-weight: 900; 
+        width: 22px; 
+        height: 22px; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        border: 2px solid #d31a1a; 
+    }
 
-    @keyframes goldSparkle { 0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); transform: scale(1); } 50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.9), inset 0 0 10px rgba(255, 215, 0, 0.5); transform: scale(1.02); } }
-    .win-sparkle-effect { animation: goldSparkle 2s infinite ease-in-out; border: 2px solid #F59E0B !important; position: relative; z-index: 10; }
-    @keyframes shimmerSweep { 0% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(200%) skewX(-20deg); } }
-    .shimmer-sweep::after { content: ''; position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation: shimmerSweep 3s infinite; pointer-events: none; }
+    @keyframes goldSparkle { 
+        0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); transform: scale(1); } 
+        50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.9), inset 0 0 10px rgba(255, 215, 0, 0.5); transform: scale(1.02); } 
+    }
+    .win-sparkle-effect { 
+        animation: goldSparkle 2s infinite ease-in-out; 
+        border: 2px solid #F59E0B !important; 
+        position: relative; 
+        z-index: 10; 
+    }
+    @keyframes shimmerSweep { 
+        0% { transform: translateX(-150%) skewX(-20deg); } 
+        100% { transform: translateX(200%) skewX(-20deg); } 
+    }
+    .shimmer-sweep::after { 
+        content: ''; 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        width: 50%; 
+        height: 100%; 
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); 
+        animation: shimmerSweep 3s infinite; 
+        pointer-events: none; 
+    }
   </style>
 </head>
 <body class="pb-32">
@@ -58,14 +264,19 @@
         <img id="main-store-logo" src="" class="h-9 w-9 object-contain bg-white rounded-full border-2 border-white shadow-md hidden">
         <div class="text-[20px] font-black premium-logo tracking-wide text-white drop-shadow-md" id="display-store-name">ลอตเตอรี่ออนไลน์</div>
       </div>
-      <div id="user-info"><button onclick="forceLineLogin()" class="text-xs bg-white text-[#d31a1a] rounded-full px-4 py-1.5 font-bold shadow-sm">เข้าสู่ระบบ</button></div>
+      <div id="user-info">
+          <button onclick="forceLineLogin()" class="text-xs bg-white text-[#d31a1a] rounded-full px-4 py-1.5 font-bold shadow-sm">เข้าสู่ระบบ</button>
+      </div>
     </div>
     <div id="announcement-bar" class="hidden bg-red-900 text-red-100 text-xs py-1.5 px-4 overflow-hidden border-t border-red-800 shadow-inner">
         <marquee scrollamount="4" id="announcement-text" class="font-medium tracking-wide"></marquee>
     </div>
   </header>
 
-  <div id="floating-cart" onclick="switchTab('orders'); setOrderTab('unpaid');" class="hidden max-w-md mx-auto"><span class="text-2xl">🛒</span><span id="cart-badge">0</span></div>
+  <div id="floating-cart" onclick="switchTab('orders'); setOrderTab('unpaid');" class="hidden max-w-md mx-auto">
+      <span class="text-2xl">🛒</span>
+      <span id="cart-badge">0</span>
+  </div>
 
   <div id="home-section" class="block max-w-md mx-auto">
     <div class="px-4 mt-4 text-center">
@@ -83,7 +294,25 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 shadow-sm rounded-b-2xl mb-4">
+    <!-- แบนเนอร์เมนูหลัก 3 ช่อง (เพิ่มใหม่) -->
+    <div class="px-4 mb-4 mt-2">
+        <div class="grid grid-cols-2 gap-2.5">
+            <!-- ซ้าย: มาสคอตสุ่มหยิบโชค -->
+            <div class="row-span-2 relative cursor-pointer active:scale-95 transition shadow-sm rounded-xl overflow-hidden border border-gray-200 bg-white" onclick="openMascotPicker()">
+                <img id="banner-mascot" src="https://via.placeholder.com/300x400?text=รูปมาสคอต" class="w-full h-full object-cover min-h-[170px]">
+            </div>
+            <!-- ขวาบน: 10 อันดับเลขดัง -->
+            <div class="relative cursor-pointer active:scale-95 transition shadow-sm rounded-xl overflow-hidden border border-gray-200 bg-white" onclick="openTop10Modal()">
+                <img id="banner-top10" src="https://via.placeholder.com/300x190?text=10อันดับเลขดัง" class="w-full h-full object-cover min-h-[80px]">
+            </div>
+            <!-- ขวาล่าง: ทำนายฝัน / อื่นๆ -->
+            <div class="relative cursor-pointer active:scale-95 transition shadow-sm rounded-xl overflow-hidden border border-gray-200 bg-white" onclick="showDreamPrediction()">
+                <img id="banner-extra" src="https://via.placeholder.com/300x190?text=ทำนายฝัน" class="w-full h-full object-cover min-h-[80px]">
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-4 shadow-sm rounded-2xl mb-4 mx-3 border border-gray-100">
       <h2 class="text-gray-800 font-bold mb-3" id="search-header-text">กรอกตัวเลข ค้นหารางวัลที่ 1</h2>
       <div class="grid grid-cols-3 gap-2 mb-3">
         <div class="filter-btn active" id="type-all" onclick="setLotteryType('all')">ทั้งหมด</div>
@@ -95,23 +324,25 @@
         <input type="number" id="search-input" oninput="filterData()" maxlength="6" placeholder="ค้นหาเลข 6 หลัก..." class="flex-1 border border-gray-300 bg-gray-50 text-gray-800 py-3 px-4 rounded-xl outline-none text-center text-[17px] font-bold tracking-[0.2em] focus:border-[#d31a1a] focus:ring-1 focus:ring-[#d31a1a] transition">
       </div>
       
-      <div class="bg-rose-50 border border-rose-100 rounded-xl p-3 mb-2">
-          <h3 class="text-[12px] font-bold text-rose-600 mb-2 flex items-center gap-1">🔥 5 อันดับเลขฮิตมาแรง</h3>
+      <!-- เซกชัน 5 อันดับเลขฮิตมาแรงจากสถิติจริง -->
+      <div class="bg-rose-50 border border-rose-100 rounded-xl p-3">
+          <h3 class="text-[12px] font-bold text-rose-600 mb-2 flex items-center gap-1">🔥 5 อันดับเลขฮิตค้นหาแรงที่สุด</h3>
           <div class="flex flex-wrap gap-2" id="trending-numbers-container"></div>
       </div>
 
       <p class="text-xs text-gray-500 mt-3 text-center font-medium">พบสลากว่าง <span id="ticket-count" class="font-bold text-[#d31a1a]">0</span> ใบ (งวด: <span id="storefront-draw-name">...</span>)</p>
     </div>
 
+    <!-- แถบคลัง Flash Sale ขนาดกว้างเต็มตา 260px ไม่บีบเลข -->
     <div id="flash-sale-container" class="hidden mx-3 my-4 bg-gradient-to-br from-amber-500 via-rose-500 to-red-600 p-3.5 rounded-2xl text-white shadow-xl border border-amber-300 relative overflow-hidden">
        <div class="flex justify-between items-center mb-2.5 border-b border-white/20 pb-2 relative z-10">
           <div class="flex items-center gap-1.5">
               <span class="text-xl animate-bounce">⚡</span>
-              <h3 id="fs-display-title" class="font-black text-[13px] tracking-wide drop-shadow-md">FLASH SALE เลขสวย</h3>
+              <h3 id="fs-display-title" class="font-black text-[13px] tracking-wide drop-shadow-md">FLASH SALE เลขสวย ราคาพิเศษ</h3>
           </div>
           <div id="fs-timer" class="bg-black/30 px-2.5 py-1 rounded-lg font-mono text-[11px] font-black tracking-wider border border-white/10 text-yellow-300 animate-pulse">⏱️ เหลือเวลา: --:--:--</div>
        </div>
-       <div id="flash-sale-scroll" class="flex overflow-x-auto gap-3 pt-1 pb-1 hide-scrollbar snap-x snap-mandatory relative z-10"></div>
+       <div id="flash-sale-scroll" class="flex overflow-x-auto gap-4 pt-1 pb-2 hide-scrollbar snap-x snap-mandatory relative z-10"></div>
     </div>
 
     <main class="px-3">
@@ -200,6 +431,22 @@
     </div>
   </div>
 
+  <!-- Modal 10 อันดับเลขฮิตมาแรง -->
+  <div id="top10-modal" class="fixed inset-0 bg-[#f4f6f9] z-[100] hidden flex-col overflow-y-auto pb-10">
+     <div class="bg-[#d31a1a] text-white px-4 py-4 flex items-center justify-between sticky top-0 z-10 shadow-md rounded-b-2xl">
+         <div class="flex items-center gap-3">
+             <button onclick="closeTop10Modal()" class="text-2xl font-black bg-white/20 w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/30">❮</button>
+             <div>
+                 <h2 class="text-[17px] font-black leading-tight">10 อันดับเลขขายดีประจำวัน</h2>
+                 <p class="text-[10px] text-red-100">อ้างอิงจากสถิติการค้นหาของลูกค้าจริงเรียบลไทม์</p>
+             </div>
+         </div>
+     </div>
+     <div class="p-4 flex-1">
+         <div id="top10-list-container" class="space-y-2.5 max-w-md mx-auto"></div>
+     </div>
+  </div>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCjlBUSa8LEL4j7ORix2p9piAnBU8hvvCY",
@@ -235,6 +482,7 @@
     let flashSaleTimerInterval = null; 
     let myWithdrawals = {};
     let mainCountdownInterval = null;
+    let searchTypingTimer = null;
 
     async function initLIFF() {
       try {
@@ -265,8 +513,18 @@
         if (!doc.exists || !doc.data().consentGiven) {
             Swal.fire({
                 title: 'ข้อตกลงและเงื่อนไขการใช้บริการ',
-                html: `<div class="text-left text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200"><p class="font-bold text-rose-600">กรุณาอ่านและกดยอมรับก่อนใช้งาน</p><p class="flex items-start gap-2"><span>1.</span><span>ข้าพเจ้ายืนยันว่ามีอายุ <strong>20 ปีบริบูรณ์ขึ้นไป</strong></span></p><p class="flex items-start gap-2"><span>2.</span><span>ข้าพเจ้ารับทราบและยินยอมให้คิดราคาสลาก <strong>80 บาท</strong> และมีค่าบริการฝากจัดเก็บ/ดำเนินการ <strong>20 บาท</strong> (รวมชำระ 100 บาท/ใบ)</span></p><p class="flex items-start gap-2"><span>3.</span><span>ข้าพเจ้ายินยอมให้ระบบบันทึกข้อมูลเพื่อใช้ในการขึ้นเงินรางวัล</span></p></div>`,
-                icon: 'info', confirmButtonText: 'ฉันยอมรับเงื่อนไขทั้งหมด', confirmButtonColor: '#d31a1a', allowOutsideClick: false, allowEscapeKey: false
+                html: `
+                <div class="text-left text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p class="font-bold text-rose-600">กรุณาอ่านและกดยอมรับก่อนใช้งาน</p>
+                    <p class="flex items-start gap-2"><span>1.</span><span>ข้าพเจ้ายืนยันว่ามีอายุ <strong>20 ปีบริบูรณ์ขึ้นไป</strong></span></p>
+                    <p class="flex items-start gap-2"><span>2.</span><span>ข้าพเจ้ารับทราบและยินยอมให้คิดราคาสลาก <strong>80 บาท</strong> และมีค่าบริการฝากจัดเก็บ/ดำเนินการ <strong>20 บาท</strong> (รวมชำระ 100 บาท/ใบ)</span></p>
+                    <p class="flex items-start gap-2"><span>3.</span><span>ข้าพเจ้ายินยอมให้ระบบบันทึกข้อมูลเพื่อใช้ในการขึ้นเงินรางวัล</span></p>
+                </div>`,
+                icon: 'info', 
+                confirmButtonText: 'ฉันยอมรับเงื่อนไขทั้งหมด', 
+                confirmButtonColor: '#d31a1a', 
+                allowOutsideClick: false, 
+                allowEscapeKey: false
             }).then(() => { 
                 userRef.set({ consentGiven: true, consentDate: Date.now(), displayName: userProfile.displayName, pictureUrl: userProfile.pictureUrl }, { merge: true }); 
             });
@@ -355,7 +613,10 @@
           if(doc.exists) {
               const data = doc.data();
               if(data.storeName) document.getElementById('display-store-name').innerText = data.storeName; 
-              if(data.logoUrl) { document.getElementById('main-store-logo').src = data.logoUrl; document.getElementById('main-store-logo').classList.remove('hidden'); }
+              if(data.logoUrl) { 
+                  document.getElementById('main-store-logo').src = data.logoUrl; 
+                  document.getElementById('main-store-logo').classList.remove('hidden'); 
+              }
               globalTicketBg = data.ticketBgUrl ? data.ticketBgUrl : "";
               if(data.searchHeaderHTML) document.getElementById('search-header-text').innerText = data.searchHeaderHTML;
               if(data.searchPlaceholder) document.getElementById('search-input').placeholder = data.searchPlaceholder;
@@ -363,7 +624,12 @@
               
               const announceBar = document.getElementById('announcement-bar'); 
               const announceTxt = document.getElementById('announcement-text');
-              if(data.announcementText && data.announcementText.trim() !== "") { announceTxt.innerText = data.announcementText; announceBar.classList.remove('hidden'); } else { announceBar.classList.add('hidden'); }
+              if(data.announcementText && data.announcementText.trim() !== "") { 
+                  announceTxt.innerText = data.announcementText; 
+                  announceBar.classList.remove('hidden'); 
+              } else { 
+                  announceBar.classList.add('hidden'); 
+              }
 
               clearTimeout(slideInterval); let hasSlide = false;
               ['slide1','slide2','slide3'].forEach(k => { 
@@ -374,41 +640,153 @@
               
               if(data.countdownTarget) {
                   const titleEl = document.getElementById('countdown-title');
-                  if(data.countdownTitle) { titleEl.innerText = data.countdownTitle; titleEl.className = `font-bold mb-2 drop-shadow-sm block ${data.countdownTitleSize || 'text-base'}`; titleEl.style.color = data.countdownTitleColor || '#1f2937'; } else { titleEl.className = 'hidden'; }
+                  if(data.countdownTitle) { 
+                      titleEl.innerText = data.countdownTitle; 
+                      titleEl.className = `font-bold mb-2 drop-shadow-sm block ${data.countdownTitleSize || 'text-base'}`; 
+                      titleEl.style.color = data.countdownTitleColor || '#1f2937'; 
+                  } else { titleEl.className = 'hidden'; }
                   startMainCountdown(data.countdownTarget);
-              } else { document.getElementById('countdown-title').className = 'hidden'; document.getElementById('countdown-display').classList.add('hidden'); }
+              } else { 
+                  document.getElementById('countdown-title').className = 'hidden'; 
+                  document.getElementById('countdown-display').classList.add('hidden'); 
+              }
 
               if(data.activeDraw) {
                   currentDraw = data.activeDraw; globalSalesOpen = data.isSalesOpen !== false; document.getElementById('storefront-draw-name').innerText = currentDraw;
-                  db.collection('winning_results').doc(currentDraw).onSnapshot(wDoc => { currentWinData = wDoc.exists ? wDoc.data() : null; filterData(); if(userProfile && currentOrderTab !== '') renderMyOrders(); });
+                  db.collection('winning_results').doc(currentDraw).onSnapshot(wDoc => { 
+                      currentWinData = wDoc.exists ? wDoc.data() : null; 
+                      filterData(); 
+                      if(userProfile && currentOrderTab !== '') renderMyOrders(); 
+                  });
                   db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => { 
                       availableTickets = []; 
                       s.forEach(tk => availableTickets.push({ id: tk.id, ...tk.data() })); 
-                      updateTrendingNumbers();
                       filterData(); 
                   });
               }
           }
       });
       db.collection('settings').doc('flashsale').onSnapshot(fsDoc => {
-          if(fsDoc.exists) { const fsData = fsDoc.data(); flashSaleActive = fsData.isActive === true; flashSaleEndTime = fsData.endTime || ""; if(fsData.title) document.getElementById('fs-display-title').innerText = fsData.title; startFlashSaleCountdown(); } else { flashSaleActive = false; document.getElementById('flash-sale-container').classList.add('hidden'); } filterData();
+          if(fsDoc.exists) { 
+              const fsData = fsDoc.data(); 
+              flashSaleActive = fsData.isActive === true; 
+              flashSaleEndTime = fsData.endTime || ""; 
+              if(fsData.title) document.getElementById('fs-display-title').innerText = fsData.title; 
+              startFlashSaleCountdown(); 
+          } else { 
+              flashSaleActive = false; 
+              document.getElementById('flash-sale-container').classList.add('hidden'); 
+          } 
+          filterData();
+      });
+      db.collection('settings').doc('menu_banners').onSnapshot(doc => {
+          if(doc.exists) {
+              let d = doc.data();
+              if(d.mascot) document.getElementById('banner-mascot').src = d.mascot;
+              if(d.top10) document.getElementById('banner-top10').src = d.top10;
+              if(d.extra) document.getElementById('banner-extra').src = d.extra;
+          }
+      });
+      db.collection('analytics').doc('search_stats').onSnapshot(doc => {
+          if(doc.exists) {
+              let data = doc.data();
+              let sorted = Object.keys(data).sort((a,b) => data[b] - data[a]); 
+              
+              let top5 = sorted.slice(0, 5);
+              let fallback = ['09', '85', '14', '79', '23'];
+              let finalTop5 = top5.length >= 3 ? top5 : fallback;
+              
+              let t5Html = finalTop5.map(num => `<span onclick="document.getElementById('search-input').value='${num}'; filterData();" class="bg-white text-rose-600 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-black cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">เลข ${num}</span>`).join('');
+              document.getElementById('trending-numbers-container').innerHTML = t5Html;
+
+              let top10 = sorted.slice(0, 10);
+              let finalTop10 = top10.length > 0 ? top10 : ['79', '89', '48', '97', '98', '59', '69', '19', '09', '23'];
+              let t10Html = finalTop10.map((num, idx) => `
+                  <div class="flex items-center justify-between bg-white border border-gray-200 p-3 rounded-2xl shadow-sm cursor-pointer active:scale-95 transition max-w-sm mx-auto" onclick="closeTop10Modal(); document.getElementById('search-input').value='${num}'; filterData();">
+                      <div class="flex items-center gap-3">
+                          <div class="w-10 h-10 rounded-full ${idx < 3 ? 'bg-gradient-to-br from-yellow-400 to-amber-600 text-white shadow-md' : 'bg-gray-100 text-gray-500 border border-gray-200'} flex items-center justify-center font-black text-lg">${idx+1}</div>
+                          <div class="text-2xl font-mono font-black tracking-[0.3em] text-slate-800 bg-amber-50 px-4 py-1 rounded-lg border border-amber-100">${num}</div>
+                      </div>
+                      <div class="text-rose-500 text-lg font-black bg-rose-50 w-8 h-8 flex items-center justify-center rounded-full">❯</div>
+                  </div>
+              `).join('');
+              document.getElementById('top10-list-container').innerHTML = t10Html;
+          } else {
+              let fallback = ['79', '89', '48', '97', '98', '59', '69', '19', '09', '23'];
+              let t5Html = fallback.slice(0, 5).map(num => `<span onclick="document.getElementById('search-input').value='${num}'; filterData();" class="bg-white text-rose-600 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-black cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">เลข ${num}</span>`).join('');
+              document.getElementById('trending-numbers-container').innerHTML = t5Html;
+          }
       });
     }
 
-    function updateTrendingNumbers() {
-        const container = document.getElementById('trending-numbers-container');
-        let hot = ['09', '85', '14', '79', '23'];
-        if(availableTickets.length > 5) {
-            hot = availableTickets.slice(0, 5).map(t => t.number.substring(4,6));
+    function openTop10Modal() { document.getElementById('top10-modal').classList.remove('hidden'); document.getElementById('top10-modal').classList.add('flex'); }
+    function closeTop10Modal() { document.getElementById('top10-modal').classList.add('hidden'); document.getElementById('top10-modal').classList.remove('flex'); }
+    
+    function showDreamPrediction() {
+        Swal.fire({
+            title: '🔮ทำนายฝันนำโชค',
+            input: 'text',
+            inputPlaceholder: 'พิมพ์สิ่งที่คุณฝันเห็น เช่น ฝันเห็นแมว...',
+            showCancelButton: true,
+            confirmButtonText: 'ตีเป็นเลขเด็ด',
+            confirmButtonColor: '#d31a1a',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.value) {
+                let randomNum = Math.floor(10 + Math.random() * 90);
+                Swal.fire({
+                    title: `เลขเด็ดจากฝันของคุณ`,
+                    html: `ตีเป็นเลขท้าย 2 ตัวได้เลข: <span class="text-3xl font-black text-rose-600 font-mono tracking-widest">${randomNum}</span>`,
+                    icon: 'success',
+                    confirmButtonText: 'ค้นหาเลขนี้ทันที',
+                    confirmButtonColor: '#d31a1a'
+                }).then(() => {
+                    document.getElementById('search-input').value = randomNum;
+                    filterData();
+                });
+            }
+        });
+    }
+
+    function openMascotPicker() {
+        Swal.fire({
+            title: 'อาเหงียวหยิบโชคให้คุณ',
+            html: `
+                <div class="text-center font-bold text-gray-500 text-xs mb-4">ระบบมาสคอตจะสุ่มสลากนำโชคที่มีอยู่บนแผงให้คุณทันที</div>
+                <div onclick="pickRandomTicket(1)" class="bg-white border border-rose-200 rounded-2xl p-4 flex items-center justify-between mb-3 cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">
+                   <div class="flex items-center gap-3">
+                       <div class="text-4xl drop-shadow-md">🧧</div>
+                       <div class="text-left"><div class="font-black text-gray-800 text-[15px]">อาเหงียวหยิบให้ 1 ใบ</div><div class="text-rose-600 font-bold text-[11px]">ราคารวม 100 บาท</div></div>
+                   </div>
+                   <div class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold text-[11px] shadow-sm">+ สุ่มจองเลย</div>
+                </div>
+                <div onclick="pickRandomTicket(2)" class="bg-white border border-rose-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">
+                   <div class="flex items-center gap-3">
+                       <div class="text-4xl drop-shadow-md">🧧</div>
+                       <div class="text-left"><div class="font-black text-gray-800 text-[15px]">อาเหงียวหยิบให้ชุด 2 ใบ</div><div class="text-rose-600 font-bold text-[11px]">ราคารวม 200 บาท</div></div>
+                   </div>
+                   <div class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold text-[11px] shadow-sm">+ สุ่มจองเลย</div>
+                </div>
+            `,
+            showConfirmButton: false, showCloseButton: true
+        });
+    }
+
+    function pickRandomTicket(qty) {
+        let available = availableTickets.filter(t => parseInt(t.quantity) === qty && !t.isFlashSale);
+        if(available.length === 0) {
+            Swal.fire('ขออภัย', `ตอนนี้ไม่มีสลากชุด ${qty} ใบ ว่างในแผงเลยครับ`, 'warning'); return;
         }
-        container.innerHTML = hot.map(num => `<span onclick="document.getElementById('search-input').value='${num}'; filterData();" class="bg-white text-rose-600 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-black cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">เลข ${num}</span>`).join('');
+        let randomIndex = Math.floor(Math.random() * available.length);
+        let selectedTicket = available[randomIndex];
+        Swal.close();
+        let displayAmount = selectedTicket.flashSalePrice ? parseInt(selectedTicket.flashSalePrice) : qty * 100;
+        openCheckout(selectedTicket.id, String(selectedTicket.number).padStart(6, '0'), displayAmount);
     }
 
     function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
       const numStr = String(number).padStart(6, '0'); 
-      let tk = availableTickets.find(t=>t.id===id); 
-      if(!tk && mode === 'order') tk = myTickets.find(t=>t.id===id);
-      
+      let tk = availableTickets.find(t=>t.id===id); if(!tk && mode === 'order') tk = myTickets.find(t=>t.id===id);
       let isFs = tk ? (tk.isFlashSale === true) : false;
       let baseAmount = qty * 100; let displayAmount = baseAmount; let priceLabel = `(฿${displayAmount})`;
       
@@ -419,50 +797,13 @@
 
       let bottomActionHTML = '';
       if (mode === 'store') { 
-          bottomActionHTML = globalSalesOpen ? 
-          `<button onclick="openCheckout('${id}', '${numStr}', ${displayAmount})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-sm rounded-b-lg border-t border-red-800"><span class="text-xs">🛒</span> หยิบใส่ตะกร้า ${priceLabel}</button>` : 
-          `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed rounded-b-lg">🚫 ปิดรับการซื้อ</button>`; 
+          bottomActionHTML = globalSalesOpen ? `<button onclick="openCheckout('${id}', '${numStr}', ${displayAmount})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-sm rounded-b-lg border-t border-red-800"><span class="text-xs">🛒</span> หยิบใส่ตะกร้า ${priceLabel}</button>` : `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed rounded-b-lg">🚫 ปิดรับการซื้อ</button>`; 
       } 
       
       const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${numStr}&size=35x35`;
       
-      return `
-        <div class="pro-ticket-card ${isFs ? 'shimmer-sweep' : ''}">
-            <div class="ticket-body-wrap" style="${ticketBgStyle}">
-                <div class="ticket-stub pl-1 pr-1 w-[28%] shrink-0">
-                    <span class="ticket-stub-txt tracking-tighter text-[#d31a1a]">สลากกินแบ่งรัฐบาล</span>
-                    <div class="text-center mt-0.5">
-                        <div class="text-[13px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div>
-                        <div class="text-[8.5px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div>
-                    </div>
-                    <div class="text-center leading-none mt-2">
-                        <div class="text-[18px] font-black text-[#d31a1a] drop-shadow-md">80</div>
-                        <div class="text-[8.5px] font-black text-black drop-shadow-md">บาท</div>
-                    </div>
-                </div>
-                <div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1" style="container-type: inline-size;">
-                    <div class="flex justify-between items-center w-full min-w-0">
-                        <div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm shrink-0 mr-1">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">GOVERNMENT</span></div>
-                        <div class="flex-1 text-right min-w-0 overflow-hidden">
-                            <span class="font-mono font-black text-gray-900 drop-shadow-sm tracking-tighter whitespace-nowrap" style="font-size: clamp(14px, 16cqi, 20px); line-height: 1;">${numStr}</span>
-                        </div>
-                    </div>
-                    <div class="flex justify-center shrink-0 w-full">
-                        <div class="bg-white/95 border border-gray-300 rounded px-1.5 py-[1px] shadow-sm">
-                            <div class="text-[6.5px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-end w-full min-w-0 shrink-0">
-                        <img src="${qrCodeUrl}" alt="QR" class="w-[13px] h-[13px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm">
-                        <div class="flex-1 ml-1 overflow-hidden flex items-end justify-end min-w-0">
-                            <span class="real-barcode text-[16px] text-gray-800">*${numStr}*</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            ${bottomActionHTML}
-        </div>`;
+      return `<div class="pro-ticket-card ${isFs ? 'shimmer-sweep' : ''}"><div class="ticket-body-wrap" style="${ticketBgStyle}"><div class="ticket-stub pl-1 pr-1 w-[28%] shrink-0"><span class="ticket-stub-txt tracking-tighter text-[#d31a1a]">สลากกินแบ่งรัฐบาล</span><div class="text-center mt-0.5"><div class="text-[13px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div><div class="text-[8.5px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div></div><div class="text-center leading-none mt-2"><div class="text-[18px] font-black text-[#d31a1a] drop-shadow-md">80</div><div class="text-[8.5px] font-black text-black drop-shadow-md">บาท</div></div></div><div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1"><div class="flex justify-between items-center w-full min-w-0"><div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm shrink-0 mr-1">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">GOVERNMENT</span></div><div class="flex-1 text-right min-w-0 overflow-hidden"><span class="font-mono font-black text-gray-900 drop-shadow-sm tracking-tighter whitespace-nowrap" style="font-size: clamp(14px, 4vw, 18px); line-height: 1;">${numStr}</span></div></div><div class="flex justify-center shrink-0 w-full"><div class="bg-white/95 border border-gray-300 rounded px-1.5 py-[1px] shadow-sm"><div class="text-[6.5px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div></div></div><div class="flex justify-between items-end w-full min-w-0 shrink-0"><img src="${qrCodeUrl}" alt="QR" class="w-[13px] h-[13px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm"><div class="flex-1 ml-1 overflow-hidden flex items-end justify-end min-w-0"><span class="real-barcode text-[16px] text-gray-800">*${numStr}*</span></div></div></div></div>${bottomActionHTML}</div>`;
     }
 
     function filterData() {
@@ -472,69 +813,44 @@
       else if (currentLotteryType === 'set') list = list.filter(t => parseInt(t.quantity) > 1);
       if (search) list = list.filter(item => String(item.number).includes(search));
       
+      if(search.length >= 2) {
+          clearTimeout(searchTypingTimer);
+          searchTypingTimer = setTimeout(() => {
+              db.collection('analytics').doc('search_stats').set({ [search]: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+          }, 1500);
+      }
+      
       const flashSaleScroll = document.getElementById('flash-sale-scroll'); flashSaleScroll.innerHTML = '';
       const now = Date.now(); const isFsExpired = flashSaleEndTime ? (new Date(flashSaleEndTime).getTime() - now <= 0) : false;
-      
       if (flashSaleActive && !isFsExpired) {
           const fsList = availableTickets.filter(t => t.isFlashSale === true);
           if (fsList.length > 0) { 
               document.getElementById('flash-sale-container').classList.remove('hidden'); 
               fsList.forEach(item => { 
                   const ticketHtml = buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store'); 
-                  // ขยายความกว้าง Flash Sale เป็น 260px โชว์ครบสวยงาม
-                  flashSaleScroll.insertAdjacentHTML('beforeend', `<div class="snap-start shrink-0" style="min-w:260px; max-w:260px;">${ticketHtml}</div>`); 
+                  flashSaleScroll.insertAdjacentHTML('beforeend', `<div class="snap-start shrink-0" style="min-width:260px; max-width:260px; width:260px;">${ticketHtml}</div>`); 
               }); 
           } else { document.getElementById('flash-sale-container').classList.add('hidden'); }
           list = list.filter(t => t.isFlashSale !== true);
       } else { document.getElementById('flash-sale-container').classList.add('hidden'); }
       
-      document.getElementById('ticket-count').innerText = list.length; 
-      const grid = document.getElementById('lottery-grid'); grid.innerHTML = '';
-      
+      document.getElementById('ticket-count').innerText = list.length; const grid = document.getElementById('lottery-grid'); grid.innerHTML = '';
       if(list.length === 0) { document.getElementById('no-data').classList.remove('hidden'); return; }
-      document.getElementById('no-data').classList.add('hidden'); 
-      list.forEach((item) => { grid.insertAdjacentHTML('beforeend', buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store')); });
+      document.getElementById('no-data').classList.add('hidden'); list.forEach((item) => { grid.insertAdjacentHTML('beforeend', buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store')); });
     }
 
-    function setOrderTab(tab) { 
-        currentOrderTab = tab; 
-        ['unpaid', 'pending', 'success', 'history'].forEach(t => { document.getElementById('tab-'+t).className = (t === tab) ? 'order-tab active whitespace-nowrap px-3' : 'order-tab whitespace-nowrap px-3'; }); 
-        if(tab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); 
-        else document.getElementById('bulk-pay-bar').classList.add('hidden'); 
-        renderMyOrders(); 
-    }
+    function setOrderTab(tab) { currentOrderTab = tab; ['unpaid', 'pending', 'success', 'history'].forEach(t => { document.getElementById('tab-'+t).className = (t === tab) ? 'order-tab active whitespace-nowrap px-3' : 'order-tab whitespace-nowrap px-3'; }); if(tab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); else document.getElementById('bulk-pay-bar').classList.add('hidden'); renderMyOrders(); }
 
-    function updateCartBadge(unpaidCount) { 
-        const cart = document.getElementById('floating-cart'); const badge = document.getElementById('cart-badge'); 
-        if (unpaidCount > 0) { cart.classList.remove('hidden'); badge.innerText = unpaidCount; } else { cart.classList.add('hidden'); } 
-    }
+    function updateCartBadge(unpaidCount) { const cart = document.getElementById('floating-cart'); const badge = document.getElementById('cart-badge'); if (unpaidCount > 0) { cart.classList.remove('hidden'); badge.innerText = unpaidCount; } else { cart.classList.add('hidden'); } }
 
     function loadMyTickets() {
       if(!userProfile) return;
-      db.collection('withdrawals').where('userId', '==', userProfile.userId).onSnapshot(ws => { 
-          myWithdrawals = {}; ws.forEach(d => { myWithdrawals[d.id] = d.data(); });
-          db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => { 
-              myTickets = []; s.forEach(doc => { const data = doc.data(); if(data.status !== 'available') myTickets.push({ id: doc.id, ...data }); }); renderMyOrders(); 
-          });
+      db.collection('withdrawals').where('userId', '==', userProfile.userId).onSnapshot(ws => { myWithdrawals = {}; ws.forEach(d => { myWithdrawals[d.id] = d.data(); });
+          db.collection('lotteries').where('userId', '==', userProfile.userId).onSnapshot(s => { myTickets = []; s.forEach(doc => { const data = doc.data(); if(data.status !== 'available') myTickets.push({ id: doc.id, ...data }); }); renderMyOrders(); });
       });
     }
 
-    function startCountdownTimer() { 
-        if(countdownInterval) clearInterval(countdownInterval); 
-        countdownInterval = setInterval(() => { 
-            const now = Date.now(); 
-            document.querySelectorAll('.timer-display').forEach(el => { 
-                const expiresAt = parseInt(el.dataset.expire); const diff = expiresAt - now; 
-                if(diff <= 0) { 
-                    el.innerHTML = "🚫 หมดเวลาจองแล้ว ระบบกำลังดึงสลากคืนแผง..."; 
-                    el.className = "timer-display text-[11px] text-gray-500 font-bold bg-gray-100 text-center py-2 rounded-lg border border-gray-200 mb-3 shadow-inner mx-3"; 
-                } else { 
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); const seconds = Math.floor((diff % (1000 * 60)) / 1000); 
-                    el.innerHTML = `⏱️ ต้องชำระเงินภายใน: <span class="text-[#d31a1a]">${minutes} นาที ${seconds} วินาที</span>`; 
-                } 
-            }); 
-        }, 1000); 
-    }
+    function startCountdownTimer() { if(countdownInterval) clearInterval(countdownInterval); countdownInterval = setInterval(() => { const now = Date.now(); document.querySelectorAll('.timer-display').forEach(el => { const expiresAt = parseInt(el.dataset.expire); const diff = expiresAt - now; if(diff <= 0) { el.innerHTML = "🚫 หมดเวลาจองแล้ว ระบบกำลังดึงสลากคืนแผง..."; el.className = "timer-display text-[11px] text-gray-500 font-bold bg-gray-100 text-center py-2 rounded-lg border border-gray-200 mb-3 shadow-inner mx-3"; } else { const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); const seconds = Math.floor((diff % (1000 * 60)) / 1000); el.innerHTML = `⏱️ ต้องชำระเงินภายใน: <span class="text-[#d31a1a]">${minutes} นาที ${seconds} วินาที</span>`; } }); }, 1000); }
 
     function checkWinningPrize(ticketNumber, qty, winData) {
         if (!winData) return { won: false, total: 0, labels: [] }; let totalPrize = 0; let labels = []; let numStr = String(ticketNumber).padStart(6, '0'); qty = parseInt(qty) || 1;
@@ -553,7 +869,6 @@
     function renderMyOrders() {
       const grid = document.getElementById('my-orders-grid'); grid.innerHTML = ''; let filteredList = []; let unpaidTotalCount = 0;
       myTickets.forEach(t => { if (t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ')) { unpaidTotalCount++; } }); updateCartBadge(unpaidTotalCount);
-      
       if (currentOrderTab === 'unpaid') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ'));
       else if (currentOrderTab === 'pending') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'รอตรวจสอบสลิป' || t.status === 'pending' || t.status === 'รอตรวจสอบ'));
       else if (currentOrderTab === 'success') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'ชำระสำเร็จ' || t.status === 'sold' || t.status === 'success' || t.status === 'ชำระแล้ว'));
@@ -565,11 +880,8 @@
       filteredList.forEach((item) => {
         const numStr = String(item.number).padStart(6, '0'); const qty = item.quantity || 1; const amount = item.flashSalePrice ? parseInt(item.flashSalePrice) : qty * 100;
         let statusBadge = ''; let actionHTML = ''; let checkboxHTML = ''; let timerHTML = '';
-        
         if (currentOrderTab === 'unpaid') {
-            statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>'; 
-            actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="w-full bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl text-xs font-bold hover:bg-red-50 transition mt-3">ชำระเฉพาะใบนี้</button>`; 
-            checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
+            statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>'; actionHTML = `<button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="w-full bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl text-xs font-bold hover:bg-red-50 transition mt-3">ชำระเฉพาะใบนี้</button>`; checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
             if (item.expiresAt) timerHTML = `<div class="timer-display mx-3 text-[11px] text-rose-600 font-bold bg-rose-50 text-center py-2 rounded-lg border border-rose-200 mb-3 shadow-inner" data-expire="${item.expiresAt}">⏱️ กำลังคำนวณเวลา...</div>`;
         } else if (currentOrderTab === 'pending') { statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold border border-amber-200 shadow-sm">⏳ รอตรวจสอบสลิป</span>'; } else { statusBadge = '<span class="text-[11px] bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-md font-bold border border-[#bbf7d0] shadow-sm">✅ ชำระสำเร็จ</span>'; }
         if (currentOrderTab === 'history') { if(item.status === 'จอง' || item.status === 'reserve' || item.status === 'ยังไม่ชำระ') statusBadge = '<span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-1 rounded font-bold">หมดอายุ/ไม่ชำระ</span>'; else if (item.status === 'รอตรวจสอบสลิป' || item.status === 'pending' || item.status === 'รอตรวจสอบ') statusBadge = '<span class="text-[11px] bg-amber-100 text-amber-600 px-2 py-1 rounded-full font-bold">รอยืนยัน</span>'; else statusBadge = '<span class="text-[11px] bg-[#dcfce7] text-[#166534] px-2 py-1 rounded-md font-bold">✅ สำเร็จ</span>'; }
@@ -644,7 +956,6 @@
     }
 
     function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false }); } }); }); }
-    
     window.onload = function() { initLIFF(); loadShopLotteries(); };
   </script>
 </body>
