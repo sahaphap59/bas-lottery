@@ -189,7 +189,7 @@
       <div class="gold-gradient rounded-2xl shadow-lg p-5 mb-4 text-slate-900 flex justify-between items-center border border-yellow-300 relative overflow-hidden">
           <div class="absolute -right-4 -top-4 opacity-20 text-7xl">🪙</div>
           <div>
-              <div class="text-xs font-bold text-yellow-900 mb-0.5 flex items-center"><span class="coin-icon">฿</span> เหมียว Coin ของฉัน</div>
+              <div class="text-xs font-bold text-yellow-900 mb-0.5 flex items-center"><span class="coin-icon">฿</span> Ah-Meow Coin ของฉัน</div>
               <div class="text-3xl font-black drop-shadow-sm flex items-center gap-2"><span id="display-coins">0</span> <span class="text-lg">Coin</span></div>
           </div>
           <div class="text-right">
@@ -479,7 +479,7 @@
         let randomIndex = Math.floor(Math.random() * available.length);
         let selectedTicket = available[randomIndex]; Swal.close();
         let displayAmount = selectedTicket.flashSalePrice ? parseInt(selectedTicket.flashSalePrice) : qty * 100;
-        openCheckout(selectedTicket.id, String(selectedTicket.number).padStart(6, '0'), displayAmount);
+        openCheckout(selectedTicket.id, String(selectedTicket.number).padStart(6, '0'), displayAmount, qty);
     }
 
     function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
@@ -489,7 +489,7 @@
       let baseAmount = qty * 100; let displayAmount = baseAmount; let priceLabel = `(฿${displayAmount})`;
       if (isFs && tk && tk.flashSalePrice) { displayAmount = parseInt(tk.flashSalePrice); priceLabel = `(<s class="opacity-70">฿${baseAmount}</s> ฿${displayAmount})`; }
       let bottomActionHTML = '';
-      if (mode === 'store') { bottomActionHTML = globalSalesOpen ? `<button onclick="openCheckout('${id}', '${numStr}', ${displayAmount})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-sm rounded-b-lg border-t border-red-800"><span class="text-xs">🛒</span> หยิบใส่ตะกร้า ${priceLabel}</button>` : `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed rounded-b-lg">🚫 ปิดรับการซื้อ</button>`; } 
+      if (mode === 'store') { bottomActionHTML = globalSalesOpen ? `<button onclick="openCheckout('${id}', '${numStr}', ${displayAmount}, ${qty})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-sm rounded-b-lg border-t border-red-800"><span class="text-xs">🛒</span> หยิบใส่ตะกร้า ${priceLabel}</button>` : `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed rounded-b-lg">🚫 ปิดรับการซื้อ</button>`; } 
       const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${numStr}&size=35x35`;
       return `<div class="pro-ticket-card ${isFs ? 'shimmer-sweep' : ''}"><div class="ticket-body-wrap" style="${ticketBgStyle}"><div class="ticket-stub pl-1 pr-1 w-[28%] shrink-0"><span class="ticket-stub-txt tracking-tighter text-[#d31a1a]">สลากกินแบ่งรัฐบาล</span><div class="text-center mt-0.5"><div class="text-[13px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div><div class="text-[8.5px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div></div><div class="text-center leading-none mt-2"><div class="text-[18px] font-black text-[#d31a1a] drop-shadow-md">80</div><div class="text-[8.5px] font-black text-black drop-shadow-md">บาท</div></div></div><div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1" style="container-type: inline-size;"><div class="flex justify-between items-center w-full min-w-0"><div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm shrink-0 mr-1">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">GOVERNMENT</span></div><div class="flex-1 text-right min-w-0 overflow-hidden"><span class="font-mono font-black text-gray-900 drop-shadow-sm tracking-tighter whitespace-nowrap" style="font-size: clamp(12px, 11cqi, 18px); line-height: 1;">${numStr}</span></div></div><div class="flex justify-center shrink-0 w-full"><div class="bg-white/95 border border-gray-300 rounded px-1.5 py-[1px] shadow-sm"><div class="text-[6.5px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div></div></div><div class="flex justify-between items-end w-full min-w-0 shrink-0"><img src="${qrCodeUrl}" alt="QR" class="w-[13px] h-[13px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm"><div class="flex-1 ml-1 overflow-hidden flex items-end justify-end min-w-0"><span class="real-barcode text-[16px] text-gray-800">*${numStr}*</span></div></div></div></div>${bottomActionHTML}</div>`;
@@ -652,25 +652,56 @@
         db.collection('users').doc(userProfile.userId).onSnapshot(doc => { 
             if(doc.exists) { 
                 const d = doc.data(); 
-                globalSavedPhone = d.phone || ""; globalSavedAddress = d.address || ""; globalBankName = d.bankName || ""; globalBankAccountName = d.bankAccountName || ""; globalBankAccountNumber = d.bankAccountNumber || ""; 
-                globalAhMeowCoins = d.coins || 0; 
+                globalAhMeowCoins = d.coins || 0; // รับค่ายอด Coin ปัจจุบัน
                 document.getElementById('display-coins').innerText = globalAhMeowCoins.toLocaleString();
+                globalSavedPhone = d.phone || ""; globalSavedAddress = d.address || ""; globalBankName = d.bankName || ""; globalBankAccountName = d.bankAccountName || ""; globalBankAccountNumber = d.bankAccountNumber || ""; 
             } 
             document.getElementById('display-phone').innerText = globalSavedPhone ? globalSavedPhone : "เพิ่มเบอร์โทร..."; document.getElementById('display-address').innerText = globalSavedAddress ? globalSavedAddress : "เพิ่มที่อยู่..."; document.getElementById('display-bank').innerText = globalBankName ? `${globalBankName} (${globalBankAccountNumber})` : "กดเพื่อเพิ่มบัญชีรับเงิน"; document.getElementById('display-bank').className = globalBankName ? "text-xs text-emerald-600 font-bold" : "text-xs text-amber-500 font-bold"; 
         });
     }
 
-    window.updatePayAmount = function(baseAmount) {
+    // อัปเดตยอดโอนหลังจากหัก Coin
+    function updatePayAmount(baseAmount) {
         let useCoins = parseInt(document.getElementById('coin-input').value) || 0;
-        if(useCoins < 0) useCoins = 0;
-        if(useCoins > globalAhMeowCoins) useCoins = globalAhMeowCoins; 
-        if(useCoins > baseAmount) useCoins = baseAmount; 
+        if(useCoins > globalAhMeowCoins) useCoins = globalAhMeowCoins;
+        if(useCoins > baseAmount) useCoins = baseAmount;
         document.getElementById('coin-input').value = useCoins;
-        
-        let net = baseAmount - useCoins;
-        document.getElementById('net-pay-text').innerText = net.toLocaleString();
-        document.getElementById('qr-pay-img').src = `https://promptpay.io/1410400401805/${net}.png`;
+        const netPay = baseAmount - useCoins;
+        document.getElementById('net-pay-text').innerText = netPay.toLocaleString();
+        document.getElementById('qr-pay-img').src = `https://promptpay.io/1410400401805/${netPay}.png`;
     }
+
+    function editBankInfo() {
+        if(!userProfile) return;
+        const html = `<div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">ธนาคาร</label><select id="edit-bank-name" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><option value="กสิกรไทย (KBANK)" ${globalBankName === 'กสิกรไทย (KBANK)' ? 'selected':''}>กสิกรไทย (KBANK)</option><option value="ไทยพาณิชย์ (SCB)" ${globalBankName === 'ไทยพาณิชย์ (SCB)' ? 'selected':''}>ไทยพาณิชย์ (SCB)</option><option value="กรุงเทพ (BBL)" ${globalBankName === 'กรุงเทพ (BBL)' ? 'selected':''}>กรุงเทพ (BBL)</option><option value="กรุงไทย (KTB)" ${globalBankName === 'กรุงไทย (KTB)' ? 'selected':''}>กรุงไทย (KTB)</option><option value="กรุงศรีอยุธยา (BAY)" ${globalBankName === 'กรุงศรีอยุธยา (BAY)' ? 'selected':''}>กรุงศรีอยุธยา (BAY)</option><option value="ทหารไทยธนชาต (TTB)" ${globalBankName === 'ทหารไทยธนชาต (TTB)' ? 'selected':''}>ทหารไทยธนชาต (TTB)</option><option value="ออมสิน (GSB)" ${globalBankName === 'ออมสิน (GSB)' ? 'selected':''}>ออมสิน (GSB)</option><option value="ธ.ก.ส. (BAAC)" ${globalBankName === 'ธ.ก.ส. (BAAC)' ? 'selected':''}>ธ.ก.ส. (BAAC)</option></select><label class="block text-xs font-bold text-gray-700 mb-1">ชื่อบัญชี</label><input type="text" id="edit-bank-account-name" value="${globalBankAccountName}" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><label class="block text-xs font-bold text-gray-700 mb-1">เลขที่บัญชี</label><input type="number" id="edit-bank-account-number" value="${globalBankAccountNumber}" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm tracking-widest"></div>`;
+        Swal.fire({ title: 'บัญชีรับเงินรางวัล', html: html, showCancelButton: true, confirmButtonText: '💾 บันทึกบัญชี', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const bName = document.getElementById('edit-bank-name').value; const bAccName = document.getElementById('edit-bank-account-name').value.trim(); const bAccNum = document.getElementById('edit-bank-account-number').value.trim(); if(!bAccName || !bAccNum) { Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน'); return false; } try { Swal.showLoading(); await db.collection('users').doc(userProfile.userId).set({ bankName: bName, bankAccountName: bAccName, bankAccountNumber: bAccNum, updatedAt: Date.now() }, { merge: true }); return true; } catch(err) { Swal.showValidationMessage('ผิดพลาด'); return false; } } }).then((res) => { if(res.isConfirmed) Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false }); });
+    }
+
+    function editProfileField(field) {
+        if(!userProfile) return;
+        let title = field === 'phone' ? '📱 เบอร์โทรศัพท์' : '🚚 ที่อยู่จัดส่ง'; let currentValue = field === 'phone' ? globalSavedPhone : globalSavedAddress;
+        let inputHtml = field === 'phone' ? `<input type="tel" id="edit-field-input" value="${currentValue}" placeholder="เช่น 0891234567" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-center text-lg bg-gray-50 shadow-inner">` : `<textarea id="edit-field-input" rows="4" placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-medium text-sm bg-gray-50 shadow-inner">${currentValue}</textarea>`;
+        Swal.fire({ title: title, html: inputHtml, showCancelButton: true, confirmButtonText: '💾 บันทึก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const newVal = document.getElementById('edit-field-input').value.trim(); if(field === 'phone' && !newVal) { Swal.showValidationMessage('กรุณากรอกข้อมูลด้วยครับ'); return false; } try { Swal.showLoading(); let updateData = { updatedAt: Date.now() }; if(field === 'phone') updateData.phone = newVal; if(field === 'address') updateData.address = newVal; await db.collection('users').doc(userProfile.userId).set(updateData, { merge: true }); return true; } catch(err) { Swal.showValidationMessage('ผิดพลาด'); return false; } } }).then((res) => { if(res.isConfirmed) Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false }); });
+    }
+
+    function showShopBankInfo() { Swal.fire({ title: '🏦 บัญชีร้านค้า', html: `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left mt-2"><p class="text-sm font-medium text-gray-600 mb-1">ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="text-sm font-medium text-gray-600 mb-1">ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p><p class="text-sm font-medium text-gray-600 mt-3">เลขที่บัญชี:</p><div class="bg-white border border-emerald-100 rounded-lg p-2 text-center mt-1 flex flex-col items-center gap-2"><span class="font-mono font-black text-2xl text-gray-800 tracking-widest select-all">0138284018</span><button onclick="copyBankNumber('0138284018')" class="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm active:scale-95 transition">📋 คัดลอกเลขบัญชี</button></div></div>`, confirmButtonText: 'ปิด', confirmButtonColor: '#d31a1a' }); }
+    
+    window.copyBankNumber = function(text) {
+        const el = document.createElement('input');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        Swal.fire({ toast: true, position: 'top', title: '📋 คัดลอกเลขบัญชีแล้ว', icon: 'success', timer: 1500, showConfirmButton: false });
+    };
+
+    function openCheckout(docId, num, displayAmount, qty) { 
+      if (!liff.isLoggedIn()) { forceLineLogin(); return; }
+      Swal.fire({ title: 'ยืนยันการสั่งซื้อ', html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ชุด ${qty} ใบ • ยอดชำระ <span class="text-gray-900 text-lg">฿${displayAmount.toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`, showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const phone = document.getElementById('checkoutPhone').value.trim(); if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; } return { phone }; } }).then((result) => { if (result.isConfirmed) { db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true }); db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000) }).then(() => { Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); }); } });
+    }
+
+    function handleFileSelection(fileInputId) { return new Promise((resolve) => { const fileInput = document.getElementById(fileInputId); if(fileInput.files.length === 0) { resolve(null); return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onloadend = function() { resolve(reader.result); }; reader.readAsDataURL(file); }); }
 
     function notifyPayment(docId, num, baseAmount) {
         const qrUrl = `https://promptpay.io/1410400401805/${baseAmount}.png`;
@@ -698,7 +729,7 @@
                 <div class="text-[11px] text-gray-700 font-medium space-y-1">
                     <p class="text-xs font-bold text-gray-800 border-b border-emerald-200 pb-1 mb-1">ทางเลือกโอนเข้าเลขบัญชี:</p>
                     <p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p>
-                    <p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p>
+                    <p class="flex items-center gap-2 mt-1">เลขบัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span> <button onclick="copyBankNumber('0138284018')" class="bg-white border border-gray-300 text-gray-700 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm active:scale-95 transition">📋 คัดลอก</button></p>
                     <p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p>
                 </div>
             </div>
@@ -747,7 +778,7 @@
                 <div class="text-[11px] text-gray-700 font-medium space-y-1">
                     <p class="text-xs font-bold text-gray-800 border-b border-emerald-200 pb-1 mb-1">ทางเลือกโอนเข้าเลขบัญชี:</p>
                     <p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p>
-                    <p>เลขที่บัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span></p>
+                    <p class="flex items-center gap-2 mt-1">เลขบัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span> <button onclick="copyBankNumber('0138284018')" class="bg-white border border-gray-300 text-gray-700 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm active:scale-95 transition">📋 คัดลอก</button></p>
                     <p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p>
                 </div>
             </div>
@@ -776,21 +807,6 @@
             } 
         });
     }
-
-    function editBankInfo() {
-        if(!userProfile) return;
-        const html = `<div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">ธนาคาร</label><select id="edit-bank-name" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><option value="กสิกรไทย (KBANK)" ${globalBankName === 'กสิกรไทย (KBANK)' ? 'selected':''}>กสิกรไทย (KBANK)</option><option value="ไทยพาณิชย์ (SCB)" ${globalBankName === 'ไทยพาณิชย์ (SCB)' ? 'selected':''}>ไทยพาณิชย์ (SCB)</option><option value="กรุงเทพ (BBL)" ${globalBankName === 'กรุงเทพ (BBL)' ? 'selected':''}>กรุงเทพ (BBL)</option><option value="กรุงไทย (KTB)" ${globalBankName === 'กรุงไทย (KTB)' ? 'selected':''}>กรุงไทย (KTB)</option><option value="กรุงศรีอยุธยา (BAY)" ${globalBankName === 'กรุงศรีอยุธยา (BAY)' ? 'selected':''}>กรุงศรีอยุธยา (BAY)</option><option value="ทหารไทยธนชาต (TTB)" ${globalBankName === 'ทหารไทยธนชาต (TTB)' ? 'selected':''}>ทหารไทยธนชาต (TTB)</option><option value="ออมสิน (GSB)" ${globalBankName === 'ออมสิน (GSB)' ? 'selected':''}>ออมสิน (GSB)</option><option value="ธ.ก.ส. (BAAC)" ${globalBankName === 'ธ.ก.ส. (BAAC)' ? 'selected':''}>ธ.ก.ส. (BAAC)</option></select><label class="block text-xs font-bold text-gray-700 mb-1">ชื่อบัญชี</label><input type="text" id="edit-bank-account-name" value="${globalBankAccountName}" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><label class="block text-xs font-bold text-gray-700 mb-1">เลขที่บัญชี</label><input type="number" id="edit-bank-account-number" value="${globalBankAccountNumber}" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm tracking-widest"></div>`;
-        Swal.fire({ title: 'บัญชีรับเงินรางวัล', html: html, showCancelButton: true, confirmButtonText: '💾 บันทึกบัญชี', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const bName = document.getElementById('edit-bank-name').value; const bAccName = document.getElementById('edit-bank-account-name').value.trim(); const bAccNum = document.getElementById('edit-bank-account-number').value.trim(); if(!bAccName || !bAccNum) { Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน'); return false; } try { Swal.showLoading(); await db.collection('users').doc(userProfile.userId).set({ bankName: bName, bankAccountName: bAccName, bankAccountNumber: bAccNum, updatedAt: Date.now() }, { merge: true }); return true; } catch(err) { Swal.showValidationMessage('ผิดพลาด'); return false; } } }).then((res) => { if(res.isConfirmed) Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false }); });
-    }
-
-    function editProfileField(field) {
-        if(!userProfile) return;
-        let title = field === 'phone' ? '📱 เบอร์โทรศัพท์' : '🚚 ที่อยู่จัดส่ง'; let currentValue = field === 'phone' ? globalSavedPhone : globalSavedAddress;
-        let inputHtml = field === 'phone' ? `<input type="tel" id="edit-field-input" value="${currentValue}" placeholder="เช่น 0891234567" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-center text-lg bg-gray-50 shadow-inner">` : `<textarea id="edit-field-input" rows="4" placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-medium text-sm bg-gray-50 shadow-inner">${currentValue}</textarea>`;
-        Swal.fire({ title: title, html: inputHtml, showCancelButton: true, confirmButtonText: '💾 บันทึก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const newVal = document.getElementById('edit-field-input').value.trim(); if(field === 'phone' && !newVal) { Swal.showValidationMessage('กรุณากรอกข้อมูลด้วยครับ'); return false; } try { Swal.showLoading(); let updateData = { updatedAt: Date.now() }; if(field === 'phone') updateData.phone = newVal; if(field === 'address') updateData.address = newVal; await db.collection('users').doc(userProfile.userId).set(updateData, { merge: true }); return true; } catch(err) { Swal.showValidationMessage('ผิดพลาด'); return false; } } }).then((res) => { if(res.isConfirmed) Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false }); });
-    }
-
-    function showShopBankInfo() { Swal.fire({ title: '🏦 บัญชีร้านค้า', html: `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left mt-2"><p class="text-sm font-medium text-gray-600 mb-1">ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="text-sm font-medium text-gray-600 mb-1">ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p><p class="text-sm font-medium text-gray-600 mt-3">เลขที่บัญชี:</p><div class="bg-white border border-emerald-100 rounded-lg p-2 text-center mt-1"><span class="font-mono font-black text-2xl text-gray-800 tracking-widest select-all">0138284018</span></div></div>`, confirmButtonText: 'ปิด', confirmButtonColor: '#d31a1a' }); }
 
     function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false }); } }); }); }
     window.onload = function() { initLIFF(); loadShopLotteries(); };
