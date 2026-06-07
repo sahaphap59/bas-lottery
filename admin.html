@@ -70,10 +70,6 @@
         <button onclick="openPromoModal()" class="bg-fuchsia-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📣 โปรโมชัน</button>
         <button onclick="openFlashSaleModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md">⚡ Flash Sale</button>
         <button onclick="addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
-        
-        <!-- 🌟 ปุ่มดึงรายงาน Excel 🌟 -->
-        <button onclick="exportToExcel()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md">📊 โหลดรายงาน (Excel)</button>
-
         <button onclick="openWinningModal()" class="gold-gradient text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md hover:opacity-90">🏆 บันทึกผลรางวัล</button>
         <button onclick="openModal()" class="bg-slate-700 border border-slate-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">➕ ลงทะเบียนสลาก</button>
       </div>
@@ -179,7 +175,6 @@
             <div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 3: แบนเนอร์เสริม/ทำนายฝัน (ขวาล่าง)</label><input type="file" id="mbExtraFile" accept="image/*" onchange="previewMenuBanner('extra')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbExtraPreview" class="max-h-16 rounded mt-1 hidden"></div>
         </div>
 
-        <!-- 🌟 โซนอัปโหลดรูปป๊อปอัปถูกรางวัล 🌟 -->
         <hr class="border-slate-100">
         <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 space-y-3">
             <h3 class="text-xs font-black text-yellow-800">🎉 รูปป๊อปอัปเมื่อลูกค้าถูกรางวัล (อลังการ)</h3>
@@ -618,10 +613,10 @@
 
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
         
-        // ปุ่มอนุมัติสลิป + แจก Coin
+        // 🌟 ปุ่มอนุมัติสลิป & แจก Coin ที่หายไป กลับมาแล้ว 🌟
         let approveBtn = '';
         if(item.status === 'รอตรวจสอบสลิป') {
-            approveBtn = `<button onclick="approveSlip('${item.id}', '${item.userId || ''}', '${qty}')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm mb-1 w-full">✅ ยืนยันสลิป</button><br>`;
+            approveBtn = `<button onclick="approveSlip('${item.id}', '${item.userId || ''}', '${qty}', '${safeNumStr}')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm mb-1 w-full">✅ ยืนยันสลิป</button><br>`;
         }
         
         let action = `
@@ -643,11 +638,11 @@
       document.getElementById('no-data').className = hasRows ? "hidden" : "block";
     }
 
-    // ฟังก์ชันกดยืนยันสลิปและแจก Coin
-    window.approveSlip = function(id, userId, quantity) {
+    // ฟังก์ชันกดยืนยันสลิปและแจก Coin และส่ง LINE Push Message
+    window.approveSlip = function(id, userId, quantity, numStr) {
         Swal.fire({
             title: 'ยืนยันสลิปถูกต้อง?',
-            text: 'ระบบจะเปลี่ยนสถานะเป็นชำระแล้ว และเพิ่ม Ah-Meow Coin ให้ลูกค้า (1 ใบ = 100 บาท = 1 Coin)',
+            text: 'ระบบจะเปลี่ยนสถานะเป็นชำระแล้ว แจก Coin และแจ้งเตือนลูกค้าทาง LINE',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#10b981',
@@ -656,17 +651,33 @@
             if(r.isConfirmed) {
                 Swal.fire({title: 'กำลังอัปเดตระบบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
                 db.collection('lotteries').doc(id).update({status: 'sold'}).then(() => {
-                    // แจกคอยให้ลูกค้า
                     if(userId) {
                         let coinsEarned = parseInt(quantity);
                         db.collection('users').doc(userId).update({
                             coins: firebase.firestore.FieldValue.increment(coinsEarned)
                         });
+                        
+                        // 🌟 ยิงข้อความเข้าแชทลูกค้า (Push Message) 🌟
+                        let msg = `🎉 ยืนยันการชำระเงินสำเร็จ!\n\nขอบคุณที่อุดหนุนครับ แอดมินตรวจสอบสลิปเรียบร้อยแล้ว\n\n📌 รายละเอียดออเดอร์:\n- สลากเลข: ${numStr}\n- รหัส: #${id.substring(0,8)}\n- จำนวน: ${quantity} ใบ\n\n💰 คุณได้รับ +${coinsEarned} Ah-Meow Coin`;
+                        sendCustomerPushMessage(userId, msg);
                     }
                     Swal.fire('สำเร็จ', 'ยืนยันสลิปและเพิ่ม Coin ให้ลูกค้าแล้ว', 'success');
                 });
             }
         });
+    }
+
+    // ฟังก์ชันส่ง Push Message ไปให้ Google Apps Script
+    function sendCustomerPushMessage(userId, message) {
+        // 🔴🔴 เอา Web App URL จาก Google Apps Script มาวางตรงนี้ครับ 🔴🔴
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec"; 
+        
+        if (!GAS_URL || GAS_URL.includes("ใส่_URL")) return;
+        
+        fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "push", userId: userId, message: message })
+        }).catch(e => console.log("Push Error:", e));
     }
 
     // ฟังก์ชันดึงรายงานยอดขาย Excel
@@ -740,7 +751,8 @@
     function switchTab(t) { 
         currentTab = t; seenCounts[t] = currentCounts[t]; updateTabBadge(t);
         ['all','empty','paid','unpaid','pending_slip','winners','flashsale'].forEach(k => { 
-            const btn = document.getElementById('tab-'+k); if(!btn) return;
+            const btn = document.getElementById('tab-'+k); 
+            if(!btn) return;
             if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative ml-2" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative ml-2"; } 
             else if (k === 'flashsale') { btn.className = (k===t) ? "tab-btn text-amber-900 bg-amber-200 border border-amber-400 shadow-inner relative ml-2" : "tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2"; }
             else if (k === 'pending_slip') { btn.className = (k===t) ? "tab-btn text-blue-900 bg-blue-200 border border-blue-400 shadow-inner relative" : "tab-btn text-slate-600 hover:bg-white relative"; }
@@ -778,7 +790,6 @@
           const user = doc.data(); const userId = doc.id; const dateStr = user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('th-TH') : '-'; const img = user.pictureUrl ? `<img src="${user.pictureUrl}" class="w-10 h-10 rounded-full mx-auto shadow-sm object-cover">` : '<div class="w-10 h-10 rounded-full bg-gray-200 mx-auto flex items-center justify-center text-xl">👤</div>';
           let bankInfo = `<span class="text-xs text-gray-400 italic">ยังไม่ผูกบัญชี</span>`; if (user.bankName) { bankInfo = `<div class="text-xs font-bold text-indigo-700">${user.bankName}</div><div class="text-sm font-mono tracking-widest text-gray-800">${user.bankAccountNumber}</div><div class="text-xs text-gray-500">ชื่อ: ${user.bankAccountName}</div>`; }
           
-          // โชว์คอยน์ในตาราง
           const coinsInfo = `<div class="mt-2 text-xs font-bold text-yellow-800 bg-yellow-100 inline-block px-2 py-1 rounded shadow-sm border border-yellow-300">🪙 Coin สะสม: ${user.coins || 0}</div>`;
 
           const safePhone = user.phone ? user.phone.replace(/'/g, "\\'") : ''; const safeBankName = user.bankName ? user.bankName.replace(/'/g, "\\'") : ''; const safeBankAccName = user.bankAccountName ? user.bankAccountName.replace(/'/g, "\\'") : ''; const safeBankAccNum = user.bankAccountNumber ? user.bankAccountNumber.replace(/'/g, "\\'") : '';
@@ -789,7 +800,6 @@
       });
     }
 
-    // ฟังก์ชันแก้ไขข้อมูลลูกค้า รวมถึง Coin
     window.editCustomerProfile = function(userId, phone, bankName, bankAccName, bankAccNum, coins) {
         Swal.fire({
             title: 'แก้ไขข้อมูลลูกค้า',
