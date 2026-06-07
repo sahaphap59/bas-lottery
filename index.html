@@ -329,7 +329,7 @@
     const LIFF_ID = "2010226176-jm6lSL41"; 
 
     // 🔴 เอา URL ของ Web App Google มาใส่ตรงนี้ครับ 🔴
-    const GAS_NOTIFY_URL = "https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec";
+    const GAS_NOTIFY_URL = "ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้";
 
     let availableTickets = []; let myTickets = []; let userProfile = null; 
     let currentDraw = ""; let currentLotteryType = 'all'; let currentOrderTab = 'unpaid'; 
@@ -715,11 +715,9 @@
       if (!liff.isLoggedIn()) { forceLineLogin(); return; }
       Swal.fire({ title: 'ยืนยันการสั่งซื้อ', html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ยอดชำระ <span class="text-gray-900 text-lg">฿${displayAmount.toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`, showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const phone = document.getElementById('checkoutPhone').value.trim(); if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; } return { phone }; } }).then((result) => { if (result.isConfirmed) { db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true }); db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000) }).then(() => { 
           sendLineNotify(`🛒 มีออเดอร์ใหม่ (จอง)!\nเลข: ${num}\nยอด: ฿${displayAmount.toLocaleString()}\nลูกค้า: ${userProfile.displayName}`);
-          
           if (liff.isInClient()) {
               liff.sendMessages([{ type: 'text', text: `🛒 ยืนยันการจองสลาก\nเลข: ${num}\nยอดชำระ: ฿${displayAmount.toLocaleString()}\n(กรุณาชำระเงินและแจ้งโอนภายใน 30 นาที)` }]).catch(err => console.error(err));
           }
-
           Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); 
       }); } });
     }
@@ -771,7 +769,6 @@
                 if(used > 0) { db.collection('users').doc(userProfile.userId).update({ coins: firebase.firestore.FieldValue.increment(-used) }); }
                 db.collection('lotteries').doc(docId).update({ status: 'รอตรวจสอบสลิป', slip: result.value.slip, expiresAt: null, discountCoins: used }).then(() => { 
                     sendLineNotify(`💸 แจ้งโอนเงิน!\nสลาก: ${num}\nยอดโอนสุทธิ: ฿${netAmount.toLocaleString()}\nใช้คอยลดไป: ฿${used}\nลูกค้า: ${userProfile.displayName}`);
-                    
                     if (liff.isInClient()) {
                         liff.sendMessages([{ type: 'text', text: `💸 แจ้งชำระเงิน\nสลากเลข: ${num}\nยอดโอน: ฿${netAmount.toLocaleString()}\n(รอแอดมินตรวจสอบสลิปครับ)` }]).catch(err => console.error(err));
                     }
@@ -833,7 +830,6 @@
                 }); 
                 batch.commit().then(() => { 
                     sendLineNotify(`💸 แจ้งโอนเงิน (รวบยอด)!\nจำนวน: ${ids.length} ใบ\nยอดโอนสุทธิ: ฿${netAmount.toLocaleString()}\nใช้คอยลดไป: ฿${used}\nลูกค้า: ${userProfile.displayName}`);
-                    
                     if (liff.isInClient()) {
                         liff.sendMessages([{ type: 'text', text: `💸 แจ้งชำระเงิน (รวบยอด)\nจำนวนสลาก: ${ids.length} ใบ\nยอดโอนรวม: ฿${netAmount.toLocaleString()}\n(รอแอดมินตรวจสอบสลิปครับ)` }]).catch(err => console.error(err));
                     }
