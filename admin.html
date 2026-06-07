@@ -406,7 +406,7 @@
         let input = document.getElementById(type === 'winBanner' ? 'winningBannerFile' : `mb${type.charAt(0).toUpperCase() + type.slice(1)}File`);
         let preview = document.getElementById(type === 'winBanner' ? 'mbWinBannerPreview' : `mb${type.charAt(0).toUpperCase() + type.slice(1)}Preview`);
         if(input.files && input.files[0]) {
-            let base64 = await resizeImage(input.files[0], 800, 1200, 0.85); // ให้รูปยาวชัดขึ้น
+            let base64 = await resizeImage(input.files[0], 800, 1200, 0.85); 
             if(type === 'mascot') tempMascot = base64;
             if(type === 'top10') tempTop10 = base64;
             if(type === 'extra') tempExtra = base64;
@@ -611,7 +611,7 @@
 
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
         
-        // 🌟 ปุ่มอนุมัติสลิปแบบรวดเร็ว + แจก Coin
+        // ปุ่มอนุมัติสลิป + แจก Coin
         let approveBtn = '';
         if(item.status === 'รอตรวจสอบสลิป') {
             approveBtn = `<button onclick="approveSlip('${item.id}', '${item.userId || ''}', '${qty}')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm mb-1 w-full">✅ ยืนยันสลิป</button><br>`;
@@ -636,7 +636,6 @@
       document.getElementById('no-data').className = hasRows ? "hidden" : "block";
     }
 
-    // ฟังก์ชันอนุมัติสลิปและแจก Coin
     window.approveSlip = function(id, userId, quantity) {
         Swal.fire({
             title: 'ยืนยันสลิปถูกต้อง?',
@@ -681,7 +680,7 @@
         currentTab = t; seenCounts[t] = currentCounts[t]; updateTabBadge(t);
         ['all','empty','paid','unpaid','pending_slip','winners','flashsale'].forEach(k => { 
             const btn = document.getElementById('tab-'+k); if(!btn) return;
-            if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative"; } 
+            if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative ml-2" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative ml-2"; } 
             else if (k === 'flashsale') { btn.className = (k===t) ? "tab-btn text-amber-900 bg-amber-200 border border-amber-400 shadow-inner relative ml-2" : "tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2"; }
             else if (k === 'pending_slip') { btn.className = (k===t) ? "tab-btn text-blue-900 bg-blue-200 border border-blue-400 shadow-inner relative" : "tab-btn text-slate-600 hover:bg-white relative"; }
             else { btn.className = (k===t) ? "tab-btn tab-active relative" : "tab-btn text-slate-600 hover:bg-white relative"; } 
