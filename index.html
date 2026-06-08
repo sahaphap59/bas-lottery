@@ -235,6 +235,10 @@
           <div class="flex items-center gap-3"><div class="text-xl text-purple-600"><i class="fa-solid fa-headset"></i></div><div><div class="text-sm font-black text-purple-700">แชทติดต่อแอดมิน (Live Chat)</div><div class="text-xs text-purple-600 font-medium">แจ้งปัญหา คุยกับเจ้าหน้าที่โดยตรง</div></div></div><span class="text-purple-500 font-bold">❯</span>
       </div>
 
+      <div onclick="window.open('https://lin.ee/nrDW4UH', '_blank')" class="bg-emerald-50 rounded-xl shadow-sm border border-emerald-200 p-4 cursor-pointer hover:bg-emerald-100 flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3"><div class="text-xl">🟢</div><div><div class="text-sm font-black text-emerald-700">ติดต่อแอดมิน (LINE Official)</div><div class="text-xs text-emerald-600 font-medium">เพิ่มเพื่อนเพื่อติดตามข่าวสาร</div></div></div><span class="text-emerald-500 font-bold">❯</span>
+      </div>
+
       <div onclick="showShopBankInfo()" class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between mb-4">
           <div class="flex items-center gap-3"><div class="text-xl">🏪</div><div><div class="text-sm font-bold text-gray-700">บัญชีร้านค้า (สำหรับโอนจ่าย)</div><div class="text-xs text-rose-500 font-bold">คลิกดูเลขบัญชีร้าน</div></div></div><span class="text-gray-300 font-bold">❯</span>
       </div>
@@ -449,7 +453,7 @@
 
     // --- ฟังก์ชัน Live Chat ฝั่งลูกค้า ---
     function startChatPrompt() {
-        if(!currentUser.name) {
+        if (!liff.isLoggedIn() || !userProfile) {
             return Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE เพื่อติดต่อแอดมินครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin());
         }
         
@@ -474,14 +478,14 @@
         modal.classList.add('flex');
         
         // บันทึกสถานะว่าลูกค้าเริ่มแชท
-        db.collection('chats').doc(currentUser.id).set({
-            userName: currentUser.name,
+        db.collection('chats').doc(userProfile.userId).set({
+            userName: userProfile.displayName,
             status: 'active',
             updatedAt: Date.now()
         }, {merge: true});
 
         // ดึงข้อความสนทนา
-        activeChatUnsub = db.collection('chats').doc(currentUser.id).collection('messages').orderBy('timestamp').onSnapshot(snap => {
+        activeChatUnsub = db.collection('chats').doc(userProfile.userId).collection('messages').orderBy('timestamp').onSnapshot(snap => {
             const box = document.getElementById('chat-messages');
             box.innerHTML = '';
             if(snap.empty) {
@@ -519,25 +523,25 @@
         const text = input.value.trim();
         if(!text) return;
         
-        input.value = '';
+        input.value = ''; // ล้างช่องพิมพ์
         const now = Date.now();
         
-        db.collection('chats').doc(currentUser.id).collection('messages').add({
+        // เพิ่มข้อความ
+        db.collection('chats').doc(userProfile.userId).collection('messages').add({
             text: text,
             sender: 'user',
             timestamp: now
         });
-        db.collection('chats').doc(currentUser.id).update({
+        // อัปเดตสถานะให้เด้งไปอยู่บนสุดของแอดมิน
+        db.collection('chats').doc(userProfile.userId).update({
             status: 'active',
             lastMessage: text,
             updatedAt: now
         });
     }
+    // -------------------------
 
-    function switchTab(tab) {
-      if ((tab === 'orders' || tab === 'profile') && (!liff || !liff.isLoggedIn())) { 
-          Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE ก่อนครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin()); return; 
-      }
+    function listenToStorefront() {
       document.getElementById('home-section').style.display = tab === 'home' ? 'block' : 'none'; 
       document.getElementById('orders-section').style.display = tab === 'orders' ? 'block' : 'none'; 
       document.getElementById('profile-section').style.display = tab === 'profile' ? 'block' : 'none';
@@ -1232,10 +1236,33 @@
 
     function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false, updatedAt: Date.now() }); } }); }); }
     
+    function showPromoPopup() {
+        db.collection('settings').doc('promotion').get().then(doc => {
+            if(doc.exists && doc.data().isActive && doc.data().imageUrl) {
+                if(!sessionStorage.getItem('promo_shown')) {
+                    Swal.fire({
+                        imageUrl: doc.data().imageUrl,
+                        imageAlt: 'Promotion',
+                        showConfirmButton: true,
+                        confirmButtonText: 'ปิดหน้าต่าง',
+                        confirmButtonColor: '#d31a1a',
+                        width: '90%',
+                        padding: '0',
+                        background: 'transparent',
+                        backdrop: `rgba(0,0,0,0.8)`,
+                        customClass: { image: 'rounded-2xl max-w-full m-0' }
+                    });
+                    sessionStorage.setItem('promo_shown', 'true');
+                }
+            }
+        });
+    }
+
     window.onload = function() { 
         initLIFF(); 
         loadShopLotteries(); 
         initAdvancedAnalytics(); 
+        showPromoPopup(); // เรียกใช้ป๊อปอัปโปรโมชัน
     };
     
     // โค้ดสำหรับดึง IP และเก็บสถิติเชิงลึก 
