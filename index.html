@@ -1092,6 +1092,11 @@
     function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false }); } }); }); }
     
     window.onload = function() { initLIFF(); loadShopLotteries(); };
+// นำโค้ดนี้ไปวางในส่วน <script> ของไฟล์ index.html (ตัวอย่างเช่น นำไปวางต่อท้ายบรรทัดที่ประกาศ const db = firebase.firestore(); ก็ได้ครับ)
+db.collection('settings').doc('analytics').set({
+    pageViews: firebase.firestore.FieldValue.increment(1)
+}, { merge: true });
+
   </script>
 </body>
 </html>

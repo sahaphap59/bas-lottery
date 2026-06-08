@@ -64,6 +64,7 @@
           </div>
         </div>
         
+        <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📊 โหลดรายงาน (Excel)</button>
         <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🏪 ไปหน้าร้าน</button>
         <button onclick="toggleSales()" id="btn-toggle-sales" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🛒 สถานะขาย: เปิด</button>
         <button onclick="openDesignModal()" class="bg-teal-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">🖼️ จัดการระบบร้าน</button>
@@ -78,12 +79,13 @@
 
   <div class="max-w-7xl mx-auto px-4">
     <div id="content" class="block">
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         <div class="dash-box p-5 bg-white border-t-4 border-t-indigo-500"><div class="dash-title text-indigo-600">👥 ออเดอร์ทั้งหมด</div><h3 class="dash-val text-slate-800" id="sum-buyers">0 ท่าน</h3></div>
         <div class="dash-box p-5 bg-white border-t-4 border-t-pink-500"><div class="dash-title text-pink-600">🎟️ จำนวนใบรวม</div><h3 class="dash-val text-slate-800" id="sum-qty">0 ใบ</h3></div>
         <div class="dash-box p-5 bg-amber-50 border-t-4 border-t-amber-500"><div class="dash-title text-amber-700">💰 ยอดเงินรวม</div><h3 class="dash-val text-amber-600" id="sum-total">฿0</h3></div>
         <div class="dash-box p-5 bg-emerald-50 border-t-4 border-t-emerald-500"><div class="dash-title text-emerald-700">🟢 ยอดชำระแล้ว</div><h3 class="dash-val text-emerald-600" id="sum-paid">฿0</h3></div>
         <div class="dash-box p-5 bg-rose-50 border-t-4 border-t-rose-500"><div class="dash-title text-rose-700">⚠️ ยอดค้างชำระ / จอง</div><h3 class="dash-val text-rose-600" id="sum-unpaid">฿0</h3></div>
+        <div class="dash-box p-5 bg-cyan-50 border-t-4 border-t-cyan-500"><div class="dash-title text-cyan-700">👁️ ผู้เข้าชมเว็บ</div><h3 class="dash-val text-cyan-600" id="sum-visitors">0</h3></div>
       </div>
 
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-12">
@@ -123,6 +125,7 @@
     </div>
   </div>
 
+  <!-- Design Modal -->
   <div id="designModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-8">
       <div class="bg-teal-600 text-white px-6 py-4 flex justify-between items-center rounded-t-2xl">
@@ -348,6 +351,7 @@
       if (document.getElementById('adminPin').value === '123456') { 
         document.getElementById('adminAuthOverlay').style.display = 'none';
         loadInitialData(); listenToStorefrontSettings(); listenToWithdrawals(); listenToCustomersCount(); 
+        listenToVisitorCount();
         startAdminCountdown();
       } else { Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('adminPin').value = ''; }
     }
@@ -415,6 +419,16 @@
             if(type === 'winBanner') tempWinBanner = base64;
             preview.src = base64; preview.classList.remove('hidden');
         }
+    }
+
+    function listenToVisitorCount() {
+        db.collection('settings').doc('analytics').onSnapshot(doc => {
+            if(doc.exists) {
+                document.getElementById('sum-visitors').innerText = (doc.data().pageViews || 0).toLocaleString('th-TH');
+            } else {
+                document.getElementById('sum-visitors').innerText = '0';
+            }
+        });
     }
 
     function listenToWithdrawals() { db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => { currentCounts['withdraw'] = snap.size; updateTabBadge('withdraw'); if(currentTab === 'withdraw') loadWithdrawalsCRM(); }); }
@@ -613,7 +627,6 @@
 
         const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
         
-        // 🌟 ปุ่มอนุมัติสลิป & แจก Coin ที่หายไป กลับมาแล้ว 🌟
         let approveBtn = '';
         if(item.status === 'รอตรวจสอบสลิป') {
             approveBtn = `<button onclick="approveSlip('${item.id}', '${item.userId || ''}', '${qty}', '${safeNumStr}')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm mb-1 w-full">✅ ยืนยันสลิป</button><br>`;
@@ -638,7 +651,6 @@
       document.getElementById('no-data').className = hasRows ? "hidden" : "block";
     }
 
-    // ฟังก์ชันกดยืนยันสลิปและแจก Coin และส่ง LINE Push Message
     window.approveSlip = function(id, userId, quantity, numStr) {
         Swal.fire({
             title: 'ยืนยันสลิปถูกต้อง?',
@@ -657,7 +669,6 @@
                             coins: firebase.firestore.FieldValue.increment(coinsEarned)
                         });
                         
-                        // 🌟 ยิงข้อความเข้าแชทลูกค้า (Push Message) 🌟
                         let msg = `🎉 ยืนยันการชำระเงินสำเร็จ!\n\nขอบคุณที่อุดหนุนครับ แอดมินตรวจสอบสลิปเรียบร้อยแล้ว\n\n📌 รายละเอียดออเดอร์:\n- สลากเลข: ${numStr}\n- รหัส: #${id.substring(0,8)}\n- จำนวน: ${quantity} ใบ\n\n💰 คุณได้รับ +${coinsEarned} Ah-Meow Coin`;
                         sendCustomerPushMessage(userId, msg);
                     }
@@ -667,20 +678,15 @@
         });
     }
 
-    // ฟังก์ชันส่ง Push Message ไปให้ Google Apps Script
     function sendCustomerPushMessage(userId, message) {
-        // 🔴🔴 เอา Web App URL จาก Google Apps Script มาวางตรงนี้ครับ 🔴🔴
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec"; 
-        
+        const GAS_URL = "ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้"; 
         if (!GAS_URL || GAS_URL.includes("ใส่_URL")) return;
-        
         fetch(GAS_URL, {
             method: 'POST',
             body: JSON.stringify({ action: "push", userId: userId, message: message })
         }).catch(e => console.log("Push Error:", e));
     }
 
-    // ฟังก์ชันดึงรายงานยอดขาย Excel
     window.exportToExcel = function() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดที่ต้องการดึงรายงานก่อนครับ', 'warning');
         
