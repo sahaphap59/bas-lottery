@@ -9,6 +9,8 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  <!-- เพิ่ม FontAwesome สำหรับไอคอน -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; color: #1e293b; }
@@ -87,7 +89,16 @@
         <div class="dash-box p-4 bg-amber-50 border-t-4 border-t-amber-500"><div class="dash-title text-amber-700">💰 ยอดขายรวม</div><h3 class="dash-val text-amber-600 text-2xl" id="sum-total">฿0</h3></div>
         <div class="dash-box p-4 bg-emerald-50 border-t-4 border-t-emerald-500"><div class="dash-title text-emerald-700">🟢 รับเงินแล้ว</div><h3 class="dash-val text-emerald-600 text-2xl" id="sum-paid">฿0</h3></div>
         <div class="dash-box p-4 bg-rose-50 border-t-4 border-t-rose-500"><div class="dash-title text-rose-700">⚠️ ค้างชำระ</div><h3 class="dash-val text-rose-600 text-2xl" id="sum-unpaid">฿0</h3></div>
-        <div class="dash-box p-4 bg-cyan-50 border-t-4 border-t-cyan-500"><div class="dash-title text-cyan-700">👁️ ผู้เข้าชม</div><h3 class="dash-val text-cyan-600 text-2xl" id="sum-visitors">0</h3></div>
+        <!-- แก้ไขกล่องผู้เข้าชม ให้กดได้ -->
+        <div class="dash-box p-4 bg-cyan-50 border-t-4 border-t-cyan-500 cursor-pointer hover:bg-cyan-100 transition shadow-sm" onclick="openAnalyticsModal()">
+            <div class="dash-title text-cyan-700">👁️ เข้าชม (คลิกดู)</div>
+            <h3 class="dash-val text-cyan-700 text-2xl flex items-center gap-2">
+                <span id="sum-realtime" class="text-rose-500 animate-pulse text-3xl">0</span> 
+                <span class="text-sm text-slate-400 font-normal">/</span>
+                <span id="sum-visitors" class="text-xl">0</span>
+            </h3>
+            <div class="text-[9px] text-cyan-600 mt-1 font-bold">ตอนนี้ / ดูทั้งหมด</div>
+        </div>
       </div>
 
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-12">
@@ -131,6 +142,53 @@
           </table>
           <div id="no-data" class="hidden text-center py-20 text-slate-400"><p class="font-bold text-lg">✨ ไม่พบข้อมูลในหมวดหมู่นี้</p></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Modal (ใหม่) -->
+  <div id="analyticsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden my-8 border-t-4 border-cyan-500">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+        <h2 class="text-lg font-bold flex items-center gap-2 text-cyan-400"><i class="fa-solid fa-chart-pie"></i> สถิติผู้เข้าชมเชิงลึก</h2>
+        <button onclick="closeAnalyticsModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button>
+      </div>
+      <div class="p-6 space-y-4 bg-slate-50">
+          <div class="grid grid-cols-2 gap-4">
+              <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                  <div class="text-[10px] font-bold text-slate-500">กำลังออนไลน์ (Real-time)</div>
+                  <div class="text-3xl font-black text-rose-500 animate-pulse mt-1" id="stat-realtime">0</div>
+              </div>
+              <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                  <div class="text-[10px] font-bold text-slate-500">ผู้ชมไม่ซ้ำ (Unique IP/Device)</div>
+                  <div class="text-3xl font-black text-indigo-600 mt-1" id="stat-unique">0</div>
+              </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <div class="text-xs font-bold text-slate-700 mb-3 border-b pb-2">แยกตามประเภทอุปกรณ์ (ยอดวิวทั้งหมด)</div>
+              <div class="flex justify-between items-center mb-2">
+                  <div class="text-sm font-bold text-slate-600"><i class="fa-solid fa-mobile-screen-button text-cyan-500 mr-2"></i> โทรศัพท์มือถือ</div>
+                  <div class="text-sm font-black text-slate-800" id="stat-mobile">0</div>
+              </div>
+              <div class="flex justify-between items-center">
+                  <div class="text-sm font-bold text-slate-600"><i class="fa-solid fa-desktop text-indigo-400 mr-2"></i> คอมพิวเตอร์ (PC/Tablet)</div>
+                  <div class="text-sm font-black text-slate-800" id="stat-desktop">0</div>
+              </div>
+          </div>
+          
+          <!-- แสดงรายการ IP ของคนที่กำลังออนไลน์ -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div class="bg-slate-100 text-[10px] font-bold text-slate-600 px-4 py-2 border-b border-slate-200">ประวัติเข้าชมแบบเรียลไทม์ (IP & อุปกรณ์)</div>
+              <div class="max-h-32 overflow-y-auto">
+                  <table class="w-full text-left whitespace-nowrap text-[10px]">
+                      <tbody id="realtime-user-list" class="divide-y divide-slate-100">
+                          <tr><td class="text-center py-4 text-slate-400">ยังไม่มีผู้ใช้งาน</td></tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <div class="text-center text-[10px] text-slate-400 font-bold mt-2">ยอดวิวรวมทั้งหมด: <span id="stat-total">0</span> ครั้ง</div>
       </div>
     </div>
   </div>
@@ -418,6 +476,7 @@
         document.getElementById('adminAuthOverlay').style.display = 'none';
         loadInitialData(); listenToStorefrontSettings(); listenToWithdrawals(); listenToCustomersCount(); 
         listenToVisitorCount();
+        listenToRealtimeVisitors(); // เรียกฟังก์ชัน realtime
         startAdminCountdown();
       } else { Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('adminPin').value = ''; }
     }
@@ -487,15 +546,57 @@
         }
     }
 
+    // ฟังก์ชันอ่านสถิติรวมและอุปกรณ์
     function listenToVisitorCount() {
         db.collection('settings').doc('analytics').onSnapshot(doc => {
             if(doc.exists) {
-                document.getElementById('sum-visitors').innerText = (doc.data().pageViews || 0).toLocaleString('th-TH');
+                const data = doc.data();
+                document.getElementById('sum-visitors').innerText = (data.pageViews || 0).toLocaleString('th-TH');
+                
+                // สำหรับ Modal
+                document.getElementById('stat-unique').innerText = (data.uniqueVisitors || 0).toLocaleString('th-TH');
+                document.getElementById('stat-mobile').innerText = (data.mobileViews || 0).toLocaleString('th-TH') + ' ครั้ง';
+                document.getElementById('stat-desktop').innerText = (data.desktopViews || 0).toLocaleString('th-TH') + ' ครั้ง';
+                document.getElementById('stat-total').innerText = (data.pageViews || 0).toLocaleString('th-TH');
             } else {
                 document.getElementById('sum-visitors').innerText = '0';
             }
         });
     }
+
+    // ฟังก์ชันอ่านคนกำลังออนไลน์ (Real-time & IP)
+    function listenToRealtimeVisitors() {
+        // ดึงเฉพาะคนที่เคลื่อนไหวใน 1 นาทีที่ผ่านมา
+        const oneMinuteAgo = Date.now() - 60000;
+        db.collection('active_visitors').where('lastActive', '>', oneMinuteAgo).onSnapshot(snap => {
+            document.getElementById('sum-realtime').innerText = snap.size;
+            document.getElementById('stat-realtime').innerText = snap.size;
+
+            const userList = document.getElementById('realtime-user-list');
+            userList.innerHTML = '';
+            
+            if(snap.empty) {
+                userList.innerHTML = '<tr><td class="text-center py-4 text-slate-400">ยังไม่มีผู้ใช้งานขณะนี้</td></tr>';
+            } else {
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const icon = d.device === 'Mobile' ? '<i class="fa-solid fa-mobile-screen-button text-cyan-500"></i> มือถือ' : '<i class="fa-solid fa-desktop text-indigo-400"></i> คอมฯ';
+                    const ip = d.ip || 'ไม่ทราบ IP';
+                    const time = new Date(d.lastActive).toLocaleTimeString('th-TH');
+                    
+                    userList.innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100">
+                        <td class="py-2 px-4 font-mono font-bold text-slate-700">${ip}</td>
+                        <td class="py-2 px-4 text-slate-600">${icon}</td>
+                        <td class="py-2 px-4 text-right text-slate-400 text-[9px]">ล่าสุด: ${time}</td>
+                    </tr>`;
+                });
+            }
+        });
+    }
+
+    function openAnalyticsModal() { document.getElementById('analyticsModal').classList.remove('hidden'); }
+    function closeAnalyticsModal() { document.getElementById('analyticsModal').classList.add('hidden'); }
 
     function listenToWithdrawals() { db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => { currentCounts['withdraw'] = snap.size; updateTabBadge('withdraw'); if(currentTab === 'withdraw') loadWithdrawalsCRM(); }); }
     function listenToCustomersCount() { db.collection('users').onSnapshot(snap => { currentCounts['crm'] = snap.size; updateTabBadge('crm'); }); }

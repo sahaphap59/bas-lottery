@@ -1096,6 +1096,57 @@
 db.collection('settings').doc('analytics').set({
     pageViews: firebase.firestore.FieldValue.increment(1)
 }, { merge: true });
+// 🔴 โค้ดสำหรับดึง IP และเก็บสถิติเชิงลึก (นำไปใส่ในส่วน script ของ index.html) 🔴
+        async function initAdvancedAnalytics() {
+            // 1. ตรวจสอบประเภทอุปกรณ์ (Mobile / Desktop)
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const deviceType = isMobile ? 'mobileViews' : 'desktopViews';
+            
+            // 2. ตรวจสอบผู้ชมไม่ซ้ำ (Unique Visitor)
+            let isUnique = false;
+            if (!localStorage.getItem('bas_visited_unique')) {
+                isUnique = true;
+                localStorage.setItem('bas_visited_unique', 'true');
+            }
+
+            // 3. เพิ่มยอดวิวรวมและแยกอุปกรณ์
+            const increment = firebase.firestore.FieldValue.increment(1);
+            let updateData = { pageViews: increment, [deviceType]: increment };
+            if (isUnique) updateData.uniqueVisitors = increment;
+            db.collection('settings').doc('analytics').set(updateData, { merge: true }).catch(()=>{});
+
+            // 4. ดึงหมายเลข IP (ใช้บริการฟรีจาก ipify)
+            let userIP = "ไม่ระบุ";
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                userIP = data.ip;
+            } catch(e) { console.log('IP fetch failed'); }
+
+            // 5. รายงานสถานะออนไลน์ (Real-time Presence)
+            const sessionId = currentUser.id || generateUUID();
+            const presenceRef = db.collection('active_visitors').doc(sessionId);
+            
+            function sendHeartbeat() {
+                presenceRef.set({
+                    lastActive: Date.now(),
+                    device: isMobile ? 'Mobile' : 'Desktop',
+                    ip: userIP,
+                    userAgent: navigator.userAgent
+                }, { merge: true }).catch(()=>{});
+            }
+            
+            sendHeartbeat(); // ส่งตอนเข้าเว็บ
+            setInterval(sendHeartbeat, 25000); // อัปเดตทุก 25 วินาทีว่ายังไม่ปิดเว็บ
+            
+            // 6. ลบตัวเองออกจากระบบ Real-time เมื่อปิดเว็บ
+            window.addEventListener('beforeunload', () => {
+                presenceRef.delete().catch(()=>{});
+            });
+        }
+        
+        // เรียกใช้งานฟังก์ชันเก็บสถิติทันที
+        initAdvancedAnalytics();
 
   </script>
 </body>
