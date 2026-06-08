@@ -11,6 +11,7 @@
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     body { font-family: 'Prompt', sans-serif; background-color: #f4f6f9; color: #1f2937; }
@@ -46,6 +47,10 @@
     #cart-badge { position: absolute; top: 0; right: 0; background-color: white; color: #d31a1a; font-size: 11px; font-weight: 900; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d31a1a; }
     #cart-timer { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); background-color: #fef08a; color: #b45309; font-size: 9px; font-weight: 900; font-family: monospace; padding: 2px 6px; border-radius: 10px; border: 1px solid #fde047; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap; }
 
+    /* สไตล์สำหรับปุ่มแชทลอย */
+    #floating-chat { position: fixed; bottom: 85px; left: 16px; background-color: #9333ea; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(147,51,234,0.4); cursor: pointer; z-index: 45; transition: transform 0.2s; }
+    #floating-chat:active { transform: scale(0.9); }
+
     @keyframes goldSparkle { 0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); transform: scale(1); } 50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.9), inset 0 0 10px rgba(255, 215, 0, 0.5); transform: scale(1.02); } }
     .win-sparkle-effect { animation: goldSparkle 2s infinite ease-in-out; border: 2px solid #F59E0B !important; position: relative; z-index: 10; }
     @keyframes shimmerSweep { 0% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(200%) skewX(-20deg); } }
@@ -77,6 +82,11 @@
       <span class="text-2xl">🛒</span>
       <span id="cart-badge">0</span>
       <span id="cart-timer" style="display: none;">00:00</span>
+  </div>
+
+  <!-- ปุ่มแชทลอย -->
+  <div id="floating-chat" onclick="startChatPrompt()" class="max-w-md mx-auto">
+      <i class="fa-solid fa-headset text-2xl mt-1 text-white"></i>
   </div>
 
   <div id="home-section" class="block max-w-md mx-auto">
@@ -218,13 +228,15 @@
       <div onclick="switchTab('orders'); setOrderTab('success');" class="bg-white rounded-xl shadow-sm border border-[#f5c200] p-4 cursor-pointer hover:bg-yellow-50 flex items-center justify-between mt-4">
           <div class="flex items-center gap-3"><div class="text-xl">💸</div><div><div class="text-sm font-bold text-gray-800">แจ้งถอนเงินรางวัล</div><div class="text-xs text-gray-500">เช็คยอดและถอนเงินเขัาบัญชี</div></div></div><span class="text-[#f5c200] font-bold">❯</span>
       </div>
-      <h3 class="text-sm font-bold text-gray-800 mt-6 mb-2 px-1">โอนเงินค่าสลากมาที่</h3>
-      <div onclick="showShopBankInfo()" class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3"><div class="text-xl">🏪</div><div><div class="text-sm font-bold text-gray-700">บัญชีร้านค้า (สำหรับโอนจ่าย)</div><div class="text-xs text-rose-500 font-bold">คลิกดูเลขบัญชีร้าน</div></div></div><span class="text-gray-300 font-bold">❯</span>
+      <h3 class="text-sm font-bold text-gray-800 mt-6 mb-2 px-1">ศูนย์ช่วยเหลือ</h3>
+      
+      <!-- เปลี่ยนปุ่มติดต่อแอดมินให้เป็นระบบ Live Chat แทน -->
+      <div onclick="startChatPrompt()" class="bg-purple-50 rounded-xl shadow-sm border border-purple-200 p-4 cursor-pointer hover:bg-purple-100 flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3"><div class="text-xl text-purple-600"><i class="fa-solid fa-headset"></i></div><div><div class="text-sm font-black text-purple-700">แชทติดต่อแอดมิน (Live Chat)</div><div class="text-xs text-purple-600 font-medium">แจ้งปัญหา คุยกับเจ้าหน้าที่โดยตรง</div></div></div><span class="text-purple-500 font-bold">❯</span>
       </div>
 
-      <div onclick="window.open('https://lin.ee/nrDW4UH', '_blank')" class="bg-emerald-50 rounded-xl shadow-sm border border-emerald-200 p-4 cursor-pointer hover:bg-emerald-100 flex items-center justify-between">
-          <div class="flex items-center gap-3"><div class="text-xl">💬</div><div><div class="text-sm font-black text-emerald-700">ติดต่อแอดมิน (LINE)</div><div class="text-xs text-emerald-600 font-medium">แจ้งปัญหา หรือสอบถามเพิ่มเติม</div></div></div><span class="text-emerald-500 font-bold">❯</span>
+      <div onclick="showShopBankInfo()" class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3"><div class="text-xl">🏪</div><div><div class="text-sm font-bold text-gray-700">บัญชีร้านค้า (สำหรับโอนจ่าย)</div><div class="text-xs text-rose-500 font-bold">คลิกดูเลขบัญชีร้าน</div></div></div><span class="text-gray-300 font-bold">❯</span>
       </div>
     </div>
   </div>
@@ -261,6 +273,26 @@
      </div>
   </div>
 
+  <!-- Chat Modal -->
+  <div id="chatModal" class="fixed inset-0 bg-gray-900/80 z-[100] hidden flex-col items-center justify-end sm:justify-center p-0 sm:p-4">
+      <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col h-[75vh] sm:h-[80vh] shadow-2xl relative pb-safe">
+          <!-- Header -->
+          <div class="bg-purple-600 text-white p-4 flex justify-between items-center shadow-md z-10">
+              <h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-headset text-lg"></i> แชทติดต่อแอดมิน</h3>
+              <button onclick="closeChatModal()" class="text-3xl leading-none hover:text-gray-200 transition">&times;</button>
+          </div>
+          <!-- Message Area -->
+          <div id="chat-messages" class="flex-1 bg-slate-50 p-4 overflow-y-auto space-y-3 hide-scrollbar">
+              <div class="text-center text-gray-400 text-xs mt-10">กำลังเชื่อมต่อกับเจ้าหน้าที่...</div>
+          </div>
+          <!-- Input Area -->
+          <div class="p-3 bg-white border-t border-gray-200 flex gap-2">
+              <input type="text" id="chat-input" class="flex-1 border border-gray-300 rounded-full px-4 py-2.5 outline-none focus:border-purple-500 bg-gray-50 text-sm" placeholder="พิมพ์ข้อความ..." onkeypress="if(event.key==='Enter') sendUserMessage()">
+              <button onclick="sendUserMessage()" class="bg-purple-600 hover:bg-purple-700 transition text-white w-11 h-11 rounded-full shrink-0 flex items-center justify-center shadow-md"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+      </div>
+  </div>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCjlBUSa8LEL4j7ORix2p9piAnBU8hvvCY",
@@ -277,31 +309,50 @@
     // 🔴 ใส่ URL ของ Web App Google Apps Script ที่นี่ 🔴
     const GAS_NOTIFY_URL = "ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้";
 
-    let availableTickets = []; 
-    let myTickets = []; 
-    let userProfile = null; 
-    let currentDraw = ""; 
-    let currentLotteryType = 'all'; 
-    let currentOrderTab = 'unpaid'; 
-    let globalSavedPhone = ""; 
-    let globalSavedAddress = ""; 
-    let globalBankName = ""; 
-    let globalBankAccountName = ""; 
-    let globalBankAccountNumber = "";
-    let userCoins = 0;
-    let currentWinData = null; 
-    let globalSalesOpen = true; 
-    let globalTicketBg = "";
-    let countdownInterval = null; 
-    let slideInterval = null; 
-    let slideIndex = 0;
-    let flashSaleActive = false; 
-    let flashSaleEndTime = ""; 
-    let flashSaleTimerInterval = null; 
-    let myWithdrawals = {};
-    let mainCountdownInterval = null;
-    let searchTypingTimer = null;
-    let globalWinBannerUrl = "";
+    window.generateUUID = function() { return 'user_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); };
+
+    let localUid = 'temp_user';
+    try {
+        localUid = localStorage.getItem('bas_lottery_uid') || window.generateUUID();
+        localStorage.setItem('bas_lottery_uid', localUid);
+    } catch(e) {
+        localUid = window.generateUUID();
+    }
+
+    var currentUser = { id: localUid, name: '', phone: '', coins: 0 };
+    var storefrontData = {};
+    var activeDrawName = "";
+    var globalTicketBg = "";
+    var allTickets = [];
+    var myCartTickets = [];
+    var cartTotalAmount = 0;
+    var cartTotalQty = 0;
+    var currentView = 'home';
+    var countdownInterval = null;
+    var activeChatUnsub = null;
+    var slideInterval = null; 
+    var slideIndex = 0;
+    var flashSaleActive = false; 
+    var flashSaleEndTime = ""; 
+    var flashSaleTimerInterval = null; 
+    var myWithdrawals = {};
+    var mainCountdownInterval = null;
+    var searchTypingTimer = null;
+    var globalWinBannerUrl = "";
+    var currentLotteryType = 'all'; 
+    var currentOrderTab = 'unpaid'; 
+    var globalSavedPhone = ""; 
+    var globalSavedAddress = ""; 
+    var globalBankName = ""; 
+    var globalBankAccountName = ""; 
+    var globalBankAccountNumber = "";
+    var userCoins = 0;
+    var currentWinData = null; 
+    var globalSalesOpen = true; 
+    var availableTickets = []; 
+    var myTickets = []; 
+    var userProfile = null; 
+    var currentDraw = "";
 
     async function initLIFF() {
       try {
@@ -312,10 +363,10 @@
               document.getElementById('user-info').innerHTML = `<img src="${userProfile.pictureUrl}" onclick="switchTab('profile')" class="w-8 h-8 rounded-full border border-white shadow-sm object-cover cursor-pointer">`;
               document.getElementById('page-profile-img').src = userProfile.pictureUrl;
           }
-          await checkUserConsent(); 
-          checkReferral();
-          fetchUserProfileData(); 
-          loadMyTickets();
+          await checkUserConsent(userProfile); 
+          checkReferral(userProfile);
+          fetchUserProfileData(userProfile); 
+          loadMyTickets(userProfile);
         } else { 
             if (liff.isInClient()) liff.login(); 
         }
@@ -327,7 +378,7 @@
         if(!liff.isLoggedIn()) liff.login({ redirectUri: window.location.origin }); 
     }
 
-    async function checkUserConsent() {
+    async function checkUserConsent(userProfile) {
         const userRef = db.collection('users').doc(userProfile.userId);
         const doc = await userRef.get();
         if (!doc.exists || !doc.data().consentGiven) {
@@ -351,7 +402,7 @@
         }
     }
 
-    function checkReferral() {
+    function checkReferral(userProfile) {
         const urlParams = new URLSearchParams(window.location.search);
         const refId = urlParams.get('ref');
         if(refId && refId !== userProfile.userId) {
@@ -368,7 +419,7 @@
     }
 
     function shareReferralLink() {
-        const refLink = `${window.location.origin}?ref=${userProfile.userId}`;
+        const refLink = `${window.location.origin}?ref=${currentUser.id}`;
         if (liff.isApiAvailable('shareTargetPicker')) {
             liff.shareTargetPicker([{
                 type: "text",
@@ -394,6 +445,93 @@
         if(liff.isLoggedIn() && liff.isInClient()) {
             liff.sendMessages([{ type: "text", text: msg }]).catch(err => console.log("LIFF MSG Error: ", err));
         }
+    }
+
+    // --- ฟังก์ชัน Live Chat ฝั่งลูกค้า ---
+    function startChatPrompt() {
+        if(!currentUser.name) {
+            return Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE เพื่อติดต่อแอดมินครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin());
+        }
+        
+        Swal.fire({
+            title: 'ติดต่อเจ้าหน้าที่',
+            text: 'คุณต้องการเปิดแชทสนทนากับเจ้าหน้าที่ใช่หรือไม่?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ใช่, ต้องการติดต่อ',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#9333ea'
+        }).then(r => {
+            if(r.isConfirmed) {
+                openChatModal();
+            }
+        });
+    }
+
+    function openChatModal() {
+        const modal = document.getElementById('chatModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // บันทึกสถานะว่าลูกค้าเริ่มแชท
+        db.collection('chats').doc(currentUser.id).set({
+            userName: currentUser.name,
+            status: 'active',
+            updatedAt: Date.now()
+        }, {merge: true});
+
+        // ดึงข้อความสนทนา
+        activeChatUnsub = db.collection('chats').doc(currentUser.id).collection('messages').orderBy('timestamp').onSnapshot(snap => {
+            const box = document.getElementById('chat-messages');
+            box.innerHTML = '';
+            if(snap.empty) {
+                box.innerHTML = '<div class="text-center text-gray-400 text-xs mt-10">พิมพ์ข้อความเพื่อเริ่มคุยกับเจ้าหน้าที่ได้เลยครับ</div>';
+                return;
+            }
+            snap.forEach(doc => {
+                const msg = doc.data();
+                const isMe = msg.sender === 'user';
+                const time = new Date(msg.timestamp).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
+                
+                box.innerHTML += `
+                <div class="flex ${isMe ? 'justify-end' : 'justify-start'} w-full">
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%]">
+                        <div class="${isMe ? 'bg-purple-600 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'} px-4 py-2 rounded-2xl text-sm shadow-sm">
+                            ${msg.text}
+                        </div>
+                        <div class="text-[9px] text-gray-400 mt-1 mx-1">${time}</div>
+                    </div>
+                </div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    function closeChatModal() {
+        const modal = document.getElementById('chatModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if(activeChatUnsub) activeChatUnsub();
+    }
+
+    function sendUserMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if(!text) return;
+        
+        input.value = '';
+        const now = Date.now();
+        
+        db.collection('chats').doc(currentUser.id).collection('messages').add({
+            text: text,
+            sender: 'user',
+            timestamp: now
+        });
+        db.collection('chats').doc(currentUser.id).update({
+            status: 'active',
+            lastMessage: text,
+            updatedAt: now
+        });
     }
 
     function switchTab(tab) {
@@ -521,7 +659,7 @@
                   db.collection('winning_results').doc(currentDraw).onSnapshot(wDoc => { 
                       currentWinData = wDoc.exists ? wDoc.data() : null; 
                       filterData(); 
-                      if(userProfile && currentOrderTab !== '') renderMyOrders(); 
+                      if(currentUser && currentUser.name && currentOrderTab !== '') renderMyOrders(); 
                   });
                   db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => { 
                       availableTickets = []; 
@@ -555,7 +693,7 @@
       });
       db.collection('analytics').doc('search_stats').onSnapshot(doc => {
           if(doc.exists) {
-              let data = doc.data();
+              let data = doc.data() || {};
               let sorted = Object.keys(data).sort((a,b) => data[b] - data[a]); 
               
               let top5 = sorted.slice(0, 5);
@@ -729,7 +867,7 @@
         } 
     }
 
-    function loadMyTickets() {
+    function loadMyTickets(userProfile) {
       if(!userProfile) return;
       db.collection('withdrawals').where('userId', '==', userProfile.userId).onSnapshot(ws => { 
           myWithdrawals = {}; ws.forEach(d => { myWithdrawals[d.id] = d.data(); });
@@ -803,6 +941,9 @@
       else if (currentOrderTab === 'pending') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'รอตรวจสอบสลิป' || t.status === 'pending' || t.status === 'รอตรวจสอบ'));
       else if (currentOrderTab === 'success') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'ชำระสำเร็จ' || t.status === 'sold' || t.status === 'success' || t.status === 'ชำระแล้ว'));
       else if (currentOrderTab === 'history') filteredList = myTickets.filter(t => t.draw !== currentDraw);
+
+      // เรียงลำดับรายการที่มีการเคลื่อนไหวล่าสุดขึ้นก่อน
+      filteredList.sort((a,b) => (b.updatedAt || b.expiresAt || 0) - (a.updatedAt || a.expiresAt || 0));
 
       if(filteredList.length === 0) { document.getElementById('no-orders-data').classList.remove('hidden'); updateBulkPayment(); return; }
       document.getElementById('no-orders-data').classList.add('hidden');
@@ -920,7 +1061,7 @@
             cancelButtonText: 'ปิด'
         }).then((result) => {
             if (result.isConfirmed) {
-                db.collection('lotteries').doc(docId).update({ status: 'available', name: '-', userId: null, expiresAt: null, email: '' }).then(() => {
+                db.collection('lotteries').doc(docId).update({ status: 'available', name: '-', userId: null, expiresAt: null, email: '', updatedAt: Date.now() }).then(() => {
                     Swal.fire({toast: true, position: 'top-end', title: 'ยกเลิกสำเร็จ', icon: 'success', timer: 1500, showConfirmButton: false});
                 });
             }
@@ -944,7 +1085,7 @@
         else { btn.classList.add('opacity-50', 'pointer-events-none'); } 
     }
 
-    async function fetchUserProfileData() {
+    async function fetchUserProfileData(userProfile) {
         if(!userProfile) return;
         document.getElementById('page-profile-name').innerText = userProfile.displayName; document.getElementById('page-profile-id').innerText = `รหัสสมาชิก : P${userProfile.userId.substring(0,6).toUpperCase()}`;
         db.collection('users').doc(userProfile.userId).onSnapshot(doc => { 
@@ -972,7 +1113,7 @@
 
     function openCheckout(docId, num, displayAmount) { 
       if (!liff.isLoggedIn()) { forceLineLogin(); return; }
-      Swal.fire({ title: 'ยืนยันการสั่งซื้อ', html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ยอดชำระ <span class="text-gray-900 text-lg">฿${displayAmount.toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`, showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const phone = document.getElementById('checkoutPhone').value.trim(); if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; } return { phone }; } }).then((result) => { if (result.isConfirmed) { db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true }); db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000) }).then(() => { sendLiffMessage(`☑️ คุณได้จองสลากเลข ${num}\nโปรดชำระเงินภายใน 30 นาทีครับ`); Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); }); } });
+      Swal.fire({ title: 'ยืนยันการสั่งซื้อ', html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ยอดชำระ <span class="text-gray-900 text-lg">฿${displayAmount.toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`, showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const phone = document.getElementById('checkoutPhone').value.trim(); if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; } return { phone }; } }).then((result) => { if (result.isConfirmed) { db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true }); db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000), updatedAt: Date.now() }).then(() => { sendLiffMessage(`☑️ คุณได้จองสลากเลข ${num}\nโปรดชำระเงินภายใน 30 นาทีครับ`); Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); }); } });
     }
 
     function handleFileSelection(fileInputId) { return new Promise((resolve) => { const fileInput = document.getElementById(fileInputId); if(fileInput.files.length === 0) { resolve(null); return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onloadend = function() { resolve(reader.result); }; reader.readAsDataURL(file); }); }
@@ -1019,7 +1160,7 @@
             } 
         }).then((result) => { 
             if(result.isConfirmed) { 
-                const payload = { status: 'รอตรวจสอบสลิป', expiresAt: null, discountCoins: result.value.coinsUsed || null };
+                const payload = { status: 'รอตรวจสอบสลิป', expiresAt: null, discountCoins: result.value.coinsUsed || null, updatedAt: Date.now() };
                 if (result.value.slip) payload.slip = result.value.slip;
                 db.collection('lotteries').doc(docId).update(payload).then(() => { 
                     if(result.value.coinsUsed > 0) db.collection('users').doc(userProfile.userId).update({ coins: firebase.firestore.FieldValue.increment(-result.value.coinsUsed) });
@@ -1076,7 +1217,7 @@
                 const batch = db.batch(); 
                 ids.forEach(id => { 
                     const ref = db.collection('lotteries').doc(id); 
-                    const updateData = { status: 'รอตรวจสอบสลิป', expiresAt: null, discountCoins: result.value.coinsUsed || null };
+                    const updateData = { status: 'รอตรวจสอบสลิป', expiresAt: null, discountCoins: result.value.coinsUsed || null, updatedAt: Date.now() };
                     if (result.value.slip) updateData.slip = result.value.slip;
                     batch.update(ref, updateData); 
                 }); 
@@ -1089,64 +1230,59 @@
         });
     }
 
-    function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false }); } }); }); }
+    function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false, updatedAt: Date.now() }); } }); }); }
     
-    window.onload = function() { initLIFF(); loadShopLotteries(); };
-// นำโค้ดนี้ไปวางในส่วน <script> ของไฟล์ index.html (ตัวอย่างเช่น นำไปวางต่อท้ายบรรทัดที่ประกาศ const db = firebase.firestore(); ก็ได้ครับ)
-db.collection('settings').doc('analytics').set({
-    pageViews: firebase.firestore.FieldValue.increment(1)
-}, { merge: true });
-// 🔴 โค้ดสำหรับดึง IP และเก็บสถิติเชิงลึก (นำไปใส่ในส่วน script ของ index.html) 🔴
-        async function initAdvancedAnalytics() {
-            // 1. ตรวจสอบประเภทอุปกรณ์ (Mobile / Desktop)
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const deviceType = isMobile ? 'mobileViews' : 'desktopViews';
-            
-            // 2. ตรวจสอบผู้ชมไม่ซ้ำ (Unique Visitor)
-            let isUnique = false;
+    window.onload = function() { 
+        initLIFF(); 
+        loadShopLotteries(); 
+        initAdvancedAnalytics(); 
+    };
+    
+    // โค้ดสำหรับดึง IP และเก็บสถิติเชิงลึก 
+    async function initAdvancedAnalytics() {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const deviceType = isMobile ? 'mobileViews' : 'desktopViews';
+        
+        let isUnique = false;
+        try {
             if (!localStorage.getItem('bas_visited_unique')) {
                 isUnique = true;
                 localStorage.setItem('bas_visited_unique', 'true');
             }
+        } catch(e) {}
 
-            // 3. เพิ่มยอดวิวรวมและแยกอุปกรณ์
-            const increment = firebase.firestore.FieldValue.increment(1);
-            let updateData = { pageViews: increment, [deviceType]: increment };
-            if (isUnique) updateData.uniqueVisitors = increment;
-            db.collection('settings').doc('analytics').set(updateData, { merge: true }).catch(()=>{});
+        const increment = firebase.firestore.FieldValue.increment(1);
+        let updateData = { pageViews: increment, [deviceType]: increment };
+        if (isUnique) updateData.uniqueVisitors = increment;
+        db.collection('settings').doc('analytics').set(updateData, { merge: true }).catch(()=>{});
 
-            // 4. ดึงหมายเลข IP (ใช้บริการฟรีจาก ipify)
-            let userIP = "ไม่ระบุ";
-            try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                userIP = data.ip;
-            } catch(e) { console.log('IP fetch failed'); }
+        let userIP = "ไม่ระบุ";
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            userIP = data.ip;
+        } catch(e) { console.log('IP fetch failed'); }
 
-            // 5. รายงานสถานะออนไลน์ (Real-time Presence)
-            const sessionId = currentUser.id || generateUUID();
-            const presenceRef = db.collection('active_visitors').doc(sessionId);
-            
-            function sendHeartbeat() {
-                presenceRef.set({
-                    lastActive: Date.now(),
-                    device: isMobile ? 'Mobile' : 'Desktop',
-                    ip: userIP,
-                    userAgent: navigator.userAgent
-                }, { merge: true }).catch(()=>{});
-            }
-            
-            sendHeartbeat(); // ส่งตอนเข้าเว็บ
-            setInterval(sendHeartbeat, 25000); // อัปเดตทุก 25 วินาทีว่ายังไม่ปิดเว็บ
-            
-            // 6. ลบตัวเองออกจากระบบ Real-time เมื่อปิดเว็บ
-            window.addEventListener('beforeunload', () => {
-                presenceRef.delete().catch(()=>{});
-            });
+        const sessionId = (typeof currentUser !== 'undefined' && currentUser && currentUser.id) ? currentUser.id : window.generateUUID();
+        const presenceRef = db.collection('active_visitors').doc(sessionId);
+        
+        function sendHeartbeat() {
+            presenceRef.set({
+                lastActive: Date.now(),
+                device: isMobile ? 'Mobile' : 'Desktop',
+                ip: userIP,
+                userAgent: navigator.userAgent
+            }, { merge: true }).catch(()=>{});
         }
         
-        // เรียกใช้งานฟังก์ชันเก็บสถิติทันที
-        initAdvancedAnalytics();
+        sendHeartbeat(); // ส่งตอนเข้าเว็บ
+        setInterval(sendHeartbeat, 25000); // อัปเดตทุก 25 วินาทีว่ายังไม่ปิดเว็บ
+        
+        // ลบตัวเองออกจากระบบ Real-time เมื่อปิดเว็บ
+        window.addEventListener('beforeunload', () => {
+            presenceRef.delete().catch(()=>{});
+        });
+    }
 
   </script>
 </body>
