@@ -42,19 +42,17 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    #floating-cart { position: fixed; bottom: 85px; right: 16px; background-color: #d31a1a; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(211,26,26,0.4); cursor: pointer; z-index: 45; transition: transform 0.2s; }
-    #floating-cart:active { transform: scale(0.9); }
-    #cart-badge { position: absolute; top: 0; right: 0; background-color: white; color: #d31a1a; font-size: 11px; font-weight: 900; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d31a1a; }
-    #cart-timer { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); background-color: #fef08a; color: #b45309; font-size: 9px; font-weight: 900; font-family: monospace; padding: 2px 6px; border-radius: 10px; border: 1px solid #fde047; box-shadow: 0 2px 4px rgba(0,0,0,0.1); white-space: nowrap; }
-
-    /* สไตล์สำหรับปุ่มแชทลอย */
-    #floating-chat { position: fixed; bottom: 85px; left: 16px; background-color: #9333ea; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(147,51,234,0.4); cursor: pointer; z-index: 45; transition: transform 0.2s; }
-    #floating-chat:active { transform: scale(0.9); }
+    @keyframes bounceIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    .animate-bounceIn { animation: bounceIn 0.5s ease-out; }
 
     @keyframes goldSparkle { 0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); transform: scale(1); } 50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.9), inset 0 0 10px rgba(255, 215, 0, 0.5); transform: scale(1.02); } }
     .win-sparkle-effect { animation: goldSparkle 2s infinite ease-in-out; border: 2px solid #F59E0B !important; position: relative; z-index: 10; }
     @keyframes shimmerSweep { 0% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(200%) skewX(-20deg); } }
     .shimmer-sweep::after { content: ''; position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation: shimmerSweep 3s infinite; pointer-events: none; }
+    
+    .coin-box { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #fbbf24; border-radius: 12px; padding: 12px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5); }
+    .chat-scroll::-webkit-scrollbar { width: 4px; }
+    .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
   </style>
 </head>
 <body class="pb-32">
@@ -77,7 +75,7 @@
     .animate-\\[marquee_15s_linear_infinite\\] { animation: marquee 15s linear infinite; }
   </style>
 
-  <!-- ตะกร้าสินค้าแบบลอย ย้ายไปอยู่เหนือปุ่มแชท -->
+  <!-- ตะกร้าสินค้าแบบลอย -->
   <div id="floating-cart" onclick="openPaymentModal()" class="hidden fixed bottom-[160px] right-4 z-40 flex-col items-center cursor-pointer animate-bounceIn">
       <div class="bg-[#d31a1a] w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(211,26,26,0.4)] border-2 border-white relative transition-transform hover:scale-105">
           <i class="fa-solid fa-shopping-cart text-white text-xl"></i>
@@ -86,7 +84,7 @@
       <div id="cart-timer" class="hidden mt-1 bg-yellow-300 text-amber-900 text-[9px] font-black px-2 py-0.5 rounded-full border border-yellow-400 shadow-sm whitespace-nowrap">00:00</div>
   </div>
 
-  <!-- ปุ่มแชทลอย ย้ายมาด้านขวา -->
+  <!-- ปุ่มแชทลอย -->
   <div id="floating-chat" onclick="startChatPrompt()" class="fixed bottom-[85px] right-4 z-40 flex flex-col items-center cursor-pointer animate-bounceIn">
       <div class="bg-white text-purple-600 font-bold text-[9px] px-2 py-0.5 rounded-md shadow-sm mb-1 border border-purple-100 whitespace-nowrap">💬 ติดต่อแอดมิน</div>
       <div class="bg-purple-600 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(147,51,234,0.4)] border-2 border-white transition-transform hover:scale-105">
@@ -110,18 +108,14 @@
         </div>
     </div>
 
-    <!-- แบนเนอร์เมนูหลัก 3 ช่อง -->
     <div class="px-4 mb-4 mt-2">
         <div class="grid grid-cols-2 gap-2.5">
-            <!-- ซ้าย: มาสคอตสุ่มหยิบโชค -->
             <div class="row-span-2 relative cursor-pointer active:scale-95 transition shadow-sm rounded-xl overflow-hidden border border-gray-200 bg-white" onclick="openMascotPicker()">
                 <img id="banner-mascot" src="https://via.placeholder.com/300x400?text=รูปมาสคอต" class="w-full h-full object-cover min-h-[170px]">
             </div>
-            <!-- ขวาบน: 10 อันดับเลขดัง -->
             <div class="relative cursor-pointer active:scale-95 transition shadow-sm rounded-xl overflow-hidden border border-gray-200 bg-white" onclick="openTop10Modal()">
                 <img id="banner-top10" src="https://via.placeholder.com/300x190?text=10อันดับเลขดัง" class="w-full h-full object-cover min-h-[80px]">
             </div>
-            <!-- ขวาล่าง: ทำนายฝัน / อื่นๆ -->
             <div class="relative cursor-pointer active:scale-95 transition shadow-sm rounded-xl overflow-hidden border border-gray-200 bg-white" onclick="showDreamPrediction()">
                 <img id="banner-extra" src="https://via.placeholder.com/300x190?text=ทำนายฝัน" class="w-full h-full object-cover min-h-[80px]">
             </div>
@@ -140,7 +134,6 @@
         <input type="number" id="search-input" oninput="filterData()" maxlength="6" placeholder="ค้นหาเลข 6 หลัก..." class="flex-1 border border-gray-300 bg-gray-50 text-gray-800 py-3 px-4 rounded-xl outline-none text-center text-[17px] font-bold tracking-[0.2em] focus:border-[#d31a1a] focus:ring-1 focus:ring-[#d31a1a] transition">
       </div>
       
-      <!-- เซกชัน 5 อันดับเลขฮิตมาแรงจากสถิติจริง -->
       <div class="bg-rose-50 border border-rose-100 rounded-xl p-3">
           <h3 class="text-[12px] font-bold text-rose-600 mb-2 flex items-center gap-1">🔥 5 อันดับเลขฮิตค้นหาแรงที่สุด</h3>
           <div class="flex flex-wrap gap-2" id="trending-numbers-container"></div>
@@ -235,7 +228,6 @@
       </div>
       <h3 class="text-sm font-bold text-gray-800 mt-6 mb-2 px-1">ศูนย์ช่วยเหลือ</h3>
       
-      <!-- เปลี่ยนปุ่มติดต่อแอดมินให้เป็นระบบ Live Chat แทน -->
       <div onclick="startChatPrompt()" class="bg-purple-50 rounded-xl shadow-sm border border-purple-200 p-4 cursor-pointer hover:bg-purple-100 flex items-center justify-between mb-4">
           <div class="flex items-center gap-3"><div class="text-xl text-purple-600"><i class="fa-solid fa-headset"></i></div><div><div class="text-sm font-black text-purple-700">แชทติดต่อแอดมิน (Live Chat)</div><div class="text-xs text-purple-600 font-medium">แจ้งปัญหา คุยกับเจ้าหน้าที่โดยตรง</div></div></div><span class="text-purple-500 font-bold">❯</span>
       </div>
@@ -282,20 +274,21 @@
      </div>
   </div>
 
-  <!-- Chat Modal พร้อมรูปโปรไฟล์ -->
+  <!-- Chat Modal พร้อมระบบส่งรูป -->
   <div id="chatModal" class="fixed inset-0 bg-gray-900/80 z-[100] hidden flex-col items-center justify-end sm:justify-center p-0 sm:p-4">
       <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col h-[75vh] sm:h-[80vh] shadow-2xl relative pb-safe">
-          <!-- Header -->
           <div class="bg-purple-600 text-white p-4 flex justify-between items-center shadow-md z-10">
               <h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-headset text-lg"></i> แชทติดต่อเจ้าหน้าที่</h3>
               <button onclick="closeChatModal()" class="text-3xl leading-none hover:text-gray-200 transition">&times;</button>
           </div>
-          <!-- Message Area -->
           <div id="chat-messages" class="flex-1 bg-slate-50 p-4 overflow-y-auto space-y-3 hide-scrollbar">
               <div class="text-center text-gray-400 text-xs mt-10">กำลังเชื่อมต่อกับเจ้าหน้าที่...</div>
           </div>
-          <!-- Input Area -->
-          <div class="p-3 bg-white border-t border-gray-200 flex gap-2">
+          <div class="p-3 bg-white border-t border-gray-200 flex gap-2 items-center">
+              <label class="cursor-pointer text-gray-400 hover:text-purple-600 transition p-2">
+                  <i class="fa-solid fa-image text-2xl"></i>
+                  <input type="file" id="chat-image-input" accept="image/*" class="hidden" onchange="sendChatImage()">
+              </label>
               <input type="text" id="chat-input" class="flex-1 border border-gray-300 rounded-full px-4 py-2.5 outline-none focus:border-purple-500 bg-gray-50 text-sm" placeholder="พิมพ์ข้อความ..." onkeypress="if(event.key==='Enter') sendUserMessage()">
               <button onclick="sendUserMessage()" class="bg-purple-600 hover:bg-purple-700 transition text-white w-11 h-11 rounded-full shrink-0 flex items-center justify-center shadow-md"><i class="fa-solid fa-paper-plane"></i></button>
           </div>
@@ -351,27 +344,15 @@
                     ✅ ชำระด้วย Coin ครบแล้ว<br><span class="text-sm font-medium">กดปุ่มยืนยันแจ้งชำระเงินได้เลย</span>
                 </div>
 
-                <button onclick="submitOrder()" class="w-full bg-slate-800 text-white font-bold p-3.5 rounded-xl shadow-md text-lg mt-4">✅ ยืนยันแจ้งชำระเงิน</button>
+                <button id="btn-confirm-pay" onclick="submitOrder()" class="w-full bg-slate-800 text-white font-bold p-3.5 rounded-xl shadow-md text-lg mt-4">✅ ยืนยันแจ้งชำระเงิน</button>
             </div>
         </div>
-    </div>
-
-    <!-- Grand Winning Popup -->
-    <div id="grandWinningPopup">
-        <div class="win-bg-container">
-            <img id="win-popup-bg" src="https://via.placeholder.com/600x800?text=Win" class="win-img-bg">
-            <div class="win-content">
-                <div id="win-number-text" class="win-number-display">123456</div>
-                <div class="mt-4 text-white font-black text-xl drop-shadow-md">รับเงินรางวัล: <span id="win-amount-text" class="text-yellow-300 text-2xl">฿6,000,000</span></div>
-            </div>
-        </div>
-        <button onclick="closeWinPopup()" class="mt-6 bg-white/20 text-white border-2 border-white px-6 py-2 rounded-full font-bold backdrop-blur-md">ปิดหน้าต่าง</button>
     </div>
 
     <input type="text" id="copy-helper" class="absolute -left-[9999px]">
 
   <script>
-    // --- ตั้งค่า Firebase และ ตัวแปรหลักทั้งหมด (ห้ามแก้ถ้าไม่จำเป็น) ---
+    // --- ตั้งค่า Firebase ---
     const firebaseConfig = {
       apiKey: "AIzaSyCjlBUSa8LEL4j7ORix2p9piAnBU8hvvCY",
       authDomain: "bas-lottery.firebaseapp.com",
@@ -383,7 +364,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const LIFF_ID = "2010226176-jm6lSL41"; 
-    
     const GAS_NOTIFY_URL = "ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้";
 
     window.generateUUID = function() { return 'user_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); };
@@ -552,7 +532,7 @@
         }
     }
 
-    function shareReferralLink() {
+    window.shareReferralLink = function() {
         const refLink = `${window.location.origin}?ref=${currentUser.id}`;
         if (liff.isApiAvailable('shareTargetPicker')) {
             liff.shareTargetPicker([{
@@ -565,7 +545,7 @@
         }
     }
 
-    function copyToClipboard(text) {
+    window.copyToClipboard = function(text) {
         const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
         Swal.fire({toast: true, position: 'top-end', title: 'คัดลอกแล้ว', icon: 'success', timer: 1500, showConfirmButton: false});
     }
@@ -626,12 +606,16 @@
                 const isMe = msg.sender === 'user';
                 const time = new Date(msg.timestamp).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
                 
+                const textHtml = msg.text ? `<div>${msg.text}</div>` : '';
+                const imgHtml = msg.imageUrl ? `<img src="${msg.imageUrl}" class="w-full max-w-[200px] rounded-lg ${msg.text ? 'mt-2' : ''} cursor-pointer shadow-sm border border-gray-200" onclick="window.open(this.src, '_blank')">` : '';
+                const contentHtml = textHtml + imgHtml;
+                
                 if (isMe) {
                     box.innerHTML += `
                     <div class="flex justify-end w-full gap-2">
                         <div class="flex flex-col items-end max-w-[75%]">
                             <div class="bg-purple-600 text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm shadow-sm">
-                                ${msg.text}
+                                ${contentHtml}
                             </div>
                             <div class="text-[9px] text-gray-400 mt-1 mx-1">${time}</div>
                         </div>
@@ -645,7 +629,7 @@
                         </div>
                         <div class="flex flex-col items-start max-w-[75%]">
                             <div class="bg-white border border-gray-200 text-gray-800 px-4 py-2 rounded-2xl rounded-tl-sm text-sm shadow-sm">
-                                ${msg.text}
+                                ${contentHtml}
                             </div>
                             <div class="text-[9px] text-gray-400 mt-1 mx-1">${time}</div>
                         </div>
@@ -672,15 +656,30 @@
         const now = Date.now();
         
         db.collection('chats').doc(userProfile.userId).collection('messages').add({
-            text: text,
-            sender: 'user',
-            timestamp: now
+            text: text, sender: 'user', timestamp: now
         });
         db.collection('chats').doc(userProfile.userId).update({
-            status: 'active',
-            lastMessage: text,
-            updatedAt: now
+            status: 'active', lastMessage: text, updatedAt: now
         });
+    }
+
+    window.sendChatImage = async function() {
+        const fileInput = document.getElementById('chat-image-input');
+        if (!fileInput.files.length) return;
+        
+        Swal.fire({title: 'กำลังส่งรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+        const base64 = await resizeImage(fileInput.files[0], 800, 800, 0.7);
+        fileInput.value = '';
+        
+        const now = Date.now();
+        
+        await db.collection('chats').doc(userProfile.userId).collection('messages').add({
+            text: '', imageUrl: base64, sender: 'user', timestamp: now
+        });
+        await db.collection('chats').doc(userProfile.userId).update({
+            status: 'active', lastMessage: 'ส่งรูปภาพ 📷', updatedAt: now
+        });
+        Swal.close();
     }
 
     // --- ส่วนการจัดการสลากของระบบหน้าร้าน ---
@@ -942,14 +941,16 @@
 
     function renderMyOrders() {
       const grid = document.getElementById('my-orders-grid'); grid.innerHTML = ''; let filteredList = []; let unpaidTotalCount = 0;
-      myTickets.forEach(t => { if (t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ')) { unpaidTotalCount++; } }); updateCartBadge(unpaidTotalCount);
       
-      if (currentOrderTab === 'unpaid') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ'));
+      myCartTickets = myTickets.filter(t => t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ'));
+      unpaidTotalCount = myCartTickets.length;
+      updateCartBadge(unpaidTotalCount);
+      
+      if (currentOrderTab === 'unpaid') filteredList = myCartTickets;
       else if (currentOrderTab === 'pending') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'รอตรวจสอบสลิป' || t.status === 'pending' || t.status === 'รอตรวจสอบ'));
       else if (currentOrderTab === 'success') filteredList = myTickets.filter(t => t.draw === currentDraw && (t.status === 'ชำระสำเร็จ' || t.status === 'sold' || t.status === 'success' || t.status === 'ชำระแล้ว'));
       else if (currentOrderTab === 'history') filteredList = myTickets.filter(t => t.draw !== currentDraw);
 
-      // เรียงลำดับรายการที่มีการเคลื่อนไหวล่าสุดขึ้นก่อน
       filteredList.sort((a,b) => (b.updatedAt || b.expiresAt || 0) - (a.updatedAt || a.expiresAt || 0));
 
       if(filteredList.length === 0) { document.getElementById('no-orders-data').classList.remove('hidden'); updateBulkPayment(); return; }
@@ -1056,6 +1057,10 @@
         }
     }
 
+    window.closeWinPopup = function() {
+        document.getElementById('grandWinningPopup').style.display = 'none';
+    }
+
     function cancelTicket(docId) {
         Swal.fire({
             title: 'ยกเลิกการจองสลาก?',
@@ -1103,25 +1108,20 @@
         });
     }
 
-    function editBankInfo() {
+    window.editBankInfo = function() {
         if(!userProfile) return;
         const html = `<div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">ธนาคาร</label><select id="edit-bank-name" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><option value="กสิกรไทย (KBANK)" ${globalBankName === 'กสิกรไทย (KBANK)' ? 'selected':''}>กสิกรไทย (KBANK)</option><option value="ไทยพาณิชย์ (SCB)" ${globalBankName === 'ไทยพาณิชย์ (SCB)' ? 'selected':''}>ไทยพาณิชย์ (SCB)</option><option value="กรุงเทพ (BBL)" ${globalBankName === 'กรุงเทพ (BBL)' ? 'selected':''}>กรุงเทพ (BBL)</option><option value="กรุงไทย (KTB)" ${globalBankName === 'กรุงไทย (KTB)' ? 'selected':''}>กรุงไทย (KTB)</option><option value="กรุงศรีอยุธยา (BAY)" ${globalBankName === 'กรุงศรีอยุธยา (BAY)' ? 'selected':''}>กรุงศรีอยุธยา (BAY)</option><option value="ทหารไทยธนชาต (TTB)" ${globalBankName === 'ทหารไทยธนชาต (TTB)' ? 'selected':''}>ทหารไทยธนชาต (TTB)</option><option value="ออมสิน (GSB)" ${globalBankName === 'ออมสิน (GSB)' ? 'selected':''}>ออมสิน (GSB)</option><option value="ธ.ก.ส. (BAAC)" ${globalBankName === 'ธ.ก.ส. (BAAC)' ? 'selected':''}>ธ.ก.ส. (BAAC)</option></select><label class="block text-xs font-bold text-gray-700 mb-1">ชื่อบัญชี</label><input type="text" id="edit-bank-account-name" value="${globalBankAccountName}" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><label class="block text-xs font-bold text-gray-700 mb-1">เลขที่บัญชี</label><input type="number" id="edit-bank-account-number" value="${globalBankAccountNumber}" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm tracking-widest"></div>`;
         Swal.fire({ title: 'บัญชีรับเงินรางวัล', html: html, showCancelButton: true, confirmButtonText: '💾 บันทึกบัญชี', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const bName = document.getElementById('edit-bank-name').value; const bAccName = document.getElementById('edit-bank-account-name').value.trim(); const bAccNum = document.getElementById('edit-bank-account-number').value.trim(); if(!bAccName || !bAccNum) { Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน'); return false; } try { Swal.showLoading(); await db.collection('users').doc(userProfile.userId).set({ bankName: bName, bankAccountName: bAccName, bankAccountNumber: bAccNum, updatedAt: Date.now() }, { merge: true }); return true; } catch(err) { Swal.showValidationMessage('ผิดพลาด'); return false; } } }).then((res) => { if(res.isConfirmed) Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false }); });
     }
 
-    function editProfileField(field) {
+    window.editProfileField = function(field) {
         if(!userProfile) return;
         let title = field === 'phone' ? '📱 เบอร์โทรศัพท์' : '🚚 ที่อยู่จัดส่ง'; let currentValue = field === 'phone' ? globalSavedPhone : globalSavedAddress;
         let inputHtml = field === 'phone' ? `<input type="tel" id="edit-field-input" value="${currentValue}" placeholder="เช่น 0891234567" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-center text-lg bg-gray-50 shadow-inner">` : `<textarea id="edit-field-input" rows="4" placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-medium text-sm bg-gray-50 shadow-inner">${currentValue}</textarea>`;
         Swal.fire({ title: title, html: inputHtml, showCancelButton: true, confirmButtonText: '💾 บันทึก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const newVal = document.getElementById('edit-field-input').value.trim(); if(field === 'phone' && !newVal) { Swal.showValidationMessage('กรุณากรอกข้อมูลด้วยครับ'); return false; } try { Swal.showLoading(); let updateData = { updatedAt: Date.now() }; if(field === 'phone') updateData.phone = newVal; if(field === 'address') updateData.address = newVal; await db.collection('users').doc(userProfile.userId).set(updateData, { merge: true }); return true; } catch(err) { Swal.showValidationMessage('ผิดพลาด'); return false; } } }).then((res) => { if(res.isConfirmed) Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false }); });
     }
 
-    function showShopBankInfo() { Swal.fire({ title: '🏦 บัญชีร้านค้า', html: `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left mt-2"><p class="text-sm font-medium text-gray-600 mb-1">ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="text-sm font-medium text-gray-600 mb-1">ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p><p class="text-sm font-medium text-gray-600 mt-3">เลขที่บัญชี:</p><div class="bg-white border border-emerald-100 rounded-lg p-2 text-center mt-1 flex items-center justify-center gap-2"><span class="font-mono font-black text-2xl text-gray-800 tracking-widest select-all">0138284018</span> <button onclick="copyToClipboard('0138284018')" class="bg-gray-200 text-gray-700 p-2 rounded-lg text-xs font-bold active:scale-95 transition">📋</button></div></div>`, confirmButtonText: 'ปิด', confirmButtonColor: '#d31a1a' }); }
-
-    function openCheckout(docId, num, displayAmount) { 
-      if (typeof liff === 'undefined' || !liff.isLoggedIn()) { forceLineLogin(); return; }
-      Swal.fire({ title: 'ยืนยันการสั่งซื้อ', html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ยอดชำระ <span class="text-gray-900 text-lg">฿${displayAmount.toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`, showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const phone = document.getElementById('checkoutPhone').value.trim(); if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; } return { phone }; } }).then((result) => { if (result.isConfirmed) { db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true }); db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000), updatedAt: Date.now() }).then(() => { sendLiffMessage(`☑️ คุณได้จองสลากเลข ${num}\nโปรดชำระเงินภายใน 30 นาทีครับ`); Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); }); } });
-    }
+    window.showShopBankInfo = function() { Swal.fire({ title: '🏦 บัญชีร้านค้า', html: `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left mt-2"><p class="text-sm font-medium text-gray-600 mb-1">ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="text-sm font-medium text-gray-600 mb-1">ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p><p class="text-sm font-medium text-gray-600 mt-3">เลขที่บัญชี:</p><div class="bg-white border border-emerald-100 rounded-lg p-2 text-center mt-1 flex items-center justify-center gap-2"><span class="font-mono font-black text-2xl text-gray-800 tracking-widest select-all">0138284018</span> <button onclick="copyToClipboard('0138284018')" class="bg-gray-200 text-gray-700 p-2 rounded-lg text-xs font-bold active:scale-95 transition">📋</button></div></div>`, confirmButtonText: 'ปิด', confirmButtonColor: '#d31a1a' }); }
 
     window.openPaymentModal = function(id = null, numStr = null, amount = null) {
         if(myCartTickets.length === 0 && !id) return;
@@ -1221,36 +1221,14 @@
         });
     }
 
-    window.processBulkPayment = function() {
-        const btn = document.getElementById('btn-bulk-pay'); 
-        const ids = JSON.parse(btn.dataset.ids); 
-        const amount = parseInt(btn.dataset.total);
-        cartTotalAmount = amount; cartTotalQty = ids.length;
-        
-        document.getElementById('pay-qty').innerText = ids.length + ' ใบ (รวบยอด)';
-        if(document.getElementById('btn-confirm-pay')) {
-             document.getElementById('btn-confirm-pay').dataset.ids = JSON.stringify(ids);
-        }
-        
-        document.getElementById('pay-total').innerText = '฿' + cartTotalAmount.toLocaleString();
-        document.getElementById('pay-my-coins').innerText = userCoins;
-        document.getElementById('input-use-coins').value = '';
-        document.getElementById('slip-file').value = '';
-        if(storefrontData.promptpayNumber) { document.getElementById('promptpay-qr').src = `https://promptpay.io/${storefrontData.promptpayNumber}/${cartTotalAmount}.png`; } 
-
-        recalcPayment();
-        const modal = document.getElementById('paymentModal');
-        modal.classList.remove('hidden'); modal.classList.add('flex');
-    }
-
     function handleFileSelection(fileInputId) { return new Promise((resolve) => { const fileInput = document.getElementById(fileInputId); if(fileInput.files.length === 0) { resolve(null); return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onloadend = function() { resolve(reader.result); }; reader.readAsDataURL(file); }); }
     function openTop10Modal() { document.getElementById('top10-modal').classList.remove('hidden'); document.getElementById('top10-modal').classList.add('flex'); }
     function closeTop10Modal() { document.getElementById('top10-modal').classList.add('hidden'); document.getElementById('top10-modal').classList.remove('flex'); }
     function setLotteryType(type) { currentLotteryType = type; ['all','single','set'].forEach(t => { document.getElementById('type-'+t).className = (t === type) ? 'filter-btn active' : 'filter-btn'; }); filterData(); }
     function randomizeNumber() { const randomNum = Math.floor(100000 + Math.random() * 900000); document.getElementById('search-input').value = randomNum.toString().substring(0, 2); filterData(); }
     function showSlides() { const slides = document.querySelectorAll('.carousel-slide.active-slide'); if(slides.length === 0) return; for (let i = 0; i < slides.length; i++) slides[i].style.display = "none"; slideIndex++; if (slideIndex > slides.length) slideIndex = 1; slides[slideIndex - 1].style.display = "block"; slideInterval = setTimeout(showSlides, 3000); }
-    function showPromoPopup() { db.collection('settings').doc('promotion').get().then(doc => { if(doc.exists && doc.data().isActive && doc.data().imageUrl) { if(!sessionStorage.getItem('promo_shown')) { Swal.fire({ imageUrl: doc.data().imageUrl, imageAlt: 'Promotion', showConfirmButton: true, confirmButtonText: 'ปิดหน้าต่าง', confirmButtonColor: '#d31a1a', width: '90%', padding: '0', background: 'transparent', backdrop: `rgba(0,0,0,0.8)`, customClass: { image: 'rounded-2xl max-w-full m-0' } }); sessionStorage.setItem('promo_shown', 'true'); } } }); }
     function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false, updatedAt: Date.now() }); } }); }); }
+    function showPromoPopup() { db.collection('settings').doc('promotion').get().then(doc => { if(doc.exists && doc.data().isActive && doc.data().imageUrl) { if(!sessionStorage.getItem('promo_shown')) { Swal.fire({ imageUrl: doc.data().imageUrl, imageAlt: 'Promotion', showConfirmButton: true, confirmButtonText: 'ปิดหน้าต่าง', confirmButtonColor: '#d31a1a', width: '90%', padding: '0', background: 'transparent', backdrop: `rgba(0,0,0,0.8)`, customClass: { image: 'rounded-2xl max-w-full m-0' } }); sessionStorage.setItem('promo_shown', 'true'); } } }); }
 
     async function initAdvancedAnalytics() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

@@ -644,6 +644,7 @@
         document.getElementById('admin-chat-name').innerHTML = `<i class="fa-solid fa-comments text-purple-500"></i> สนทนากับ: ${userName || 'ลูกค้า'}`;
         document.getElementById('btn-close-chat').classList.remove('hidden');
         document.getElementById('admin-chat-input-area').classList.remove('hidden');
+        document.getElementById('admin-chat-input-area').classList.add('flex');
         
         db.collection('chats').where('status', '==', 'active').get().then(snap => loadAdminChatList(snap));
 
@@ -664,12 +665,16 @@
                 const isMe = msg.sender === 'admin';
                 const time = new Date(msg.timestamp).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
                 
+                const textHtml = msg.text ? `<div>${msg.text}</div>` : '';
+                const imgHtml = msg.imageUrl ? `<img src="${msg.imageUrl}" class="w-full max-w-[200px] rounded-lg ${msg.text ? 'mt-2' : ''} cursor-pointer shadow-sm border border-gray-200" onclick="window.open(this.src, '_blank')">` : '';
+                const contentHtml = textHtml + imgHtml;
+
                 messagesDiv.innerHTML += `
                 <div class="flex ${isMe ? 'justify-end' : 'justify-start'} w-full gap-2 mb-3">
                     ${!isMe ? `<div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center shrink-0 shadow-sm border border-slate-300"><i class="fa-solid fa-user text-xs"></i></div>` : ''}
                     <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
                         <div class="${isMe ? 'bg-purple-600 text-white rounded-tr-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'} px-4 py-2.5 rounded-2xl text-sm shadow-sm">
-                            ${msg.text}
+                            ${contentHtml}
                         </div>
                         <div class="text-[9px] text-slate-400 mt-1 mx-1">${time}</div>
                     </div>
@@ -693,6 +698,26 @@
         db.collection('chats').doc(currentChatUserId).update({
             lastMessage: text, updatedAt: now
         });
+    }
+
+    window.sendChatImage = async function() {
+        if (!currentChatUserId) return;
+        const fileInput = document.getElementById('admin-chat-image-input');
+        if (!fileInput.files.length) return;
+        
+        Swal.fire({title: 'กำลังส่งรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+        const base64 = await resizeImage(fileInput.files[0], 800, 800, 0.7);
+        fileInput.value = '';
+        
+        const now = Date.now();
+        
+        await db.collection('chats').doc(currentChatUserId).collection('messages').add({
+            text: '', imageUrl: base64, sender: 'admin', timestamp: now
+        });
+        await db.collection('chats').doc(currentChatUserId).update({
+            status: 'active', lastMessage: 'ส่งรูปภาพ 📷', updatedAt: now
+        });
+        Swal.close();
     }
 
     function closeChatCase() {
