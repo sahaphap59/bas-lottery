@@ -77,16 +77,21 @@
     .animate-\\[marquee_15s_linear_infinite\\] { animation: marquee 15s linear infinite; }
   </style>
 
-  <!-- ตะกร้าสินค้าแบบลอย พร้อมเวลานับถอยหลัง -->
-  <div id="floating-cart" onclick="switchTab('orders'); setOrderTab('unpaid');" class="hidden max-w-md mx-auto">
-      <span class="text-2xl">🛒</span>
-      <span id="cart-badge">0</span>
-      <span id="cart-timer" style="display: none;">00:00</span>
+  <!-- ตะกร้าสินค้าแบบลอย ย้ายไปอยู่เหนือปุ่มแชท -->
+  <div id="floating-cart" onclick="openPaymentModal()" class="hidden fixed bottom-[160px] right-4 z-40 flex-col items-center cursor-pointer animate-bounceIn">
+      <div class="bg-[#d31a1a] w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(211,26,26,0.4)] border-2 border-white relative transition-transform hover:scale-105">
+          <i class="fa-solid fa-shopping-cart text-white text-xl"></i>
+          <span id="cart-badge" class="absolute -top-1 -right-1 bg-white text-[#d31a1a] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#d31a1a]">0</span>
+      </div>
+      <div id="cart-timer" class="hidden mt-1 bg-yellow-300 text-amber-900 text-[9px] font-black px-2 py-0.5 rounded-full border border-yellow-400 shadow-sm whitespace-nowrap">00:00</div>
   </div>
 
-  <!-- ปุ่มแชทลอย -->
-  <div id="floating-chat" onclick="startChatPrompt()" class="max-w-md mx-auto">
-      <i class="fa-solid fa-headset text-2xl mt-1 text-white"></i>
+  <!-- ปุ่มแชทลอย ย้ายมาด้านขวา -->
+  <div id="floating-chat" onclick="startChatPrompt()" class="fixed bottom-[85px] right-4 z-40 flex flex-col items-center cursor-pointer animate-bounceIn">
+      <div class="bg-white text-purple-600 font-bold text-[9px] px-2 py-0.5 rounded-md shadow-sm mb-1 border border-purple-100 whitespace-nowrap">💬 ติดต่อแอดมิน</div>
+      <div class="bg-purple-600 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(147,51,234,0.4)] border-2 border-white transition-transform hover:scale-105">
+          <i class="fa-solid fa-headset text-white text-xl mt-0.5"></i>
+      </div>
   </div>
 
   <div id="home-section" class="block max-w-md mx-auto">
@@ -277,12 +282,12 @@
      </div>
   </div>
 
-  <!-- Chat Modal -->
+  <!-- Chat Modal พร้อมรูปโปรไฟล์ -->
   <div id="chatModal" class="fixed inset-0 bg-gray-900/80 z-[100] hidden flex-col items-center justify-end sm:justify-center p-0 sm:p-4">
       <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col h-[75vh] sm:h-[80vh] shadow-2xl relative pb-safe">
           <!-- Header -->
           <div class="bg-purple-600 text-white p-4 flex justify-between items-center shadow-md z-10">
-              <h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-headset text-lg"></i> แชทติดต่อแอดมิน</h3>
+              <h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-headset text-lg"></i> แชทติดต่อเจ้าหน้าที่</h3>
               <button onclick="closeChatModal()" class="text-3xl leading-none hover:text-gray-200 transition">&times;</button>
           </div>
           <!-- Message Area -->
@@ -297,7 +302,76 @@
       </div>
   </div>
 
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="fixed inset-0 bg-slate-900/90 z-[90] items-center justify-center p-4 backdrop-blur-sm overflow-y-auto pt-10 pb-20 hidden">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden my-auto">
+            <div class="bg-slate-800 text-white p-4 flex justify-between items-center">
+                <h2 class="font-bold">🛒 ยืนยันการสั่งซื้อ</h2>
+                <button onclick="closePaymentModal()" class="text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="p-5">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
+                    <div class="flex justify-between text-sm font-bold text-slate-600 mb-1"><span>จำนวนสลากที่จอง:</span><span id="pay-qty" class="text-slate-800">0 ใบ</span></div>
+                    <div class="flex justify-between text-sm font-bold text-slate-600"><span>ยอดรวมเบื้องต้น:</span><span id="pay-total" class="text-rose-600">฿0</span></div>
+                </div>
+
+                <div class="coin-box mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-black text-yellow-800"><i class="fa-solid fa-coins"></i> ใช้ Coin เป็นส่วนลด</label>
+                        <span class="text-[10px] font-bold text-yellow-600">มีอยู่: <span id="pay-my-coins">0</span></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="number" id="input-use-coins" placeholder="ใส่จำนวน Coin" oninput="recalcPayment()" class="flex-1 border border-yellow-300 p-2.5 rounded-lg text-sm font-bold outline-none text-yellow-900 bg-white">
+                        <button onclick="useMaxCoins()" class="bg-yellow-500 text-white font-bold px-4 rounded-lg text-xs shadow-sm">ใช้ทั้งหมด</button>
+                    </div>
+                    <div class="text-[10px] text-yellow-700 mt-1">* 1 Coin = ลด 1 บาท</div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-4 mb-4 flex justify-between items-end">
+                    <span class="font-bold text-slate-700">ยอดชำระสุทธิ:</span>
+                    <span id="pay-final" class="text-3xl font-black text-emerald-600">฿0</span>
+                </div>
+
+                <div id="payment-method-area">
+                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 text-center mb-4">
+                        <p class="text-xs font-bold text-indigo-800 mb-2">สแกน QR Code เพื่อชำระเงิน</p>
+                        <img id="promptpay-qr" src="" class="w-40 h-40 mx-auto rounded-lg shadow-sm border-2 border-indigo-200 mb-2">
+                        <p class="text-sm font-black text-indigo-900" id="bank-acc-num">012-3-45678-9</p>
+                        <p class="text-xs font-bold text-indigo-600" id="bank-acc-name">นาย ทดสอบ ระบบ</p>
+                        <button onclick="copyAccNumber()" class="mt-2 text-xs bg-indigo-200 text-indigo-800 font-bold px-3 py-1 rounded-full"><i class="fa-regular fa-copy"></i> คัดลอกเลขบัญชี</button>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">📸 อัปโหลดสลิปโอนเงิน (บังคับ)</label>
+                        <input type="file" id="slip-file" accept="image/*" class="w-full text-sm border border-slate-300 p-2 rounded-xl outline-none bg-slate-50">
+                    </div>
+                </div>
+                
+                <div id="free-order-msg" class="hidden text-center py-6 bg-green-50 border border-green-200 rounded-xl text-green-700 font-black text-lg">
+                    ✅ ชำระด้วย Coin ครบแล้ว<br><span class="text-sm font-medium">กดปุ่มยืนยันแจ้งชำระเงินได้เลย</span>
+                </div>
+
+                <button onclick="submitOrder()" class="w-full bg-slate-800 text-white font-bold p-3.5 rounded-xl shadow-md text-lg mt-4">✅ ยืนยันแจ้งชำระเงิน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grand Winning Popup -->
+    <div id="grandWinningPopup">
+        <div class="win-bg-container">
+            <img id="win-popup-bg" src="https://via.placeholder.com/600x800?text=Win" class="win-img-bg">
+            <div class="win-content">
+                <div id="win-number-text" class="win-number-display">123456</div>
+                <div class="mt-4 text-white font-black text-xl drop-shadow-md">รับเงินรางวัล: <span id="win-amount-text" class="text-yellow-300 text-2xl">฿6,000,000</span></div>
+            </div>
+        </div>
+        <button onclick="closeWinPopup()" class="mt-6 bg-white/20 text-white border-2 border-white px-6 py-2 rounded-full font-bold backdrop-blur-md">ปิดหน้าต่าง</button>
+    </div>
+
+    <input type="text" id="copy-helper" class="absolute -left-[9999px]">
+
   <script>
+    // --- ตั้งค่า Firebase และ ตัวแปรหลักทั้งหมด (ห้ามแก้ถ้าไม่จำเป็น) ---
     const firebaseConfig = {
       apiKey: "AIzaSyCjlBUSa8LEL4j7ORix2p9piAnBU8hvvCY",
       authDomain: "bas-lottery.firebaseapp.com",
@@ -310,12 +384,11 @@
     const db = firebase.firestore();
     const LIFF_ID = "2010226176-jm6lSL41"; 
     
-    // 🔴 ใส่ URL ของ Web App Google Apps Script ที่นี่ 🔴
     const GAS_NOTIFY_URL = "ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้";
 
     window.generateUUID = function() { return 'user_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); };
 
-    let localUid = 'temp_user';
+    var localUid = 'temp_user';
     try {
         localUid = localStorage.getItem('bas_lottery_uid') || window.generateUUID();
         localStorage.setItem('bas_lottery_uid', localUid);
@@ -327,7 +400,8 @@
     var storefrontData = {};
     var activeDrawName = "";
     var globalTicketBg = "";
-    var allTickets = [];
+    var availableTickets = []; 
+    var myTickets = []; 
     var myCartTickets = [];
     var cartTotalAmount = 0;
     var cartTotalQty = 0;
@@ -353,10 +427,76 @@
     var userCoins = 0;
     var currentWinData = null; 
     var globalSalesOpen = true; 
-    var availableTickets = []; 
-    var myTickets = []; 
     var userProfile = null; 
     var currentDraw = "";
+
+    // ฟังก์ชันสร้างการนับถอยหลังหลัก
+    function startMainCountdown(targetDateStr) {
+        if(mainCountdownInterval) clearInterval(mainCountdownInterval);
+        const cdBox = document.getElementById('countdown-display');
+        if(!targetDateStr) { cdBox.classList.add('hidden'); return; }
+        const target = new Date(targetDateStr).getTime(); 
+        if(isNaN(target)) { cdBox.classList.add('hidden'); return; }
+        
+        cdBox.classList.remove('hidden');
+        mainCountdownInterval = setInterval(() => {
+            const distance = target - new Date().getTime();
+            if (distance < 0) { clearInterval(mainCountdownInterval); cdBox.classList.add('hidden'); return; }
+            document.getElementById('cd-days').innerText = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0'); 
+            document.getElementById('cd-hours').innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'); 
+            document.getElementById('cd-mins').innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'); 
+            document.getElementById('cd-secs').innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+        }, 1000);
+    }
+
+    // ฟังก์ชันสร้างการนับถอยหลังสำหรับ Flash Sale
+    function startFlashSaleCountdown() {
+        if(flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
+        const container = document.getElementById('flash-sale-container'); 
+        const timerEl = document.getElementById('fs-timer');
+        if(!flashSaleActive) { container.classList.add('hidden'); return; }
+        if(!flashSaleEndTime) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; container.classList.remove('hidden'); return; }
+        const target = new Date(flashSaleEndTime).getTime(); 
+        if(isNaN(target)) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; container.classList.remove('hidden'); return; }
+        if(target - Date.now() <= 0) { container.classList.add('hidden'); return; }
+        
+        container.classList.remove('hidden');
+        flashSaleTimerInterval = setInterval(() => {
+            const distance = target - Date.now();
+            if(distance <= 0) { clearInterval(flashSaleTimerInterval); container.classList.add('hidden'); filterData(); return; }
+            const hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'); 
+            const mins = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'); 
+            const secs = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+            timerEl.innerHTML = `⏱️ สิ้นสุดใน: ${hours}:${mins}:${secs}`;
+        }, 1000);
+    }
+
+    // --- ควบคุมหน้าต่าง Navigation (เมนูด้านล่าง) ---
+    window.switchTab = function(tab) {
+      if ((tab === 'orders' || tab === 'profile') && (typeof liff === 'undefined' || !liff.isLoggedIn())) { 
+          Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE ก่อนครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin()); return; 
+      }
+      document.getElementById('home-section').style.display = tab === 'home' ? 'block' : 'none'; 
+      document.getElementById('orders-section').style.display = tab === 'orders' ? 'block' : 'none'; 
+      document.getElementById('profile-section').style.display = tab === 'profile' ? 'block' : 'none';
+      
+      document.getElementById('nav-home').className = tab === 'home' ? 'nav-item active' : 'nav-item'; 
+      document.getElementById('nav-orders').className = tab === 'orders' ? 'nav-item active' : 'nav-item'; 
+      document.getElementById('nav-profile').className = tab === 'profile' ? 'nav-item active' : 'nav-item';
+      
+      if(tab === 'orders' && currentOrderTab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); 
+      else document.getElementById('bulk-pay-bar').classList.add('hidden');
+      
+      window.scrollTo(0, 0);
+    }
+
+    // --- ส่วนเริ่มต้นระบบ LINE และโหลดข้อมูลทั้งหมด ---
+    window.onload = function() { 
+        initLIFF(); 
+        loadShopLotteries(); 
+        initAdvancedAnalytics(); 
+        showPromoPopup();
+    };
 
     async function initLIFF() {
       try {
@@ -379,43 +519,33 @@
     }
 
     function forceLineLogin() { 
-        if(!liff.isLoggedIn()) liff.login({ redirectUri: window.location.origin }); 
+        if(typeof liff !== 'undefined' && !liff.isLoggedIn()) liff.login({ redirectUri: window.location.origin }); 
     }
 
-    async function checkUserConsent(userProfile) {
-        const userRef = db.collection('users').doc(userProfile.userId);
+    async function checkUserConsent(profile) {
+        const userRef = db.collection('users').doc(profile.userId);
         const doc = await userRef.get();
         if (!doc.exists || !doc.data().consentGiven) {
             Swal.fire({
                 title: 'ข้อตกลงและเงื่อนไขการใช้บริการ',
-                html: `
-                <div class="text-left text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <p class="font-bold text-rose-600">กรุณาอ่านและกดยอมรับก่อนใช้งาน</p>
-                    <p class="flex items-start gap-2"><span>1.</span><span>ข้าพเจ้ายืนยันว่ามีอายุ <strong>20 ปีบริบูรณ์ขึ้นไป</strong></span></p>
-                    <p class="flex items-start gap-2"><span>2.</span><span>ข้าพเจ้ารับทราบและยินยอมให้คิดราคาสลาก <strong>80 บาท</strong> และมีค่าบริการฝากจัดเก็บ/ดำเนินการ <strong>20 บาท</strong> (รวมชำระ 100 บาท/ใบ)</span></p>
-                    <p class="flex items-start gap-2"><span>3.</span><span>ข้าพเจ้ายินยอมให้ระบบบันทึกข้อมูลเพื่อใช้ในการขึ้นเงินรางวัล</span></p>
-                </div>`,
-                icon: 'info', 
-                confirmButtonText: 'ฉันยอมรับเงื่อนไขทั้งหมด', 
-                confirmButtonColor: '#d31a1a', 
-                allowOutsideClick: false, 
-                allowEscapeKey: false
+                html: `<div class="text-left text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200"><p class="font-bold text-rose-600">กรุณาอ่านและกดยอมรับก่อนใช้งาน</p><p class="flex items-start gap-2"><span>1.</span><span>ข้าพเจ้ายืนยันว่ามีอายุ <strong>20 ปีบริบูรณ์ขึ้นไป</strong></span></p><p class="flex items-start gap-2"><span>2.</span><span>ข้าพเจ้ารับทราบและยินยอมให้คิดราคาสลาก <strong>80 บาท</strong> และมีค่าบริการฝากจัดเก็บ/ดำเนินการ <strong>20 บาท</strong> (รวมชำระ 100 บาท/ใบ)</span></p><p class="flex items-start gap-2"><span>3.</span><span>ข้าพเจ้ายินยอมให้ระบบบันทึกข้อมูลเพื่อใช้ในการขึ้นเงินรางวัล</span></p></div>`,
+                icon: 'info', confirmButtonText: 'ฉันยอมรับเงื่อนไขทั้งหมด', confirmButtonColor: '#d31a1a', allowOutsideClick: false, allowEscapeKey: false
             }).then(() => { 
-                userRef.set({ consentGiven: true, consentDate: Date.now(), displayName: userProfile.displayName, pictureUrl: userProfile.pictureUrl, coins: 0 }, { merge: true }); 
+                userRef.set({ consentGiven: true, consentDate: Date.now(), displayName: profile.displayName, pictureUrl: profile.pictureUrl, coins: 0 }, { merge: true }); 
             });
         }
     }
 
-    function checkReferral(userProfile) {
+    function checkReferral(profile) {
         const urlParams = new URLSearchParams(window.location.search);
         const refId = urlParams.get('ref');
-        if(refId && refId !== userProfile.userId) {
-            const userRef = db.collection('users').doc(userProfile.userId);
+        if(refId && refId !== profile.userId) {
+            const userRef = db.collection('users').doc(profile.userId);
             userRef.get().then(doc => {
                 if(doc.exists && !doc.data().referredBy) {
                     userRef.set({ referredBy: refId }, { merge: true });
                     db.collection('users').doc(refId).update({ coins: firebase.firestore.FieldValue.increment(5) });
-                    db.collection('users').doc(userProfile.userId).update({ coins: firebase.firestore.FieldValue.increment(5) });
+                    db.collection('users').doc(profile.userId).update({ coins: firebase.firestore.FieldValue.increment(5) });
                     Swal.fire({title: '🎉 ยินดีต้อนรับ!', text: 'คุณได้รับ 5 Coin จากการแนะนำของเพื่อน!', icon: 'success', confirmButtonColor: '#d31a1a'});
                 }
             });
@@ -451,24 +581,22 @@
         }
     }
 
-    // --- ฟังก์ชัน Live Chat ฝั่งลูกค้า ---
-    function startChatPrompt() {
-        if (!liff.isLoggedIn() || !userProfile) {
-            return Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE เพื่อติดต่อแอดมินครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin());
+    // --- ระบบแชท Live Chat ฝั่งลูกค้า ---
+    window.startChatPrompt = function() {
+        if (typeof liff === 'undefined' || !liff.isLoggedIn() || !userProfile) {
+            return Swal.fire({title: 'เข้าสู่ระบบ', text: 'กรุณาล็อกอินผ่าน LINE เพื่อติดต่อเจ้าหน้าที่ครับ', icon: 'info', confirmButtonColor: '#d31a1a'}).then(() => forceLineLogin());
         }
         
         Swal.fire({
             title: 'ติดต่อเจ้าหน้าที่',
-            text: 'คุณต้องการเปิดแชทสนทนากับเจ้าหน้าที่ใช่หรือไม่?',
+            text: 'เปิดแชทสนทนาสดกับเจ้าหน้าที่ใช่หรือไม่?',
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'ใช่, ต้องการติดต่อ',
+            confirmButtonText: 'ใช่, ติดต่อเลย',
             cancelButtonText: 'ยกเลิก',
             confirmButtonColor: '#9333ea'
         }).then(r => {
-            if(r.isConfirmed) {
-                openChatModal();
-            }
+            if(r.isConfirmed) { openChatModal(); }
         });
     }
 
@@ -477,14 +605,12 @@
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         
-        // บันทึกสถานะว่าลูกค้าเริ่มแชท
         db.collection('chats').doc(userProfile.userId).set({
             userName: userProfile.displayName,
             status: 'active',
             updatedAt: Date.now()
         }, {merge: true});
 
-        // ดึงข้อความสนทนา
         activeChatUnsub = db.collection('chats').doc(userProfile.userId).collection('messages').orderBy('timestamp').onSnapshot(snap => {
             const box = document.getElementById('chat-messages');
             box.innerHTML = '';
@@ -492,129 +618,72 @@
                 box.innerHTML = '<div class="text-center text-gray-400 text-xs mt-10">พิมพ์ข้อความเพื่อเริ่มคุยกับเจ้าหน้าที่ได้เลยครับ</div>';
                 return;
             }
+            
+            const userImg = (userProfile && userProfile.pictureUrl) ? userProfile.pictureUrl : 'https://via.placeholder.com/100?text=U';
+            
             snap.forEach(doc => {
                 const msg = doc.data();
                 const isMe = msg.sender === 'user';
                 const time = new Date(msg.timestamp).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
                 
-                box.innerHTML += `
-                <div class="flex ${isMe ? 'justify-end' : 'justify-start'} w-full">
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%]">
-                        <div class="${isMe ? 'bg-purple-600 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'} px-4 py-2 rounded-2xl text-sm shadow-sm">
-                            ${msg.text}
+                if (isMe) {
+                    box.innerHTML += `
+                    <div class="flex justify-end w-full gap-2">
+                        <div class="flex flex-col items-end max-w-[75%]">
+                            <div class="bg-purple-600 text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm shadow-sm">
+                                ${msg.text}
+                            </div>
+                            <div class="text-[9px] text-gray-400 mt-1 mx-1">${time}</div>
                         </div>
-                        <div class="text-[9px] text-gray-400 mt-1 mx-1">${time}</div>
-                    </div>
-                </div>`;
+                        <img src="${userImg}" class="w-8 h-8 rounded-full border border-gray-200 shadow-sm object-cover shrink-0">
+                    </div>`;
+                } else {
+                    box.innerHTML += `
+                    <div class="flex justify-start w-full gap-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm border border-indigo-100">
+                            <i class="fa-solid fa-user-tie text-xs"></i>
+                        </div>
+                        <div class="flex flex-col items-start max-w-[75%]">
+                            <div class="bg-white border border-gray-200 text-gray-800 px-4 py-2 rounded-2xl rounded-tl-sm text-sm shadow-sm">
+                                ${msg.text}
+                            </div>
+                            <div class="text-[9px] text-gray-400 mt-1 mx-1">${time}</div>
+                        </div>
+                    </div>`;
+                }
             });
             box.scrollTop = box.scrollHeight;
         });
     }
 
-    function closeChatModal() {
+    window.closeChatModal = function() {
         const modal = document.getElementById('chatModal');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         if(activeChatUnsub) activeChatUnsub();
     }
 
-    function sendUserMessage() {
+    window.sendUserMessage = function() {
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
         if(!text) return;
         
-        input.value = ''; // ล้างช่องพิมพ์
+        input.value = '';
         const now = Date.now();
         
-        // เพิ่มข้อความ
         db.collection('chats').doc(userProfile.userId).collection('messages').add({
             text: text,
             sender: 'user',
             timestamp: now
         });
-        // อัปเดตสถานะให้เด้งไปอยู่บนสุดของแอดมิน
         db.collection('chats').doc(userProfile.userId).update({
             status: 'active',
             lastMessage: text,
             updatedAt: now
         });
     }
-    // -------------------------
 
-    function listenToStorefront() {
-      document.getElementById('home-section').style.display = tab === 'home' ? 'block' : 'none'; 
-      document.getElementById('orders-section').style.display = tab === 'orders' ? 'block' : 'none'; 
-      document.getElementById('profile-section').style.display = tab === 'profile' ? 'block' : 'none';
-      document.getElementById('nav-home').className = tab === 'home' ? 'nav-item active' : 'nav-item'; 
-      document.getElementById('nav-orders').className = tab === 'orders' ? 'nav-item active' : 'nav-item'; 
-      document.getElementById('nav-profile').className = tab === 'profile' ? 'nav-item active' : 'nav-item';
-      
-      if(tab === 'orders' && currentOrderTab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); 
-      else document.getElementById('bulk-pay-bar').classList.add('hidden');
-      window.scrollTo(0, 0);
-    }
-
-    function setLotteryType(type) { 
-        currentLotteryType = type; 
-        ['all','single','set'].forEach(t => { document.getElementById('type-'+t).className = (t === type) ? 'filter-btn active' : 'filter-btn'; }); 
-        filterData(); 
-    }
-
-    function randomizeNumber() { 
-        const randomNum = Math.floor(100000 + Math.random() * 900000); 
-        document.getElementById('search-input').value = randomNum.toString().substring(0, 2); 
-        filterData(); 
-    }
-
-    function showSlides() {
-        const slides = document.querySelectorAll('.carousel-slide.active-slide'); 
-        if(slides.length === 0) return;
-        for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";
-        slideIndex++; 
-        if (slideIndex > slides.length) slideIndex = 1; 
-        slides[slideIndex - 1].style.display = "block"; 
-        slideInterval = setTimeout(showSlides, 3000);
-    }
-
-    function startMainCountdown(targetDateStr) {
-        if(mainCountdownInterval) clearInterval(mainCountdownInterval);
-        const cdBox = document.getElementById('countdown-display');
-        if(!targetDateStr) { cdBox.classList.add('hidden'); return; }
-        const target = new Date(targetDateStr).getTime(); 
-        if(isNaN(target)) { cdBox.classList.add('hidden'); return; }
-        
-        cdBox.classList.remove('hidden');
-        mainCountdownInterval = setInterval(() => {
-            const distance = target - new Date().getTime();
-            if (distance < 0) { clearInterval(mainCountdownInterval); cdBox.classList.add('hidden'); return; }
-            document.getElementById('cd-days').innerText = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0'); 
-            document.getElementById('cd-hours').innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'); 
-            document.getElementById('cd-mins').innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'); 
-            document.getElementById('cd-secs').innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
-        }, 1000);
-    }
-
-    function startFlashSaleCountdown() {
-        if(flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
-        const container = document.getElementById('flash-sale-container'); 
-        const timerEl = document.getElementById('fs-timer');
-        if(!flashSaleActive) { container.classList.add('hidden'); return; }
-        if(!flashSaleEndTime) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; container.classList.remove('hidden'); return; }
-        const target = new Date(flashSaleEndTime).getTime(); 
-        if(isNaN(target)) { timerEl.innerHTML = `⚡ รีบช้อปด่วน!`; container.classList.remove('hidden'); return; }
-        if(target - Date.now() <= 0) { container.classList.add('hidden'); return; }
-        
-        container.classList.remove('hidden');
-        flashSaleTimerInterval = setInterval(() => {
-            const distance = target - Date.now();
-            if(distance <= 0) { clearInterval(flashSaleTimerInterval); container.classList.add('hidden'); filterData(); return; }
-            const hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'); 
-            const mins = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'); 
-            const secs = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
-            timerEl.innerHTML = `⏱️ สิ้นสุดใน: ${hours}:${mins}:${secs}`;
-        }, 1000);
-    }
-
+    // --- ส่วนการจัดการสลากของระบบหน้าร้าน ---
     function loadShopLotteries() {
       db.collection('settings').doc('storefront').onSnapshot(doc => {
           if(doc.exists) {
@@ -663,7 +732,7 @@
                   db.collection('winning_results').doc(currentDraw).onSnapshot(wDoc => { 
                       currentWinData = wDoc.exists ? wDoc.data() : null; 
                       filterData(); 
-                      if(currentUser && currentUser.name && currentOrderTab !== '') renderMyOrders(); 
+                      if(userProfile && currentOrderTab !== '') renderMyOrders(); 
                   });
                   db.collection('lotteries').where('draw', '==', currentDraw).where('status', '==', 'available').onSnapshot(s => { 
                       availableTickets = []; 
@@ -719,102 +788,11 @@
                   </div>
               `).join('');
               document.getElementById('top10-list-container').innerHTML = t10Html;
-          } else {
-              let fallback = ['79', '89', '48', '97', '98', '59', '69', '19', '09', '23'];
-              let t5Html = fallback.slice(0, 5).map(num => `<span onclick="document.getElementById('search-input').value='${num}'; filterData();" class="bg-white text-rose-600 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-black cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">เลข ${num}</span>`).join('');
-              document.getElementById('trending-numbers-container').innerHTML = t5Html;
           }
       });
     }
 
-    function openTop10Modal() { document.getElementById('top10-modal').classList.remove('hidden'); document.getElementById('top10-modal').classList.add('flex'); }
-    function closeTop10Modal() { document.getElementById('top10-modal').classList.add('hidden'); document.getElementById('top10-modal').classList.remove('flex'); }
-    
-    function showDreamPrediction() {
-        Swal.fire({
-            title: '🔮ทำนายฝันนำโชค',
-            input: 'text',
-            inputPlaceholder: 'พิมพ์สิ่งที่คุณฝันเห็น เช่น ฝันเห็นแมว...',
-            showCancelButton: true,
-            confirmButtonText: 'ตีเป็นเลขเด็ด',
-            confirmButtonColor: '#d31a1a',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.value) {
-                let randomNum = Math.floor(10 + Math.random() * 90);
-                Swal.fire({
-                    title: `เลขเด็ดจากฝันของคุณ`,
-                    html: `ตีเป็นเลขท้าย 2 ตัวได้เลข: <span class="text-3xl font-black text-rose-600 font-mono tracking-widest">${randomNum}</span>`,
-                    icon: 'success',
-                    confirmButtonText: 'ค้นหาเลขนี้ทันที',
-                    confirmButtonColor: '#d31a1a'
-                }).then(() => {
-                    document.getElementById('search-input').value = randomNum;
-                    filterData();
-                });
-            }
-        });
-    }
-
-    function openMascotPicker() {
-        Swal.fire({
-            title: 'อาเหงียวหยิบโชคให้คุณ',
-            html: `
-                <div class="text-center font-bold text-gray-500 text-xs mb-4">ระบบมาสคอตจะสุ่มสลากนำโชคที่มีอยู่บนแผงให้คุณทันที</div>
-                <div onclick="pickRandomTicket(1)" class="bg-white border border-rose-200 rounded-2xl p-4 flex items-center justify-between mb-3 cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">
-                   <div class="flex items-center gap-3">
-                       <div class="text-4xl drop-shadow-md">🧧</div>
-                       <div class="text-left"><div class="font-black text-gray-800 text-[15px]">อาเหงียวหยิบให้ 1 ใบ</div><div class="text-rose-600 font-bold text-[11px]">ราคารวม 100 บาท</div></div>
-                   </div>
-                   <div class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold text-[11px] shadow-sm">+ สุ่มจองเลย</div>
-                </div>
-                <div onclick="pickRandomTicket(2)" class="bg-white border border-rose-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">
-                   <div class="flex items-center gap-3">
-                       <div class="text-4xl drop-shadow-md">🧧</div>
-                       <div class="text-left"><div class="font-black text-gray-800 text-[15px]">อาเหงียวหยิบให้ชุด 2 ใบ</div><div class="text-rose-600 font-bold text-[11px]">ราคารวม 200 บาท</div></div>
-                   </div>
-                   <div class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold text-[11px] shadow-sm">+ สุ่มจองเลย</div>
-                </div>
-            `,
-            showConfirmButton: false, showCloseButton: true
-        });
-    }
-
-    function pickRandomTicket(qty) {
-        let available = availableTickets.filter(t => parseInt(t.quantity) === qty && !t.isFlashSale);
-        if(available.length === 0) {
-            Swal.fire('ขออภัย', `ตอนนี้ไม่มีสลากชุด ${qty} ใบ ว่างในแผงเลยครับ`, 'warning'); return;
-        }
-        let randomIndex = Math.floor(Math.random() * available.length);
-        let selectedTicket = available[randomIndex];
-        Swal.close();
-        let displayAmount = selectedTicket.flashSalePrice ? parseInt(selectedTicket.flashSalePrice) : qty * 100;
-        openCheckout(selectedTicket.id, String(selectedTicket.number).padStart(6, '0'), displayAmount);
-    }
-
-    function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
-      const numStr = String(number).padStart(6, '0'); 
-      let tk = availableTickets.find(t=>t.id===id); if(!tk && mode === 'order') tk = myTickets.find(t=>t.id===id);
-      let isFs = tk ? (tk.isFlashSale === true) : false;
-      let baseAmount = qty * 100; let displayAmount = baseAmount; let priceLabel = `(฿${displayAmount})`;
-      
-      if (isFs && tk && tk.flashSalePrice) {
-          displayAmount = parseInt(tk.flashSalePrice);
-          priceLabel = `(<s class="opacity-70">฿${baseAmount}</s> ฿${displayAmount})`;
-      }
-
-      let bottomActionHTML = '';
-      if (mode === 'store') { 
-          bottomActionHTML = globalSalesOpen ? `<button onclick="openCheckout('${id}', '${numStr}', ${displayAmount})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-sm rounded-b-lg border-t border-red-800"><span class="text-xs">🛒</span> หยิบใส่ตะกร้า ${priceLabel}</button>` : `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed rounded-b-lg">🚫 ปิดรับการซื้อ</button>`; 
-      } 
-      
-      const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${numStr}&size=35x35`;
-      
-      return `<div class="pro-ticket-card ${isFs ? 'shimmer-sweep' : ''}"><div class="ticket-body-wrap" style="${ticketBgStyle}"><div class="ticket-stub pl-1 pr-1 w-[28%] shrink-0"><span class="ticket-stub-txt tracking-tighter text-[#d31a1a]">สลากกินแบ่งรัฐบาล</span><div class="text-center mt-0.5"><div class="text-[13px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div><div class="text-[8.5px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div></div><div class="text-center leading-none mt-2"><div class="text-[18px] font-black text-[#d31a1a] drop-shadow-md">80</div><div class="text-[8.5px] font-black text-black drop-shadow-md">บาท</div></div></div><div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1" style="container-type: inline-size;"><div class="flex justify-between items-center w-full min-w-0"><div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm shrink-0 mr-1">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">GOVERNMENT</span></div><div class="flex-1 text-right min-w-0 overflow-hidden"><span class="ticket-number-text">${numStr}</span></div></div><div class="flex justify-center shrink-0 w-full"><div class="bg-white/95 border border-gray-300 rounded px-1.5 py-[1px] shadow-sm"><div class="text-[6.5px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div></div></div><div class="flex justify-between items-end w-full min-w-0 shrink-0"><img src="${qrCodeUrl}" alt="QR" class="w-[13px] h-[13px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm"><div class="flex-1 ml-1 overflow-hidden flex items-end justify-end min-w-0"><span class="real-barcode text-[16px] text-gray-800">*${numStr}*</span></div></div></div></div>${bottomActionHTML}</div>`;
-    }
-
-    function filterData() {
+    window.filterData = function() {
       const search = document.getElementById('search-input').value.trim(); 
       let list = availableTickets;
       if (currentLotteryType === 'single') list = list.filter(t => parseInt(t.quantity) === 1); 
@@ -849,7 +827,30 @@
       document.getElementById('no-data').classList.add('hidden'); list.forEach((item) => { grid.insertAdjacentHTML('beforeend', buildProTicketHTML(item.id, item.number, item.quantity, currentDraw, 'store')); });
     }
 
-    function setOrderTab(tab) { 
+    function buildProTicketHTML(id, number, qty, drawName, mode = 'store') {
+      const numStr = String(number).padStart(6, '0'); 
+      let tk = availableTickets.find(t=>t.id===id); if(!tk && mode === 'order') tk = myTickets.find(t=>t.id===id);
+      let isFs = tk ? (tk.isFlashSale === true) : false;
+      let baseAmount = qty * 100; let displayAmount = baseAmount; let priceLabel = `(฿${displayAmount})`;
+      
+      if (isFs && tk && tk.flashSalePrice) {
+          displayAmount = parseInt(tk.flashSalePrice);
+          priceLabel = `(<s class="opacity-70">฿${baseAmount}</s> ฿${displayAmount})`;
+      }
+
+      let bottomActionHTML = '';
+      if (mode === 'store') { 
+          bottomActionHTML = globalSalesOpen ? `<button onclick="openCheckout('${id}', '${numStr}', ${displayAmount})" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-1.5 text-[11px] transition flex items-center justify-center gap-1 shadow-sm rounded-b-lg border-t border-red-800"><span class="text-xs">🛒</span> หยิบใส่ตะกร้า ${priceLabel}</button>` : `<button class="w-full bg-gray-400 text-white font-bold py-1.5 text-[11px] cursor-not-allowed rounded-b-lg">🚫 ปิดรับการซื้อ</button>`; 
+      } 
+      
+      const ticketBgStyle = globalTicketBg ? `background-image: url('${globalTicketBg}'); background-size: cover; background-position: center;` : 'background: #ffffff;';
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${numStr}&size=35x35`;
+      
+      return `<div class="pro-ticket-card ${isFs ? 'shimmer-sweep' : ''}"><div class="ticket-body-wrap" style="${ticketBgStyle}"><div class="ticket-stub pl-1 pr-1 w-[28%] shrink-0"><span class="ticket-stub-txt tracking-tighter text-[#d31a1a]">สลากกินแบ่งรัฐบาล</span><div class="text-center mt-0.5"><div class="text-[13px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div><div class="text-[8.5px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div></div><div class="text-center leading-none mt-2"><div class="text-[18px] font-black text-[#d31a1a] drop-shadow-md">80</div><div class="text-[8.5px] font-black text-black drop-shadow-md">บาท</div></div></div><div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1" style="container-type: inline-size;"><div class="flex justify-between items-center w-full min-w-0"><div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm shrink-0 mr-1">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">GOVERNMENT</span></div><div class="flex-1 text-right min-w-0 overflow-hidden"><span class="ticket-number-text">${numStr}</span></div></div><div class="flex justify-center shrink-0 w-full"><div class="bg-white/95 border border-gray-300 rounded px-1.5 py-[1px] shadow-sm"><div class="text-[6.5px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div></div></div><div class="flex justify-between items-end w-full min-w-0 shrink-0"><img src="${qrCodeUrl}" alt="QR" class="w-[13px] h-[13px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm"><div class="flex-1 ml-1 overflow-hidden flex items-end justify-end min-w-0"><span class="real-barcode text-[16px] text-gray-800">*${numStr}*</span></div></div></div></div>${bottomActionHTML}</div>`;
+    }
+
+    // --- ส่วนออเดอร์ของฉัน และการชำระเงิน ---
+    window.setOrderTab = function(tab) { 
         currentOrderTab = tab; 
         ['unpaid', 'pending', 'success', 'history'].forEach(t => { document.getElementById('tab-'+t).className = (t === tab) ? 'order-tab active whitespace-nowrap px-3' : 'order-tab whitespace-nowrap px-3'; }); 
         if(tab === 'unpaid') document.getElementById('bulk-pay-bar').classList.remove('hidden'); 
@@ -864,9 +865,11 @@
         
         if (unpaidCount > 0) { 
             cart.classList.remove('hidden'); 
+            cart.classList.add('flex');
             badge.innerText = unpaidCount; 
         } else { 
             cart.classList.add('hidden'); 
+            cart.classList.remove('flex');
             timerEl.style.display = 'none'; 
         } 
     }
@@ -958,7 +961,7 @@
         
         if (currentOrderTab === 'unpaid') {
             statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>'; 
-            actionHTML = `<div class="flex gap-2 w-full mt-3"><button onclick="cancelTicket('${item.id}')" class="flex-[0.4] bg-gray-100 text-gray-500 border border-gray-200 p-2.5 rounded-b-xl rounded-br-none text-xs font-bold hover:bg-gray-200 transition">ยกเลิก</button><button onclick="notifyPayment('${item.id}', '${numStr}', ${amount})" class="flex-[0.6] bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl rounded-bl-none text-xs font-bold hover:bg-red-50 transition">ชำระเฉพาะใบนี้</button></div>`; 
+            actionHTML = `<div class="flex gap-2 w-full mt-3"><button onclick="cancelTicket('${item.id}')" class="flex-[0.4] bg-gray-100 text-gray-500 border border-gray-200 p-2.5 rounded-b-xl rounded-br-none text-xs font-bold hover:bg-gray-200 transition">ยกเลิก</button><button onclick="openPaymentModal('${item.id}', '${numStr}', ${amount})" class="flex-[0.6] bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl rounded-bl-none text-xs font-bold hover:bg-red-50 transition">ชำระเฉพาะใบนี้</button></div>`; 
             checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
             if (item.expiresAt) timerHTML = `<div class="timer-display mx-3 text-[11px] text-rose-600 font-bold bg-rose-50 text-center py-2 rounded-lg border border-rose-200 mb-3 shadow-inner" data-expire="${item.expiresAt}">⏱️ กำลังคำนวณเวลา...</div>`;
         } else if (currentOrderTab === 'pending') { 
@@ -1116,201 +1119,156 @@
     function showShopBankInfo() { Swal.fire({ title: '🏦 บัญชีร้านค้า', html: `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left mt-2"><p class="text-sm font-medium text-gray-600 mb-1">ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="text-sm font-medium text-gray-600 mb-1">ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p><p class="text-sm font-medium text-gray-600 mt-3">เลขที่บัญชี:</p><div class="bg-white border border-emerald-100 rounded-lg p-2 text-center mt-1 flex items-center justify-center gap-2"><span class="font-mono font-black text-2xl text-gray-800 tracking-widest select-all">0138284018</span> <button onclick="copyToClipboard('0138284018')" class="bg-gray-200 text-gray-700 p-2 rounded-lg text-xs font-bold active:scale-95 transition">📋</button></div></div>`, confirmButtonText: 'ปิด', confirmButtonColor: '#d31a1a' }); }
 
     function openCheckout(docId, num, displayAmount) { 
-      if (!liff.isLoggedIn()) { forceLineLogin(); return; }
+      if (typeof liff === 'undefined' || !liff.isLoggedIn()) { forceLineLogin(); return; }
       Swal.fire({ title: 'ยืนยันการสั่งซื้อ', html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ยอดชำระ <span class="text-gray-900 text-lg">฿${displayAmount.toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`, showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const phone = document.getElementById('checkoutPhone').value.trim(); if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; } return { phone }; } }).then((result) => { if (result.isConfirmed) { db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true }); db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000), updatedAt: Date.now() }).then(() => { sendLiffMessage(`☑️ คุณได้จองสลากเลข ${num}\nโปรดชำระเงินภายใน 30 นาทีครับ`); Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); }); } });
     }
 
-    function handleFileSelection(fileInputId) { return new Promise((resolve) => { const fileInput = document.getElementById(fileInputId); if(fileInput.files.length === 0) { resolve(null); return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onloadend = function() { resolve(reader.result); }; reader.readAsDataURL(file); }); }
-
-    function notifyPayment(docId, num, amount) {
-        let finalAmount = amount; let useCoins = 0;
-        const promptPayBank = "1410400401805";
+    window.openPaymentModal = function(id = null, numStr = null, amount = null) {
+        if(myCartTickets.length === 0 && !id) return;
         
-        let htmlContent = `<div class="text-sm font-bold text-gray-500 mb-2">สลาก: <span class="text-[#d31a1a] text-lg">${num}</span><br>ยอดโอน: <span class="text-gray-900 text-2xl font-black" id="pay-total-display">฿${finalAmount.toLocaleString()}</span></div>`;
-        if (userCoins > 0) { htmlContent += `<div class="bg-amber-50 border border-amber-200 p-3 rounded-xl mb-3 text-left"><div class="flex justify-between items-center mb-2"><span class="text-xs font-black text-amber-800 flex items-center gap-1">🪙 มี Coin สะสม: ${userCoins}</span><button type="button" onclick="document.getElementById('coin-input').value = ${userCoins > finalAmount ? finalAmount : userCoins}; document.getElementById('coin-input').dispatchEvent(new Event('input'));" class="bg-white border border-amber-400 text-amber-700 text-[10px] px-2 py-1 rounded shadow-sm hover:bg-amber-100 transition font-bold">ใช้ทั้งหมด</button></div><div class="flex items-center gap-2"><input type="number" id="coin-input" placeholder="ระบุจำนวนที่ต้องการใช้" min="0" max="${userCoins > finalAmount ? finalAmount : userCoins}" class="flex-1 border border-amber-300 p-2 rounded-lg text-sm font-bold outline-none focus:ring-1 focus:ring-amber-500"><span class="text-xs text-amber-700 font-bold">Coin</span></div></div>`; }
-        htmlContent += `<div id="payment-methods-zone"><div class="bg-white border-2 border-indigo-100 rounded-xl p-3 mb-3 text-center shadow-sm"><p class="text-[11px] font-black text-indigo-700 mb-2 bg-indigo-50 inline-block px-3 py-1 rounded-full">📱 สแกนจ่ายผ่านแอปธนาคาร</p><img id="pay-qr-img" src="https://promptpay.io/${promptPayBank}/${finalAmount}.png" alt="PromptPay QR" class="w-40 h-40 mx-auto border border-gray-200 rounded-xl p-1.5 shadow-sm"><p class="text-[13px] text-gray-600 mt-2 font-black flex items-center justify-center gap-1">พร้อมเพย์: <span class="tracking-widest">141-XXXXXX-805</span> <button onclick="copyToClipboard('${promptPayBank}')" class="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded cursor-pointer">📋</button></p></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 text-left"><div class="text-[11px] text-gray-700 font-medium space-y-1"><p class="text-xs font-bold text-gray-800 border-b border-emerald-200 pb-1 mb-1">ทางเลือกโอนเข้าเลขบัญชี:</p><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="flex items-center gap-1">เลขที่บัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span> <button onclick="copyToClipboard('0138284018')" class="text-[10px] bg-emerald-200 px-1.5 py-0.5 rounded cursor-pointer">📋</button></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">📸 อัปโหลดสลิปที่นี่</label></div><input type="file" id="directSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none"></div>`;
-        htmlContent += `<div id="zero-baht-zone" class="hidden text-center py-6 bg-green-50 border border-green-200 rounded-xl text-green-700 font-black text-lg">✅ ชำระด้วย Coin ครบแล้ว<br><span class="text-sm font-medium">กดปุ่มยืนยันแจ้งชำระเงินได้เลย</span></div>`;
+        let totalAmt = 0; let totalQty = 0; let idsToPay = [];
+        if (id) {
+            totalAmt = amount; totalQty = 1; idsToPay = [id];
+            document.getElementById('pay-qty').innerText = `1 รายการ (${numStr})`;
+        } else {
+            myCartTickets.forEach(t => {
+                let q = parseInt(t.quantity) || 1; totalQty += q;
+                totalAmt += (t.isFlashSale && t.flashSalePrice) ? parseInt(t.flashSalePrice) : (q * 100);
+                idsToPay.push(t.id);
+            });
+            document.getElementById('pay-qty').innerText = totalQty + ' ใบ (รวบยอด)';
+        }
 
-        Swal.fire({
-            title: 'ชำระเงิน & อัปโหลดสลิป', html: htmlContent, showCancelButton: true, confirmButtonText: 'ยืนยันแจ้งชำระเงิน', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a',
-            didOpen: () => {
-                const coinInput = document.getElementById('coin-input');
-                if(coinInput) {
-                    coinInput.addEventListener('input', (e) => {
-                        let inputVal = parseInt(e.target.value) || 0;
-                        if(inputVal < 0) inputVal = 0;
-                        if(inputVal > userCoins) inputVal = userCoins;
-                        if(inputVal > amount) inputVal = amount; 
-                        e.target.value = inputVal;
-                        
-                        useCoins = inputVal;
-                        finalAmount = amount - useCoins;
-                        document.getElementById('pay-total-display').innerText = `฿${finalAmount.toLocaleString()}`;
-                        
-                        if(finalAmount > 0) { 
-                            document.getElementById('pay-qr-img').src = `https://promptpay.io/${promptPayBank}/${finalAmount}.png`; 
-                            document.getElementById('payment-methods-zone').classList.remove('hidden'); 
-                            document.getElementById('zero-baht-zone').classList.add('hidden'); 
-                        } else { 
-                            document.getElementById('payment-methods-zone').classList.add('hidden'); 
-                            document.getElementById('zero-baht-zone').classList.remove('hidden'); 
-                        }
-                    });
-                }
-            },
-            preConfirm: async () => { 
-                if(finalAmount > 0) { const fileInput = document.getElementById('directSlipFile'); if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; } Swal.showLoading(); return { slip: await handleFileSelection('directSlipFile'), coinsUsed: useCoins }; } 
-                else { Swal.showLoading(); return { slip: null, coinsUsed: useCoins }; } 
-            } 
-        }).then((result) => { 
-            if(result.isConfirmed) { 
-                const payload = { status: 'รอตรวจสอบสลิป', expiresAt: null, discountCoins: result.value.coinsUsed || null, updatedAt: Date.now() };
-                if (result.value.slip) payload.slip = result.value.slip;
-                db.collection('lotteries').doc(docId).update(payload).then(() => { 
-                    if(result.value.coinsUsed > 0) db.collection('users').doc(userProfile.userId).update({ coins: firebase.firestore.FieldValue.increment(-result.value.coinsUsed) });
-                    sendLineNotify(`🔔 มีสลิปใหม่รอตรวจสอบ!\nสลากเลข: ${num}\nยอดโอน: ฿${finalAmount}\nจาก: ${userProfile.displayName}`); sendLiffMessage(`📸 คุณได้ส่งสลิปชำระเงินเรียบร้อยแล้ว\nแอดมินกำลังตรวจสอบสักครู่นะครับ`);
-                    Swal.fire('ส่งหลักฐานสำเร็จ', 'ระบบบันทึกรูปภาพสลิปเรียบร้อยแล้ว แอดมินจะรีบตรวจสอบให้ครับ', 'success').then(()=> { setOrderTab('pending'); }); 
-                }); 
-            } 
+        cartTotalAmount = totalAmt;
+        document.getElementById('pay-total').innerText = '฿' + cartTotalAmount.toLocaleString();
+        document.getElementById('pay-my-coins').innerText = userCoins;
+        document.getElementById('input-use-coins').value = '';
+        document.getElementById('slip-file').value = '';
+        
+        document.getElementById('bank-acc-num').innerText = storefrontData.bankAccountNumber || "ยังไม่ตั้งค่าเลขบัญชี";
+        document.getElementById('bank-acc-name').innerText = storefrontData.bankAccountName || "ยังไม่ตั้งค่าชื่อบัญชี";
+        if(storefrontData.promptpayNumber) { document.getElementById('promptpay-qr').src = `https://promptpay.io/${storefrontData.promptpayNumber}/${cartTotalAmount}.png`; } 
+        
+        document.getElementById('btn-confirm-pay').dataset.ids = JSON.stringify(idsToPay);
+
+        recalcPayment();
+        const modal = document.getElementById('paymentModal');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+    }
+
+    window.closePaymentModal = function() {
+        const modal = document.getElementById('paymentModal');
+        modal.classList.add('hidden'); modal.classList.remove('flex');
+    }
+
+    window.recalcPayment = function() {
+        let coinsInput = parseInt(document.getElementById('input-use-coins').value) || 0;
+        if(coinsInput < 0) coinsInput = 0;
+        if(coinsInput > userCoins) coinsInput = userCoins;
+        if(coinsInput > cartTotalAmount) coinsInput = cartTotalAmount; 
+        document.getElementById('input-use-coins').value = coinsInput > 0 ? coinsInput : '';
+        
+        let finalPrice = cartTotalAmount - coinsInput;
+        document.getElementById('pay-final').innerText = '฿' + finalPrice.toLocaleString();
+
+        if(storefrontData.promptpayNumber && finalPrice > 0) { 
+            document.getElementById('promptpay-qr').src = `https://promptpay.io/${storefrontData.promptpayNumber}/${finalPrice}.png`; 
+        }
+
+        if(finalPrice === 0) { 
+            document.getElementById('payment-method-area').classList.add('hidden'); 
+            document.getElementById('free-order-msg').classList.remove('hidden'); 
+        } else { 
+            document.getElementById('payment-method-area').classList.remove('hidden'); 
+            document.getElementById('free-order-msg').classList.add('hidden'); 
+        }
+    }
+
+    window.useMaxCoins = function() {
+        document.getElementById('input-use-coins').value = Math.min(userCoins, cartTotalAmount);
+        recalcPayment();
+    }
+
+    window.submitOrder = async function() {
+        const btn = document.getElementById('btn-confirm-pay');
+        const ids = JSON.parse(btn.dataset.ids);
+        
+        let coinsUsed = parseInt(document.getElementById('input-use-coins').value) || 0;
+        let finalPrice = cartTotalAmount - coinsUsed;
+        const slipFile = document.getElementById('slip-file').files[0];
+
+        if(finalPrice > 0 && !slipFile) { return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาแนบรูปสลิปการโอนเงินด้วยครับ', 'warning'); }
+
+        Swal.fire({title: 'กำลังส่งข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+        let slipBase64 = null;
+        if(finalPrice > 0 && slipFile) { slipBase64 = await handleFileSelection('slip-file'); }
+
+        const batch = db.batch();
+        ids.forEach(id => {
+            batch.update(db.collection('lotteries').doc(id), {
+                status: 'รอตรวจสอบสลิป', slip: slipBase64, discountCoins: coinsUsed > 0 ? coinsUsed : null, updatedAt: Date.now()
+            });
+        });
+
+        if(coinsUsed > 0) { batch.update(db.collection('users').doc(userProfile.userId), { coins: firebase.firestore.FieldValue.increment(-coinsUsed) }); }
+
+        await batch.commit();
+
+        sendLineNotify(`🔔 แจ้งโอนเงินใหม่!\nจำนวน: ${ids.length} ใบ\nยอดโอน: ฿${finalPrice}\nจาก: ${userProfile.displayName}`); 
+        sendLiffMessage(`📸 คุณได้ส่งสลิปชำระเงินเรียบร้อยแล้ว\nแอดมินกำลังตรวจสอบสักครู่นะครับ`);
+        Swal.fire('สำเร็จ!', 'ส่งหลักฐานเรียบร้อย โปรดรอแอดมินตรวจสอบสักครู่ครับ', 'success').then(() => {
+            closePaymentModal(); switchTab('orders'); setOrderTab('pending');
         });
     }
 
     window.processBulkPayment = function() {
-        const btn = document.getElementById('btn-bulk-pay'); const ids = JSON.parse(btn.dataset.ids); const amount = parseInt(btn.dataset.total);
-        let finalAmount = amount; let useCoins = 0; const promptPayBank = "1410400401805"; 
+        const btn = document.getElementById('btn-bulk-pay'); 
+        const ids = JSON.parse(btn.dataset.ids); 
+        const amount = parseInt(btn.dataset.total);
+        cartTotalAmount = amount; cartTotalQty = ids.length;
         
-        let htmlContent = `<div class="text-sm font-bold text-gray-500 mb-2">จำนวน <span class="text-[#d31a1a]">${ids.length}</span> รายการ<br>ยอดโอนรวม: <span class="text-gray-900 text-2xl font-black" id="pay-total-display">฿${finalAmount.toLocaleString()}</span></div>`;
-        if (userCoins > 0) { htmlContent += `<div class="bg-amber-50 border border-amber-200 p-3 rounded-xl mb-3 text-left shadow-inner"><div class="flex justify-between items-center mb-2"><span class="text-xs font-black text-amber-800 flex items-center gap-1">🪙 มี Coin สะสม: ${userCoins}</span><button type="button" onclick="document.getElementById('coin-input').value = ${userCoins > finalAmount ? finalAmount : userCoins}; document.getElementById('coin-input').dispatchEvent(new Event('input'));" class="bg-white border border-amber-400 text-amber-700 text-[10px] px-2 py-1 rounded shadow-sm hover:bg-amber-100 transition font-bold">ใช้ทั้งหมด</button></div><div class="flex items-center gap-2"><input type="number" id="coin-input" placeholder="ระบุจำนวนที่ต้องการใช้" min="0" max="${userCoins > finalAmount ? finalAmount : userCoins}" class="flex-1 border border-amber-300 p-2 rounded-lg text-sm font-bold outline-none focus:ring-1 focus:ring-amber-500"><span class="text-xs text-amber-700 font-bold">Coin</span></div></div>`; }
-        htmlContent += `<div id="payment-methods-zone"><div class="bg-white border-2 border-indigo-100 rounded-xl p-3 mb-3 text-center shadow-sm"><p class="text-[11px] font-black text-indigo-700 mb-2 bg-indigo-50 inline-block px-3 py-1 rounded-full">📱 สแกนจ่ายผ่านแอปธนาคาร</p><img id="pay-qr-img" src="https://promptpay.io/${promptPayBank}/${finalAmount}.png" alt="PromptPay QR" class="w-40 h-40 mx-auto border border-gray-200 rounded-xl p-1.5 shadow-sm"><p class="text-[13px] text-gray-600 mt-2 font-black flex items-center justify-center gap-1">พร้อมเพย์: <span class="tracking-widest">141-XXXXXX-805</span> <button onclick="copyToClipboard('${promptPayBank}')" class="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded cursor-pointer">📋</button></p></div><div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 text-left"><div class="text-[11px] text-gray-700 font-medium space-y-1"><p class="text-xs font-bold text-gray-800 border-b border-emerald-200 pb-1 mb-1">ทางเลือกโอนเข้าเลขบัญชี:</p><p>ธนาคาร: <span class="font-bold text-emerald-700">กสิกรไทย (KBank)</span></p><p class="flex items-center gap-1">เลขที่บัญชี: <span class="font-mono font-extrabold text-[13px] text-gray-950 bg-white border border-emerald-100 rounded px-1.5 py-0.5 tracking-wider select-all">0138284018</span> <button onclick="copyToClipboard('0138284018')" class="text-[10px] bg-emerald-200 px-1.5 py-0.5 rounded cursor-pointer">📋</button></p><p>ชื่อบัญชี: <span class="font-bold text-gray-900">สหภาพ เนาว์แสง</span></p></div></div><div class="text-left"><label class="block text-xs font-bold text-gray-700 mb-1">📸 อัปโหลดสลิปรวบยอดที่นี่</label></div><input type="file" id="bulkSlipFile" accept="image/*" class="w-full text-xs text-gray-600 border border-gray-300 p-2.5 rounded-lg bg-gray-50 outline-none"></div>`;
-        htmlContent += `<div id="zero-baht-zone" class="hidden text-center py-6 bg-green-50 border border-green-200 rounded-xl text-green-700 font-black text-lg">✅ ชำระด้วย Coin ครบแล้ว<br><span class="text-sm font-medium">กดปุ่มยืนยันแจ้งชำระเงินได้เลย</span></div>`;
+        document.getElementById('pay-qty').innerText = ids.length + ' ใบ (รวบยอด)';
+        if(document.getElementById('btn-confirm-pay')) {
+             document.getElementById('btn-confirm-pay').dataset.ids = JSON.stringify(ids);
+        }
+        
+        document.getElementById('pay-total').innerText = '฿' + cartTotalAmount.toLocaleString();
+        document.getElementById('pay-my-coins').innerText = userCoins;
+        document.getElementById('input-use-coins').value = '';
+        document.getElementById('slip-file').value = '';
+        if(storefrontData.promptpayNumber) { document.getElementById('promptpay-qr').src = `https://promptpay.io/${storefrontData.promptpayNumber}/${cartTotalAmount}.png`; } 
 
-        Swal.fire({ 
-            title: 'โอนเงินรวบยอด', html: htmlContent, showCancelButton: true, confirmButtonText: 'ยืนยันแจ้งชำระเงิน', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', 
-            didOpen: () => {
-                const coinInput = document.getElementById('coin-input');
-                if(coinInput) {
-                    coinInput.addEventListener('input', (e) => {
-                        let inputVal = parseInt(e.target.value) || 0;
-                        if(inputVal < 0) inputVal = 0;
-                        if(inputVal > userCoins) inputVal = userCoins;
-                        if(inputVal > amount) inputVal = amount; 
-                        e.target.value = inputVal;
-                        
-                        useCoins = inputVal;
-                        finalAmount = amount - useCoins;
-                        document.getElementById('pay-total-display').innerText = `฿${finalAmount.toLocaleString()}`;
-                        
-                        if(finalAmount > 0) { 
-                            document.getElementById('pay-qr-img').src = `https://promptpay.io/${promptPayBank}/${finalAmount}.png`; 
-                            document.getElementById('payment-methods-zone').classList.remove('hidden'); 
-                            document.getElementById('zero-baht-zone').classList.add('hidden'); 
-                        } else { 
-                            document.getElementById('payment-methods-zone').classList.add('hidden'); 
-                            document.getElementById('zero-baht-zone').classList.remove('hidden'); 
-                        }
-                    });
-                }
-            },
-            preConfirm: async () => { 
-                if(finalAmount > 0) { const fileInput = document.getElementById('bulkSlipFile'); if(fileInput.files.length === 0) { Swal.showValidationMessage('กรุณาเลือกรูปภาพสลิปด้วยครับ'); return false; } Swal.showLoading(); return { slip: await handleFileSelection('bulkSlipFile'), coinsUsed: useCoins }; } 
-                else { Swal.showLoading(); return { slip: null, coinsUsed: useCoins }; } 
-            } 
-        }).then((result) => { 
-            if(result.isConfirmed) { 
-                Swal.fire({title: 'กำลังอัปเดตระบบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); 
-                const batch = db.batch(); 
-                ids.forEach(id => { 
-                    const ref = db.collection('lotteries').doc(id); 
-                    const updateData = { status: 'รอตรวจสอบสลิป', expiresAt: null, discountCoins: result.value.coinsUsed || null, updatedAt: Date.now() };
-                    if (result.value.slip) updateData.slip = result.value.slip;
-                    batch.update(ref, updateData); 
-                }); 
-                batch.commit().then(() => { 
-                    if(result.value.coinsUsed > 0) db.collection('users').doc(userProfile.userId).update({ coins: firebase.firestore.FieldValue.increment(-result.value.coinsUsed) });
-                    sendLineNotify(`🔔 แจ้งโอนเงินรวบยอด!\nจำนวน: ${ids.length} ใบ\nยอดโอน: ฿${finalAmount}\nจาก: ${userProfile.displayName}`); sendLiffMessage(`📸 คุณได้ส่งสลิปรวบยอดเรียบร้อยแล้ว\nแอดมินกำลังตรวจสอบสักครู่นะครับ`);
-                    Swal.fire('สำเร็จ', 'แจ้งโอนเงินเรียบร้อยแล้ว แอดมินจะตรวจสอบยอดทั้งหมดให้ครับ', 'success'); setOrderTab('pending'); 
-                }).catch(err => { Swal.fire('ข้อผิดพลาด', err.message, 'error'); }); 
-            } 
-        });
+        recalcPayment();
+        const modal = document.getElementById('paymentModal');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
     }
 
+    function handleFileSelection(fileInputId) { return new Promise((resolve) => { const fileInput = document.getElementById(fileInputId); if(fileInput.files.length === 0) { resolve(null); return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onloadend = function() { resolve(reader.result); }; reader.readAsDataURL(file); }); }
+    function openTop10Modal() { document.getElementById('top10-modal').classList.remove('hidden'); document.getElementById('top10-modal').classList.add('flex'); }
+    function closeTop10Modal() { document.getElementById('top10-modal').classList.add('hidden'); document.getElementById('top10-modal').classList.remove('flex'); }
+    function setLotteryType(type) { currentLotteryType = type; ['all','single','set'].forEach(t => { document.getElementById('type-'+t).className = (t === type) ? 'filter-btn active' : 'filter-btn'; }); filterData(); }
+    function randomizeNumber() { const randomNum = Math.floor(100000 + Math.random() * 900000); document.getElementById('search-input').value = randomNum.toString().substring(0, 2); filterData(); }
+    function showSlides() { const slides = document.querySelectorAll('.carousel-slide.active-slide'); if(slides.length === 0) return; for (let i = 0; i < slides.length; i++) slides[i].style.display = "none"; slideIndex++; if (slideIndex > slides.length) slideIndex = 1; slides[slideIndex - 1].style.display = "block"; slideInterval = setTimeout(showSlides, 3000); }
+    function showPromoPopup() { db.collection('settings').doc('promotion').get().then(doc => { if(doc.exists && doc.data().isActive && doc.data().imageUrl) { if(!sessionStorage.getItem('promo_shown')) { Swal.fire({ imageUrl: doc.data().imageUrl, imageAlt: 'Promotion', showConfirmButton: true, confirmButtonText: 'ปิดหน้าต่าง', confirmButtonColor: '#d31a1a', width: '90%', padding: '0', background: 'transparent', backdrop: `rgba(0,0,0,0.8)`, customClass: { image: 'rounded-2xl max-w-full m-0' } }); sessionStorage.setItem('promo_shown', 'true'); } } }); }
     function releaseExpiredReservations() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false, updatedAt: Date.now() }); } }); }); }
-    
-    function showPromoPopup() {
-        db.collection('settings').doc('promotion').get().then(doc => {
-            if(doc.exists && doc.data().isActive && doc.data().imageUrl) {
-                if(!sessionStorage.getItem('promo_shown')) {
-                    Swal.fire({
-                        imageUrl: doc.data().imageUrl,
-                        imageAlt: 'Promotion',
-                        showConfirmButton: true,
-                        confirmButtonText: 'ปิดหน้าต่าง',
-                        confirmButtonColor: '#d31a1a',
-                        width: '90%',
-                        padding: '0',
-                        background: 'transparent',
-                        backdrop: `rgba(0,0,0,0.8)`,
-                        customClass: { image: 'rounded-2xl max-w-full m-0' }
-                    });
-                    sessionStorage.setItem('promo_shown', 'true');
-                }
-            }
-        });
-    }
 
-    window.onload = function() { 
-        initLIFF(); 
-        loadShopLotteries(); 
-        initAdvancedAnalytics(); 
-        showPromoPopup(); // เรียกใช้ป๊อปอัปโปรโมชัน
-    };
-    
-    // โค้ดสำหรับดึง IP และเก็บสถิติเชิงลึก 
     async function initAdvancedAnalytics() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const deviceType = isMobile ? 'mobileViews' : 'desktopViews';
-        
         let isUnique = false;
-        try {
-            if (!localStorage.getItem('bas_visited_unique')) {
-                isUnique = true;
-                localStorage.setItem('bas_visited_unique', 'true');
-            }
-        } catch(e) {}
-
+        try { if (!localStorage.getItem('bas_visited_unique')) { isUnique = true; localStorage.setItem('bas_visited_unique', 'true'); } } catch(e) {}
         const increment = firebase.firestore.FieldValue.increment(1);
         let updateData = { pageViews: increment, [deviceType]: increment };
         if (isUnique) updateData.uniqueVisitors = increment;
         db.collection('settings').doc('analytics').set(updateData, { merge: true }).catch(()=>{});
-
         let userIP = "ไม่ระบุ";
-        try {
-            const response = await fetch('https://api.ipify.org?format=json');
-            const data = await response.json();
-            userIP = data.ip;
-        } catch(e) { console.log('IP fetch failed'); }
-
+        try { const response = await fetch('https://api.ipify.org?format=json'); const data = await response.json(); userIP = data.ip; } catch(e) { console.log('IP fetch failed'); }
         const sessionId = (typeof currentUser !== 'undefined' && currentUser && currentUser.id) ? currentUser.id : window.generateUUID();
         const presenceRef = db.collection('active_visitors').doc(sessionId);
-        
-        function sendHeartbeat() {
-            presenceRef.set({
-                lastActive: Date.now(),
-                device: isMobile ? 'Mobile' : 'Desktop',
-                ip: userIP,
-                userAgent: navigator.userAgent
-            }, { merge: true }).catch(()=>{});
-        }
-        
-        sendHeartbeat(); // ส่งตอนเข้าเว็บ
-        setInterval(sendHeartbeat, 25000); // อัปเดตทุก 25 วินาทีว่ายังไม่ปิดเว็บ
-        
-        // ลบตัวเองออกจากระบบ Real-time เมื่อปิดเว็บ
-        window.addEventListener('beforeunload', () => {
-            presenceRef.delete().catch(()=>{});
-        });
+        function sendHeartbeat() { presenceRef.set({ lastActive: Date.now(), device: isMobile ? 'Mobile' : 'Desktop', ip: userIP, userAgent: navigator.userAgent }, { merge: true }).catch(()=>{}); }
+        sendHeartbeat(); setInterval(sendHeartbeat, 25000); 
+        window.addEventListener('beforeunload', () => { presenceRef.delete().catch(()=>{}); });
     }
-
   </script>
 </body>
 </html>
