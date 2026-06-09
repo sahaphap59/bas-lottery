@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- นำเข้าระบบสแกนบาร์โค้ด -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
@@ -28,21 +27,15 @@
     .real-ticket { position: relative; width: 260px; height: 92px; background: #fffdf5; border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; overflow: hidden; border: 1px solid #cbd5e1; }
     .rt-stub { width: 28%; border-right: 1.5px dashed #94a3b8; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; background: rgba(255,255,255,0.2); }
     .rt-stub-txt { writing-mode: vertical-rl; transform: rotate(180deg); color: #dc2626; font-weight: 800; font-size: 8px; position: absolute; left: 2px; }
-    .rt-main { width: 72%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.2); }
+    .rt-main { width: 72%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.2); overflow: hidden; }
     .rt-digits { font-family: 'IBM Plex Sans Thai', monospace; font-size: 24px; font-weight: 800; color: #0f172a; letter-spacing: 2px; text-align: right; line-height: 1; }
     .real-barcode { font-family: 'Libre Barcode 39', cursive; font-size: 24px; line-height: 1; color: #1e293b; transform: scaleY(0.7); transform-origin: bottom; white-space: nowrap; }
-
-    /* Custom Scrollbar for Chat */
     .chat-scroll::-webkit-scrollbar { width: 6px; }
     .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
   </style>
 </head>
 <body>
 
-  <!-- เสียงแจ้งเตือนแชท -->
-  <audio id="chat-alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-
-  <!-- Overlay ล็อกอิน -->
   <div id="adminAuthOverlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center backdrop-blur-sm">
     <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full mx-4 text-center border-t-4 border-amber-400">
       <div class="bg-amber-100 text-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔒</div>
@@ -52,7 +45,6 @@
     </div>
   </div>
 
-  <!-- Navbar -->
   <div class="premium-nav py-6 px-6 text-white shadow-md mb-8">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
       <div class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition" onclick="window.location.reload();">
@@ -134,6 +126,7 @@
           </div>
         </div>
 
+        <!-- กล่องตาราง -->
         <div id="main-table-container" class="overflow-x-auto block">
           <table class="w-full text-left whitespace-nowrap">
             <thead id="main-thead">
@@ -152,6 +145,7 @@
           <div id="no-data" class="hidden text-center py-20 text-slate-400"><p class="font-bold text-lg">✨ ไม่พบข้อมูลในหมวดหมู่นี้</p></div>
         </div>
 
+        <!-- กล่องแชท -->
         <div id="chat-container" class="hidden flex h-[600px] border-t border-slate-200">
             <div class="w-1/3 border-r border-slate-200 bg-slate-50 overflow-y-auto chat-scroll" id="admin-chat-list">
                 <div class="p-4 text-center text-sm font-bold text-slate-500">กำลังโหลด...</div>
@@ -179,7 +173,6 @@
     </div>
   </div>
 
-  <!-- Analytics Modal -->
   <div id="analyticsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden my-8 border-t-4 border-cyan-500">
       <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
@@ -223,7 +216,6 @@
     </div>
   </div>
 
-  <!-- Design Modal -->
   <div id="designModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-8">
       <div class="bg-teal-600 text-white px-6 py-4 flex justify-between items-center rounded-t-2xl">
@@ -235,6 +227,19 @@
           <label class="block text-xs font-bold text-slate-700 mb-1">1. ชื่อร้านค้า (มุมซ้ายบน)</label>
           <input type="text" id="storeNameInput" placeholder="เช่น BAS ลอตเตอรี่" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 focus:border-teal-500">
         </div>
+        
+        <div class="bg-purple-50 p-4 rounded-xl border border-purple-200 shadow-inner mt-4">
+            <label class="block text-xs font-bold text-purple-700 mb-1">🎵 เสียงแจ้งเตือนแชท/ระบบ</label>
+            <div class="flex gap-2">
+                <select id="adminSoundSelect" class="flex-1 border border-purple-300 p-2.5 rounded-lg text-sm font-bold outline-none text-purple-900 bg-white">
+                    <option value="https://actions.google.com/sounds/v1/communications/incoming_message.ogg">เสียงที่ 1 (ป๊อป / คล้าย LINE)</option>
+                    <option value="https://actions.google.com/sounds/v1/alarms/ding.ogg">เสียงที่ 2 (กริ๊งสั้นๆ)</option>
+                    <option value="https://actions.google.com/sounds/v1/water/water_drop.ogg">เสียงที่ 3 (หยดน้ำ)</option>
+                </select>
+                <button type="button" onclick="playNotificationSound(document.getElementById('adminSoundSelect').value)" class="bg-purple-200 text-purple-800 px-3 rounded-lg font-bold text-xs shadow-sm hover:bg-purple-300">ทดสอบเสียง</button>
+            </div>
+        </div>
+
         <hr class="border-slate-100">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">2. รูปโลโก้แบรนด์</label>
@@ -411,7 +416,7 @@
     </div>
   </div>
 
-  <!-- Stock Check Modal -->
+  <!-- Stock Check Modal & Scanner -->
   <div id="stockCheckModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8 border-t-4 border-sky-500" id="stockModalContainer">
       <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
@@ -426,7 +431,7 @@
            <button type="button" id="mode-audit" onclick="setScanMode('audit')" class="shrink-0 flex-1 bg-transparent text-slate-500 py-2.5 px-2 rounded-lg text-[11px] sm:text-sm font-bold hover:bg-slate-200 transition">📦 กระทบยอด</button>
          </div>
 
-         <!-- กล่องสำหรับแสดงกล้อง -->
+         <!-- กล่องสำหรับแสดงกล้องสแกนบาร์โค้ด -->
          <div id="reader-container" class="hidden mb-4 rounded-xl overflow-hidden border-2 border-sky-300">
             <div id="reader" width="100%"></div>
             <button type="button" onclick="stopScanner()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm transition shadow-inner">❌ ปิดกล้อง</button>
@@ -493,6 +498,9 @@
     let tempSlide1 = ""; let tempSlide2 = ""; let tempSlide3 = "";
     let globalTicketBg = "";
     let tempMascot = ""; let tempTop10 = ""; let tempExtra = ""; let tempWinBanner = "";
+    
+    // ตั้งค่าเสียงแจ้งเตือนเริ่มต้น
+    let adminSoundUrl = "https://actions.google.com/sounds/v1/communications/incoming_message.ogg";
 
     // ตัวแปรสำหรับระบบแชทแอดมิน
     let currentChatUserId = null;
@@ -517,7 +525,7 @@
         document.getElementById('adminAuthOverlay').style.display = 'none';
         loadInitialData(); listenToStorefrontSettings(); listenToWithdrawals(); listenToCustomersCount(); 
         listenToVisitorCount(); listenToRealtimeVisitors(); 
-        listenToChatsCount(); // นับจำนวนแชทที่ active
+        listenToChatsCount(); // เปิดฟังชั่นนับและแจ้งเตือนแชท
         startAdminCountdown();
       } else { Swal.fire('ปฏิเสธการเข้าถึง', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('adminPin').value = ''; }
     }
@@ -561,6 +569,12 @@
             isSalesOpen = data.isSalesOpen !== false; const btn = document.getElementById('btn-toggle-sales');
             if (isSalesOpen) { btn.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🛒 สถานะขาย: เปิด"; } 
             else { btn.className = "bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🚫 สถานะขาย: ปิด"; }
+            
+            // โหลดเสียงแจ้งเตือนที่ตั้งไว้
+            if(data.adminSound) {
+                adminSoundUrl = data.adminSound;
+                document.getElementById('chat-alert-sound').src = adminSoundUrl;
+            }
         }); 
         
         db.collection('settings').doc('menu_banners').onSnapshot(doc => {
@@ -572,6 +586,24 @@
                 if(d.winBanner) { document.getElementById('mbWinBannerPreview').src = d.winBanner; document.getElementById('mbWinBannerPreview').classList.remove('hidden'); tempWinBanner = d.winBanner; }
             }
         });
+    }
+
+    async function previewDesignImage(type) {
+        let fileInput, previewImg;
+        if(type === 'logo') { fileInput = document.getElementById('logoImageFile'); previewImg = document.getElementById('logoPreview'); } 
+        else if(type === 'ticket') { fileInput = document.getElementById('ticketBgImageFile'); previewImg = document.getElementById('ticketPreview'); } 
+        else { fileInput = document.getElementById(type+'File'); previewImg = document.getElementById(type+'Preview'); }
+        
+        if (fileInput.files && fileInput.files[0]) { 
+            const base64 = await resizeImage(fileInput.files[0], 800, 800, 0.8); 
+            if(type === 'logo') tempLogoBase64 = base64; 
+            else if(type === 'ticket') tempTicketBgBase64 = base64; 
+            else if(type === 'slide1') tempSlide1 = base64; 
+            else if(type === 'slide2') tempSlide2 = base64; 
+            else if(type === 'slide3') tempSlide3 = base64; 
+            previewImg.src = base64; 
+            previewImg.classList.remove('hidden'); 
+        }
     }
 
     async function previewMenuBanner(type) {
@@ -623,24 +655,59 @@
         });
     }
 
+    // --- ระบบแจ้งเตือน และแชทแอดมินอัปเกรดแล้ว ---
     let isFirstLoadChats = true;
+    let unreadChatCount = 0; // ตัวแปรเก็บจำนวนแชทที่ยังไม่ได้อ่าน
+
+    function playNotificationSound(testUrl = null) {
+        let soundToPlay = testUrl ? testUrl : adminSoundUrl;
+        const audio = new Audio(soundToPlay);
+        audio.play().catch(e => console.log("Audio play prevented by browser"));
+    }
+
+    function updateChatBadgeUI(count) {
+        const el = document.getElementById('badge-chats');
+        if(!el) return;
+        let displayCount = count !== undefined ? count : unreadChatCount;
+        if(displayCount > 0 && currentTab !== 'chats') {
+            el.innerText = displayCount > 99 ? '99+' : displayCount;
+            el.classList.remove('hidden');
+            el.classList.add('flex', 'items-center', 'justify-center');
+        } else {
+            el.classList.add('hidden');
+            el.classList.remove('flex', 'items-center', 'justify-center');
+            unreadChatCount = 0;
+        }
+    }
+
     function listenToChatsCount() {
         db.collection('chats').where('status', '==', 'active').onSnapshot(snap => {
-            currentCounts['chats'] = snap.size;
-            updateTabBadge('chats');
-            if(currentTab === 'chats') loadAdminChatList(snap);
-            
+            if(currentTab === 'chats') {
+                 loadAdminChatList(snap);
+                 unreadChatCount = 0; 
+                 updateChatBadgeUI();
+            }
+
             if(!isFirstLoadChats) {
-                let hasNewMsg = false;
+                let hasNewMsgFromUser = false;
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added' || change.type === 'modified') {
-                        if(change.doc.data().lastMessage !== 'ส่งรูปภาพ 📷') hasNewMsg = true;
+                        // ถ้าแก้ไขหรือเพิ่ม และเราไม่ได้เปิดแท็บแชทอยู่ หรือไม่ได้เปิดห้องนั้นอยู่ ถือว่ามีแชทใหม่
+                        if (currentTab !== 'chats' || currentChatUserId !== change.doc.id) {
+                            hasNewMsgFromUser = true;
+                            unreadChatCount++;
+                        }
                     }
                 });
-                if(hasNewMsg) {
-                    try { document.getElementById('chat-alert-sound').play(); } catch(e){}
+
+                if(hasNewMsgFromUser) {
+                    playNotificationSound();
                     Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: '💬 มีข้อความใหม่จากลูกค้า', showConfirmButton: false, timer: 3000 });
+                    updateChatBadgeUI();
                 }
+            } else {
+                 unreadChatCount = snap.size; 
+                 updateChatBadgeUI(snap.size);
             }
             isFirstLoadChats = false;
         });
@@ -662,6 +729,8 @@
             const time = new Date(chat.updatedAt).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
             const isActive = (chat.id === currentChatUserId);
             const bgClass = isActive ? 'bg-purple-100 border-l-4 border-purple-500' : 'bg-white hover:bg-slate-50 border-b border-slate-200 cursor-pointer';
+            
+            // โชว์รูปโปรไฟล์ไลน์
             const imgHtml = chat.userImage ? `<img src="${chat.userImage}" class="w-10 h-10 rounded-full object-cover shrink-0 shadow-sm border border-white">` : `<div class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center shrink-0 shadow-sm border border-white"><i class="fa-solid fa-user"></i></div>`;
             
             listDiv.innerHTML += `
@@ -708,6 +777,7 @@
                 const imgHtml = msg.imageUrl ? `<img src="${msg.imageUrl}" class="w-full max-w-[200px] rounded-lg ${msg.text ? 'mt-2' : ''} cursor-pointer shadow-sm border border-gray-200" onclick="window.open(this.src, '_blank')">` : '';
                 const contentHtml = textHtml + imgHtml;
                 
+                // รูปโปรไฟล์ในช่องแชท
                 const userImgHtml = userImage ? `<img src="${userImage}" class="w-8 h-8 rounded-full object-cover shrink-0 shadow-sm border border-white">` : `<div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center shrink-0 shadow-sm border border-slate-300"><i class="fa-solid fa-user text-xs"></i></div>`;
 
                 messagesDiv.innerHTML += `
@@ -736,9 +806,9 @@
         db.collection('chats').doc(currentChatUserId).collection('messages').add({
             text: text, sender: 'admin', timestamp: now
         });
-        db.collection('chats').doc(currentChatUserId).update({
-            lastMessage: text, updatedAt: now
-        });
+        db.collection('chats').doc(currentChatUserId).set({
+            lastMessage: text, updatedAt: now, status: 'active'
+        }, {merge: true});
     }
 
     window.sendChatImage = async function() {
@@ -755,9 +825,9 @@
         await db.collection('chats').doc(currentChatUserId).collection('messages').add({
             text: '', imageUrl: base64, sender: 'admin', timestamp: now
         });
-        await db.collection('chats').doc(currentChatUserId).update({
+        await db.collection('chats').doc(currentChatUserId).set({
             status: 'active', lastMessage: 'ส่งรูปภาพ 📷', updatedAt: now
-        });
+        }, {merge: true});
         Swal.close();
     }
 
@@ -812,6 +882,7 @@
                 if(d.slide1) { document.getElementById('slide1Preview').src = d.slide1; document.getElementById('slide1Preview').classList.remove('hidden'); tempSlide1 = d.slide1; }
                 if(d.slide2) { document.getElementById('slide2Preview').src = d.slide2; document.getElementById('slide2Preview').classList.remove('hidden'); tempSlide2 = d.slide2; }
                 if(d.slide3) { document.getElementById('slide3Preview').src = d.slide3; document.getElementById('slide3Preview').classList.remove('hidden'); tempSlide3 = d.slide3; }
+                if(d.adminSound) document.getElementById('adminSoundSelect').value = d.adminSound;
             }
             db.collection('settings').doc('menu_banners').get().then(mbDoc => {
                 if(mbDoc.exists) {
@@ -824,24 +895,6 @@
                 document.getElementById('designModal').classList.remove('hidden');
             });
         });
-    }
-
-    async function previewDesignImage(type) {
-        let fileInput, previewImg;
-        if(type === 'logo') { fileInput = document.getElementById('logoImageFile'); previewImg = document.getElementById('logoPreview'); } 
-        else if(type === 'ticket') { fileInput = document.getElementById('ticketBgImageFile'); previewImg = document.getElementById('ticketPreview'); } 
-        else { fileInput = document.getElementById(type+'File'); previewImg = document.getElementById(type+'Preview'); }
-        
-        if (fileInput.files && fileInput.files[0]) { 
-            const base64 = await resizeImage(fileInput.files[0], 800, 800, 0.8); 
-            if(type === 'logo') tempLogoBase64 = base64; 
-            else if(type === 'ticket') tempTicketBgBase64 = base64; 
-            else if(type === 'slide1') tempSlide1 = base64; 
-            else if(type === 'slide2') tempSlide2 = base64; 
-            else if(type === 'slide3') tempSlide3 = base64; 
-            previewImg.src = base64; 
-            previewImg.classList.remove('hidden'); 
-        }
     }
 
     function removeSlide(slideId) { 
@@ -861,7 +914,8 @@
             await db.collection('settings').doc('storefront').set({ 
                 storeName: document.getElementById('storeNameInput').value.trim(), countdownTitle: document.getElementById('countdownTitleInput').value.trim(), countdownTitleSize: document.getElementById('countdownTitleSize').value, countdownTitleColor: document.getElementById('countdownTitleColor').value, countdownTarget: document.getElementById('countdownInput').value,
                 announcementText: document.getElementById('announcementInput').value.trim(), searchHeaderHTML: document.getElementById('searchHeaderInput').value.trim(), searchPlaceholder: document.getElementById('searchPlaceholderInput').value.trim(), gridHeaderHTML: document.getElementById('gridHeaderInput').value.trim(),
-                logoUrl: tempLogoBase64, ticketBgUrl: tempTicketBgBase64, slide1: tempSlide1, slide2: tempSlide2, slide3: tempSlide3
+                logoUrl: tempLogoBase64, ticketBgUrl: tempTicketBgBase64, slide1: tempSlide1, slide2: tempSlide2, slide3: tempSlide3,
+                adminSound: document.getElementById('adminSoundSelect').value // บันทึกเสียงแจ้งเตือน
             }, { merge: true });
             
             await db.collection('settings').doc('design').set({ storeName: document.getElementById('storeNameInput').value.trim(), logoUrl: tempLogoBase64, ticketBgUrl: tempTicketBgBase64 }, { merge: true });
@@ -1423,7 +1477,7 @@
         }, 1000);
     }
 
-    function switchTab(t) { 
+    window.switchTab = function(t) { 
         currentTab = t; seenCounts[t] = currentCounts[t]; updateTabBadge(t);
         
         ['all','empty','paid','unpaid','pending_slip','winners','flashsale','chats'].forEach(k => { 
@@ -1467,7 +1521,7 @@
         }
     }
     
-    function filterData() { if (currentTab === 'crm' || currentTab === 'withdraw') { const text = document.getElementById('search-input').value.trim().toLowerCase(); const rows = document.querySelectorAll('#table-body tr'); rows.forEach(row => { if(row.innerText.toLowerCase().includes(text)) row.style.display = ''; else row.style.display = 'none'; }); } else { renderTable(document.getElementById('search-input').value.trim()); } }
+    window.filterData = function() { if (currentTab === 'crm' || currentTab === 'withdraw') { const text = document.getElementById('search-input').value.trim().toLowerCase(); const rows = document.querySelectorAll('#table-body tr'); rows.forEach(row => { if(row.innerText.toLowerCase().includes(text)) row.style.display = ''; else row.style.display = 'none'; }); } else { renderTable(document.getElementById('search-input').value.trim()); } }
 
     function loadWithdrawalsCRM() {
       document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อ หรือ รหัสออเดอร์..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดข้อมูลการถอน...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
@@ -1483,8 +1537,8 @@
       });
     }
 
-    function approveWithdrawal(docId) { Swal.fire({ title: 'ยืนยันการโอนสำเร็จ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'โอนแล้ว' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => { Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success'); }); } }); }
-    function deleteWithdrawal(docId) { Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ลบทิ้ง' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลถูกลบแล้ว', 'success'); }); } }); }
+    window.approveWithdrawal = function(docId) { Swal.fire({ title: 'ยืนยันการโอนสำเร็จ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'โอนแล้ว' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => { Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success'); }); } }); }
+    window.deleteWithdrawal = function(docId) { Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ลบทิ้ง' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลถูกลบแล้ว', 'success'); }); } }); }
 
     function loadCustomerCRM() {
       document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
@@ -1526,13 +1580,13 @@
         });
     }
 
-    function toggleFlashSalePrice() {
+    window.toggleFlashSalePrice = function() {
         const isFs = document.getElementById('formIsFlashSale').checked;
         document.getElementById('fsPriceDiv').style.display = isFs ? 'block' : 'none';
         if(!isFs) document.getElementById('formFsPrice').value = '';
     }
 
-    function editRow(item) { 
+    window.editRow = function(item) { 
         openModal(); document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์"; document.getElementById('formRowIndex').value = item.id; document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); document.getElementById('formQty').value = item.quantity; document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); 
         document.getElementById('formIsFlashSale').checked = item.isFlashSale === true; 
         toggleFlashSalePrice();
@@ -1555,7 +1609,7 @@
         calculateAmount(); 
     }
 
-    async function submitForm(e) { 
+    window.submitForm = async function(e) { 
         e.preventDefault(); 
         const id = document.getElementById('formRowIndex').value; 
         
@@ -1606,9 +1660,9 @@
         } 
     }
 
-    function calculateAmount() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); }
+    window.calculateAmount = function() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); }
     
-    function autoFormatNumbers(inputEl, chunkLength) {
+    window.autoFormatNumbers = function(inputEl, chunkLength) {
         let raw = inputEl.value.replace(/\D/g, ''); 
         let formatted = '';
         if(raw.length > 0) {
@@ -1619,25 +1673,25 @@
         inputEl.value = formatted;
     }
 
-    function openModal() { document.getElementById('formModal').classList.remove('hidden'); document.getElementById('lotteryForm').reset(); document.getElementById('formRowIndex').value = ""; document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; document.getElementById('slip-display').classList.add('hidden'); document.getElementById('fsPriceDiv').style.display = 'none'; calculateAmount(); }
-    function closeModal() { document.getElementById('formModal').classList.add('hidden'); }
-    function clearTicket(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null, isFlashSale: false, flashSalePrice: null, discountCoins: null, updatedAt: Date.now() }); } }); }
-    function deleteTicket(id) { Swal.fire({ title: 'ยืนยันการลบสลาก?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#64748b', confirmButtonText: 'ใช่, ลบทิ้งเลย!', cancelButtonText: 'ยกเลิก' }).then((result) => { if (result.isConfirmed) { Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); db.collection('lotteries').doc(id).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success'); }); } }); }
-    function addNewMonthPopup() { Swal.fire({ title: "สร้างแผ่นงานงวดใหม่", input: "text", inputPlaceholder: "งวด 1 กรกฎาคม 2569", showCancelButton: true, confirmButtonColor: '#1e293b' }).then(r => { if(r.value) db.collection('draws').add({ name: r.value.trim(), createdAt: new Date() }); }); }
+    window.openModal = function() { document.getElementById('formModal').classList.remove('hidden'); document.getElementById('lotteryForm').reset(); document.getElementById('formRowIndex').value = ""; document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; document.getElementById('slip-display').classList.add('hidden'); document.getElementById('fsPriceDiv').style.display = 'none'; calculateAmount(); }
+    window.closeModal = function() { document.getElementById('formModal').classList.add('hidden'); }
+    window.clearTicket = function(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null, isFlashSale: false, flashSalePrice: null, discountCoins: null, updatedAt: Date.now() }); } }); }
+    window.deleteTicket = function(id) { Swal.fire({ title: 'ยืนยันการลบสลาก?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#64748b', confirmButtonText: 'ใช่, ลบทิ้งเลย!', cancelButtonText: 'ยกเลิก' }).then((result) => { if (result.isConfirmed) { Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); db.collection('lotteries').doc(id).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success'); }); } }); }
+    window.addNewMonthPopup = function() { Swal.fire({ title: "สร้างแผ่นงานงวดใหม่", input: "text", inputPlaceholder: "งวด 1 กรกฎาคม 2569", showCancelButton: true, confirmButtonColor: '#1e293b' }).then(r => { if(r.value) db.collection('draws').add({ name: r.value.trim(), createdAt: new Date() }); }); }
 
-    function openWinningModal() {
+    window.openWinningModal = function() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดสลากก่อนครับ', 'warning');
         db.collection('winning_results').doc(currentSelectedSheet).get().then(doc => { if(doc.exists) { const data = doc.data(); document.getElementById('win_prize1').value = data.prize1 || ""; document.getElementById('win_last2').value = data.last2 || ""; document.getElementById('win_front3').value = (data.front3 || []).join(' '); document.getElementById('win_last3').value = (data.last3 || []).join(' '); document.getElementById('win_prize2').value = (data.prize2 || []).join(' '); document.getElementById('win_prize3').value = (data.prize3 || []).join(' '); document.getElementById('win_prize4').value = (data.prize4 || []).join(' '); document.getElementById('win_prize5').value = (data.prize5 || []).join(' '); } else { document.getElementById('winningForm').reset(); } document.getElementById('winningModal').classList.remove('hidden'); });
     }
-    function closeWinningModal() { document.getElementById('winningModal').classList.add('hidden'); }
-    function parseNumberString(str) { return str.split(/[\s,]+/).filter(item => item.trim() !== ""); }
-    function saveWinningData(e) { e.preventDefault(); const payload = { prize1: document.getElementById('win_prize1').value.trim(), last2: document.getElementById('win_last2').value.trim(), front3: parseNumberString(document.getElementById('win_front3').value), last3: parseNumberString(document.getElementById('win_last3').value), prize2: parseNumberString(document.getElementById('win_prize2').value), prize3: parseNumberString(document.getElementById('win_prize3').value), prize4: parseNumberString(document.getElementById('win_prize4').value), prize5: parseNumberString(document.getElementById('win_prize5').value), updatedAt: new Date() }; db.collection('winning_results').doc(currentSelectedSheet).set(payload, { merge: true }).then(() => { Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', confirmButtonColor: '#b38728' }); closeWinningModal(); }); }
+    window.closeWinningModal = function() { document.getElementById('winningModal').classList.add('hidden'); }
+    window.parseNumberString = function(str) { return str.split(/[\s,]+/).filter(item => item.trim() !== ""); }
+    window.saveWinningData = function(e) { e.preventDefault(); const payload = { prize1: document.getElementById('win_prize1').value.trim(), last2: document.getElementById('win_last2').value.trim(), front3: parseNumberString(document.getElementById('win_front3').value), last3: parseNumberString(document.getElementById('win_last3').value), prize2: parseNumberString(document.getElementById('win_prize2').value), prize3: parseNumberString(document.getElementById('win_prize3').value), prize4: parseNumberString(document.getElementById('win_prize4').value), prize5: parseNumberString(document.getElementById('win_prize5').value), updatedAt: new Date() }; db.collection('winning_results').doc(currentSelectedSheet).set(payload, { merge: true }).then(() => { Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', confirmButtonColor: '#b38728' }); closeWinningModal(); }); }
 
-    function openPromoModal() { tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = ""; db.collection('settings').doc('promotion').get().then(doc => { if(doc.exists) { document.getElementById('promoStatus').value = doc.data().isActive ? "true" : "false"; if(doc.data().imageUrl) { document.getElementById('promoPreview').src = doc.data().imageUrl; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); tempPromoImageBase64 = doc.data().imageUrl; } else { document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); } } document.getElementById('promoModal').classList.remove('hidden'); }); }
-    async function previewPromoImage() { const fileInput = document.getElementById('promoImageFile'); if (fileInput.files && fileInput.files[0]) { tempPromoImageBase64 = await resizeImage(fileInput.files[0], 800, 800, 0.75); document.getElementById('promoPreview').src = tempPromoImageBase64; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); } }
-    function removePromoImage() { tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = ""; document.getElementById('promoPreview').src = ""; document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); }
-    function closePromoModal() { document.getElementById('promoModal').classList.add('hidden'); }
-    async function savePromotion(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" }; try { await db.collection('settings').doc('promotion').set(payload); Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' }); closePromoModal(); } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); } }
+    window.openPromoModal = function() { tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = ""; db.collection('settings').doc('promotion').get().then(doc => { if(doc.exists) { document.getElementById('promoStatus').value = doc.data().isActive ? "true" : "false"; if(doc.data().imageUrl) { document.getElementById('promoPreview').src = doc.data().imageUrl; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); tempPromoImageBase64 = doc.data().imageUrl; } else { document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); } } document.getElementById('promoModal').classList.remove('hidden'); }); }
+    window.previewPromoImage = async function() { const fileInput = document.getElementById('promoImageFile'); if (fileInput.files && fileInput.files[0]) { tempPromoImageBase64 = await resizeImage(fileInput.files[0], 800, 800, 0.75); document.getElementById('promoPreview').src = tempPromoImageBase64; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); } }
+    window.removePromoImage = function() { tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = ""; document.getElementById('promoPreview').src = ""; document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); }
+    window.closePromoModal = function() { document.getElementById('promoModal').classList.add('hidden'); }
+    window.savePromotion = async function(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" }; try { await db.collection('settings').doc('promotion').set(payload); Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' }); closePromoModal(); } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); } }
   </script>
 </body>
 </html>
