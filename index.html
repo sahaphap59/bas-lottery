@@ -75,7 +75,7 @@
     .animate-\\[marquee_15s_linear_infinite\\] { animation: marquee 15s linear infinite; }
   </style>
 
-  <!-- ตะกร้าสินค้าแบบลอย -->
+  <!-- ตะกร้าสินค้าแบบลอย (โชว์ตลอดเวลา) -->
   <div id="floating-cart" onclick="openPaymentModal()" class="hidden fixed bottom-[160px] right-4 z-40 flex-col items-center cursor-pointer animate-bounceIn transition-transform active:scale-95">
       <div class="bg-[#d31a1a] w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(211,26,26,0.4)] border-2 border-white relative transition-transform hover:scale-105">
           <i class="fa-solid fa-shopping-cart text-white text-xl mt-0.5"></i>
@@ -92,7 +92,6 @@
       </div>
   </div>
 
-  <!-- View: Home -->
   <div id="home-section" class="block max-w-md mx-auto">
     <div class="px-4 mt-4 text-center">
         <h3 id="countdown-title" class="hidden"></h3>
@@ -109,6 +108,7 @@
         </div>
     </div>
 
+    <!-- แบนเนอร์เมนูหลัก 3 ช่อง -->
     <div class="px-4 mb-4 mt-2">
         <div class="grid grid-cols-2 gap-2.5">
             <div class="row-span-2 relative cursor-pointer active:scale-95 transition shadow-sm rounded-xl overflow-hidden border border-gray-200 bg-white" onclick="openMascotPicker()">
@@ -131,7 +131,7 @@
         <div class="filter-btn" id="type-set" onclick="setLotteryType('set')">หวยชุด</div>
       </div>
       <div class="flex gap-2 mb-3">
-        <button onclick="randomizeNumber()" class="bg-gray-800 text-white px-4 rounded-xl font-bold flex items-center gap-1 text-sm shadow-sm active:scale-95 transition">✨ สุ่ม</button>
+        <button onclick="randomTicket()" class="bg-gray-800 text-white px-4 rounded-xl font-bold flex items-center gap-1 text-sm shadow-sm active:scale-95 transition">✨ สุ่ม</button>
         <input type="number" id="search-input" oninput="filterData()" maxlength="6" placeholder="ค้นหาเลข 6 หลัก..." class="flex-1 border border-gray-300 bg-gray-50 text-gray-800 py-3 px-4 rounded-xl outline-none text-center text-[17px] font-bold tracking-[0.2em] focus:border-[#d31a1a] focus:ring-1 focus:ring-[#d31a1a] transition">
       </div>
       
@@ -166,7 +166,6 @@
     </main>
   </div>
 
-  <!-- View: Orders -->
   <div id="orders-section" class="hidden max-w-md mx-auto">
     <div class="bg-[#d31a1a] text-white p-4 shadow-sm text-center relative rounded-b-2xl mb-4">
         <h2 class="text-xl font-black">คำสั่งซื้อของฉัน</h2>
@@ -186,13 +185,11 @@
     </main>
   </div>
 
-  <!-- Bar: Bulk Payment -->
   <div id="bulk-pay-bar" class="hidden fixed bottom-[58px] left-0 right-0 max-w-md mx-auto bg-white border-t border-red-200 p-3 flex justify-between items-center z-30 shadow-[0_-4px_15px_rgba(211,26,26,0.15)]">
      <div class="text-sm font-bold text-gray-700 leading-tight">เลือกแล้ว <span id="bulk-count" class="text-[#d31a1a] text-lg">0</span> ใบ<br>รวม: <span id="bulk-total" class="text-[#d31a1a] text-xl font-black tracking-wide">฿0</span></div>
      <button onclick="processBulkPayment()" id="btn-bulk-pay" class="bg-[#d31a1a] text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:bg-red-700 transition opacity-50 pointer-events-none">📸 แจ้งโอนทีเดียว</button>
   </div>
 
-  <!-- View: Profile -->
   <div id="profile-section" class="hidden max-w-md mx-auto min-h-screen bg-gray-50 pb-6">
     <div class="bg-[#d31a1a] px-4 pt-6 pb-12 rounded-b-[32px] shadow-sm text-white">
       <div class="flex items-center gap-4">
@@ -227,11 +224,9 @@
             <div class="flex items-center gap-3"><div class="text-xl">🏦</div><div><div class="text-sm font-bold text-gray-700">บัญชีรับเงินรางวัล</div><div class="text-xs text-amber-500 font-bold" id="display-bank">กดเพื่อเพิ่มบัญชีรับเงิน</div></div></div><span class="text-gray-300 font-bold">❯</span>
         </div>
       </div>
-      
       <div onclick="switchTab('orders'); setOrderTab('success');" class="bg-white rounded-xl shadow-sm border border-[#f5c200] p-4 cursor-pointer hover:bg-yellow-50 flex items-center justify-between mt-4">
           <div class="flex items-center gap-3"><div class="text-xl">💸</div><div><div class="text-sm font-bold text-gray-800">แจ้งถอนเงินรางวัล</div><div class="text-xs text-gray-500">เช็คยอดและถอนเงินเขัาบัญชี</div></div></div><span class="text-[#f5c200] font-bold">❯</span>
       </div>
-      
       <h3 class="text-sm font-bold text-gray-800 mt-6 mb-2 px-1">ศูนย์ช่วยเหลือ</h3>
       
       <div onclick="startChatPrompt()" class="bg-purple-50 rounded-xl shadow-sm border border-purple-200 p-4 cursor-pointer hover:bg-purple-100 flex items-center justify-between mb-4">
@@ -248,7 +243,6 @@
     </div>
   </div>
 
-  <!-- Navigation Bar (Bottom) -->
   <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe z-40 max-w-md left-1/2 transform -translate-x-1/2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
     <div class="flex justify-between items-center px-2">
       <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
@@ -266,7 +260,6 @@
     </div>
   </div>
 
-  <!-- Modals -->
   <div id="top10-modal" class="fixed inset-0 bg-[#f4f6f9] z-[100] hidden flex-col overflow-y-auto pb-10">
      <div class="bg-[#d31a1a] text-white px-4 py-4 flex items-center justify-between sticky top-0 z-10 shadow-md rounded-b-2xl">
          <div class="flex items-center gap-3">
@@ -353,12 +346,29 @@
                 <button id="btn-confirm-pay" onclick="submitOrder()" class="w-full bg-slate-800 text-white font-bold p-3.5 rounded-xl shadow-md text-lg mt-4">✅ ยืนยันแจ้งชำระเงิน</button>
             </div>
         </div>
-  </div>
+    </div>
 
-  <input type="text" id="copy-helper" class="absolute -left-[9999px]">
+    <div id="grandWinningPopup" class="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm items-center justify-center p-4 hidden">
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-bounceIn border-4 border-yellow-400">
+            <div class="bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 p-6 text-center text-amber-900">
+                <div class="text-5xl mb-2 drop-shadow-md">🎉</div>
+                <h2 class="text-2xl font-black drop-shadow-sm">ยินดีด้วยคุณถูกรางวัล!</h2>
+                <div class="bg-white/90 rounded-xl py-3 px-4 mt-4 shadow-inner">
+                    <p class="text-sm font-bold text-gray-600 mb-1">สลากหมายเลข</p>
+                    <div id="win-number-text" class="text-4xl font-black tracking-[0.2em] text-[#d31a1a] font-mono">123456</div>
+                </div>
+            </div>
+            <div class="p-6 text-center bg-yellow-50">
+                <p class="text-sm font-bold text-amber-800 mb-1">คุณได้รับเงินรางวัลรวม</p>
+                <div id="win-amount-text" class="text-4xl font-black text-green-600 drop-shadow-sm mb-6">฿6,000,000</div>
+                <button onclick="closeWinPopup()" class="w-full bg-[#d31a1a] hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-md transition">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="text" id="copy-helper" class="absolute -left-[9999px]">
 
   <script>
-    // --- ตั้งค่า Firebase ---
     const firebaseConfig = {
       apiKey: "AIzaSyCjlBUSa8LEL4j7ORix2p9piAnBU8hvvCY",
       authDomain: "bas-lottery.firebaseapp.com",
@@ -518,7 +528,7 @@
         }
     }
 
-    function checkReferral(profile) {
+    window.checkReferral = function(profile) {
         const urlParams = new URLSearchParams(window.location.search);
         const refId = urlParams.get('ref');
         if(refId && refId !== profile.userId) {
@@ -848,6 +858,7 @@
       return `<div class="pro-ticket-card ${isFs ? 'shimmer-sweep' : ''}"><div class="ticket-body-wrap" style="${ticketBgStyle}"><div class="ticket-stub pl-1 pr-1 w-[28%] shrink-0"><span class="ticket-stub-txt tracking-tighter text-[#d31a1a]">สลากกินแบ่งรัฐบาล</span><div class="text-center mt-0.5"><div class="text-[13px] font-black text-black leading-none drop-shadow-md">${qty} ใบ</div><div class="text-[8.5px] font-black text-black mt-1 drop-shadow-md">${qty*6} ล้าน</div></div><div class="text-center leading-none mt-2"><div class="text-[18px] font-black text-[#d31a1a] drop-shadow-md">80</div><div class="text-[8.5px] font-black text-black drop-shadow-md">บาท</div></div></div><div class="ticket-main w-[72%] overflow-hidden flex flex-col justify-between py-1" style="container-type: inline-size;"><div class="flex justify-between items-center w-full min-w-0"><div class="text-[5px] text-[#d31a1a] font-bold leading-[1.1] drop-shadow-sm shrink-0 mr-1">สลากกินแบ่ง<br>รัฐบาล<br><span class="text-[3.5px] text-gray-700 font-medium">GOVERNMENT</span></div><div class="flex-1 text-right min-w-0 overflow-hidden"><span class="ticket-number-text">${numStr}</span></div></div><div class="flex justify-center shrink-0 w-full"><div class="bg-white/95 border border-gray-300 rounded px-1.5 py-[1px] shadow-sm"><div class="text-[6.5px] font-bold text-gray-900 whitespace-nowrap">${drawName || currentDraw}</div></div></div><div class="flex justify-between items-end w-full min-w-0 shrink-0"><img src="${qrCodeUrl}" alt="QR" class="w-[13px] h-[13px] p-[1px] border border-gray-400 bg-white shrink-0 shadow-sm"><div class="flex-1 ml-1 overflow-hidden flex items-end justify-end min-w-0"><span class="real-barcode text-[16px] text-gray-800">*${numStr}*</span></div></div></div></div>${bottomActionHTML}</div>`;
     }
 
+    // --- ส่วนออเดอร์ของฉัน และการชำระเงิน ---
     window.setOrderTab = function(tab) { 
         currentOrderTab = tab; 
         ['unpaid', 'pending', 'success', 'history'].forEach(t => { document.getElementById('tab-'+t).className = (t === tab) ? 'order-tab active whitespace-nowrap px-3' : 'order-tab whitespace-nowrap px-3'; }); 
@@ -890,6 +901,7 @@
         countdownInterval = setInterval(() => { 
             const now = Date.now(); 
             
+            // 1. อัปเดตเวลาในหน้ารายการคำสั่งซื้อ
             document.querySelectorAll('.timer-display').forEach(el => { 
                 const expiresAt = parseInt(el.dataset.expire); const diff = expiresAt - now; 
                 if(diff <= 0) { 
@@ -901,6 +913,7 @@
                 } 
             }); 
             
+            // 2. อัปเดตเวลาบนป้ายตะกร้าลอย
             let closestExpire = null;
             if (myTickets && myTickets.length > 0) {
                 const unpaidTickets = myTickets.filter(t => t.draw === currentDraw && (t.status === 'จอง' || t.status === 'reserve' || t.status === 'ยังไม่ชำระ') && t.expiresAt);
@@ -961,7 +974,7 @@
         
         if (currentOrderTab === 'unpaid') {
             statusBadge = '<span class="text-[11px] bg-rose-100 text-rose-600 px-2 py-1 rounded-full font-bold border border-rose-200 shadow-sm">ยังไม่ชำระ (จอง)</span>'; 
-            actionHTML = `<div class="flex gap-2 w-full mt-3"><button onclick="cancelTicket('${item.id}')" class="flex-[0.4] bg-gray-100 text-gray-500 border border-gray-200 p-2.5 rounded-b-xl rounded-br-none text-xs font-bold hover:bg-gray-200 transition">ยกเลิก</button><button onclick="openPaymentModal('${item.id}', '${numStr}', ${amount})" class="flex-[0.6] bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl rounded-bl-none text-xs font-bold hover:bg-red-50 transition">ชำระเฉพาะใบนี้</button></div>`; 
+            actionHTML = `<div class="flex gap-2 w-full mt-3"><button onclick="cancelTicket('${item.id}')" class="flex-[0.4] bg-gray-100 text-gray-500 border border-gray-200 p-2.5 rounded-b-xl rounded-br-none text-xs font-bold hover:bg-gray-200 transition">ยกเลิก</button><button onclick="window.openPaymentModal('${item.id}', '${numStr}', ${amount})" class="flex-[0.6] bg-white border border-[#d31a1a] text-[#d31a1a] p-2.5 rounded-b-xl rounded-bl-none text-xs font-bold hover:bg-red-50 transition">ชำระเฉพาะใบนี้</button></div>`; 
             checkboxHTML = `<input type="checkbox" class="ticket-checkbox w-6 h-6 accent-[#d31a1a] cursor-pointer" value="${item.id}" data-amount="${amount}" onchange="updateBulkPayment()">`;
             if (item.expiresAt) timerHTML = `<div class="timer-display mx-3 text-[11px] text-rose-600 font-bold bg-rose-50 text-center py-2 rounded-lg border border-rose-200 mb-3 shadow-inner" data-expire="${item.expiresAt}">⏱️ กำลังคำนวณเวลา...</div>`;
         } else if (currentOrderTab === 'pending') { 
@@ -1264,6 +1277,77 @@
     window.showSlides = function() { const slides = document.querySelectorAll('.carousel-slide.active-slide'); if(slides.length === 0) return; for (let i = 0; i < slides.length; i++) slides[i].style.display = "none"; slideIndex++; if (slideIndex > slides.length) slideIndex = 1; slides[slideIndex - 1].style.display = "block"; slideInterval = setTimeout(showSlides, 3000); }
     window.showPromoPopup = function() { db.collection('settings').doc('promotion').get().then(doc => { if(doc.exists && doc.data().isActive && doc.data().imageUrl) { if(!sessionStorage.getItem('promo_shown')) { Swal.fire({ imageUrl: doc.data().imageUrl, imageAlt: 'Promotion', showConfirmButton: true, confirmButtonText: 'ปิดหน้าต่าง', confirmButtonColor: '#d31a1a', width: '90%', padding: '0', background: 'transparent', backdrop: `rgba(0,0,0,0.8)`, customClass: { image: 'rounded-2xl max-w-full m-0' } }); sessionStorage.setItem('promo_shown', 'true'); } } }); }
     window.releaseExpiredReservations = function() { const now = Date.now(); db.collection('lotteries').where('status', '==', 'จอง').get().then(snap => { snap.forEach(doc => { const data = doc.data(); if(data.expiresAt && now > data.expiresAt) { db.collection('lotteries').doc(doc.id).update({ status: 'available', name: '-', userId: null, expiresAt: null, slip: '', email: '', note: '', isFlashSale: false, updatedAt: Date.now() }); } }); }); }
+
+    window.openMascotPicker = function() {
+        Swal.fire({
+            title: 'อาเหงียวหยิบโชคให้คุณ',
+            html: `
+                <div class="text-center font-bold text-gray-500 text-xs mb-4">ระบบมาสคอตจะสุ่มสลากนำโชคที่มีอยู่บนแผงให้คุณทันที</div>
+                <div onclick="pickRandomTicket(1)" class="bg-white border border-rose-200 rounded-2xl p-4 flex items-center justify-between mb-3 cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">
+                   <div class="flex items-center gap-3">
+                       <div class="text-4xl drop-shadow-md">🧧</div>
+                       <div class="text-left"><div class="font-black text-gray-800 text-[15px]">อาเหงียวหยิบให้ 1 ใบ</div><div class="text-rose-600 font-bold text-[11px]">ราคารวม 100 บาท</div></div>
+                   </div>
+                   <div class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold text-[11px] shadow-sm">+ สุ่มจองเลย</div>
+                </div>
+                <div onclick="pickRandomTicket(2)" class="bg-white border border-rose-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm active:scale-95 transition hover:bg-rose-50">
+                   <div class="flex items-center gap-3">
+                       <div class="text-4xl drop-shadow-md">🧧</div>
+                       <div class="text-left"><div class="font-black text-gray-800 text-[15px]">อาเหงียวหยิบให้ชุด 2 ใบ</div><div class="text-rose-600 font-bold text-[11px]">ราคารวม 200 บาท</div></div>
+                   </div>
+                   <div class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold text-[11px] shadow-sm">+ สุ่มจองเลย</div>
+                </div>
+            `,
+            showConfirmButton: false, showCloseButton: true
+        });
+    }
+
+    window.pickRandomTicket = function(qty) {
+        let available = availableTickets.filter(t => parseInt(t.quantity) === qty && !t.isFlashSale);
+        if(available.length === 0) {
+            Swal.fire('ขออภัย', `ตอนนี้ไม่มีสลากชุด ${qty} ใบ ว่างในแผงเลยครับ`, 'warning'); return;
+        }
+        let randomIndex = Math.floor(Math.random() * available.length);
+        let selectedTicket = available[randomIndex];
+        Swal.close();
+        let displayAmount = selectedTicket.flashSalePrice ? parseInt(selectedTicket.flashSalePrice) : qty * 100;
+        openCheckout(selectedTicket.id, String(selectedTicket.number).padStart(6, '0'), displayAmount);
+    }
+
+    window.showDreamPrediction = function() {
+        Swal.fire({
+            title: '🔮ทำนายฝันนำโชค',
+            input: 'text',
+            inputPlaceholder: 'พิมพ์สิ่งที่คุณฝันเห็น เช่น ฝันเห็นแมว...',
+            showCancelButton: true,
+            confirmButtonText: 'ตีเป็นเลขเด็ด',
+            confirmButtonColor: '#d31a1a',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.value) {
+                let randomNum = Math.floor(10 + Math.random() * 90);
+                Swal.fire({
+                    title: `เลขเด็ดจากฝันของคุณ`,
+                    html: `ตีเป็นเลขท้าย 2 ตัวได้เลข: <span class="text-3xl font-black text-rose-600 font-mono tracking-widest">${randomNum}</span>`,
+                    icon: 'success',
+                    confirmButtonText: 'ค้นหาเลขนี้ทันที',
+                    confirmButtonColor: '#d31a1a'
+                }).then(() => {
+                    document.getElementById('search-input').value = randomNum;
+                    filterData();
+                });
+            }
+        });
+    }
+
+    window.randomTicket = function() {
+        const available = availableTickets.filter(t => t.status === 'available');
+        if(available.length === 0) return Swal.fire('หมดแผง', 'สลากหมดเกลี้ยงแล้วจ้า', 'info');
+        const r = available[Math.floor(Math.random() * available.length)];
+        document.getElementById('search-input').value = String(r.number);
+        filterData();
+        Swal.fire({toast:true, position: 'top-end', title: 'สุ่มเลขเด็ดให้แล้ว!', icon: 'success', timer: 1500, showConfirmButton: false});
+    }
 
     window.initAdvancedAnalytics = async function() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
