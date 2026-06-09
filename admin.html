@@ -669,9 +669,10 @@
                 db.collection('lotteries').doc(id).update({status: 'sold', updatedAt: Date.now()}).then(() => {
                     if(userId) {
                         let coinsEarned = parseInt(quantity);
-                        db.collection('users').doc(userId).update({
+                        // 🛠️ แก้ไข: เปลี่ยนจาก update เป็น set + merge เพื่อรับประกันว่า Coin จะเข้า 100% แม้ Database จะไม่สมบูรณ์
+                        db.collection('users').doc(userId).set({
                             coins: firebase.firestore.FieldValue.increment(coinsEarned)
-                        });
+                        }, { merge: true });
                         
                         let msg = `🎉 ยืนยันการชำระเงินสำเร็จ!\n\nขอบคุณที่อุดหนุนครับ แอดมินตรวจสอบสลิปเรียบร้อยแล้ว\n\n📌 รายละเอียดออเดอร์:\n- สลากเลข: ${numStr}\n- รหัส: #${id.substring(0,8)}\n- จำนวน: ${quantity} ใบ\n\n💰 คุณได้รับ +${coinsEarned} Ah-Meow Coin`;
                         sendCustomerPushMessage(userId, msg);
