@@ -35,6 +35,7 @@
     .chat-scroll::-webkit-scrollbar { width: 6px; }
     .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
     
+    /* สไตล์สำหรับ Toggle Switch สิทธิ์การใช้งาน */
     .toggle-checkbox:checked { right: 0; border-color: #10b981; }
     .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
   </style>
@@ -51,8 +52,8 @@
       <h2 class="text-2xl font-black text-slate-800 mb-1">Meowto Plus</h2>
       <p class="text-sm text-slate-500 mb-4">เข้าสู่ระบบแผงควบคุมหลังบ้าน</p>
       <input type="text" id="adminId" placeholder="ชื่อผู้ใช้ (ID)" class="w-full border border-slate-300 p-3 rounded-xl mb-3 text-center text-lg font-bold outline-none focus:border-amber-400 bg-slate-50">
-      <input type="password" id="adminPass" placeholder="รหัสผ่าน" class="w-full border border-slate-300 p-3 rounded-xl mb-5 text-center text-lg font-bold tracking-widest outline-none focus:border-amber-400 bg-slate-50">
-      <button onclick="checkAdminLogin()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold p-3.5 rounded-xl transition shadow-md">ปลดล็อกระบบ</button>
+      <input type="password" id="adminPass" placeholder="รหัสผ่าน" class="w-full border border-slate-300 p-3 rounded-xl mb-5 text-center text-lg font-bold tracking-widest outline-none focus:border-amber-400 bg-slate-50" onkeypress="if(event.key==='Enter') window.checkAdminLogin()">
+      <button onclick="window.checkAdminLogin()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold p-3.5 rounded-xl transition shadow-md">ปลดล็อกระบบ</button>
     </div>
   </div>
 
@@ -73,32 +74,33 @@
                <div class="text-[10px] text-slate-400">เข้าใช้งานโดย</div>
                <div class="text-sm font-bold text-amber-400" id="adminDisplayName">แอดมิน</div>
            </div>
-           <button onclick="adminLogout()" class="text-xs text-rose-300 hover:text-white font-bold bg-rose-500/20 hover:bg-rose-500 transition px-3 py-1.5 rounded border border-rose-500/30"><i class="fa-solid fa-power-off"></i> ออกระบบ</button>
+           <button onclick="window.openMyProfileModal()" class="text-xs text-sky-300 hover:text-white font-bold bg-sky-500/20 hover:bg-sky-500 transition px-3 py-1.5 rounded border border-sky-500/30 mr-1"><i class="fa-solid fa-gear"></i> ตั้งค่า</button>
+           <button onclick="window.adminLogout()" class="text-xs text-rose-300 hover:text-white font-bold bg-rose-500/20 hover:bg-rose-500 transition px-3 py-1.5 rounded border border-rose-500/30"><i class="fa-solid fa-power-off"></i></button>
         </div>
 
         <div class="bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 flex flex-col justify-center gap-1">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-slate-400">📅 งวดที่เลือกดู:</span>
-            <select id="sheet-selector" onchange="onSheetChange()" class="bg-transparent text-amber-300 font-bold text-sm outline-none cursor-pointer"></select>
+            <select id="sheet-selector" onchange="window.onSheetChange()" class="bg-transparent text-amber-300 font-bold text-sm outline-none cursor-pointer"></select>
           </div>
           <div class="flex items-center justify-between border-t border-slate-700 pt-1 mt-0.5">
             <span id="active-storefront-label" class="text-[10px] text-emerald-400 font-bold">🟢 หน้าร้าน: กำลังโหลด...</span>
-            <button onclick="setActiveStorefrontDraw()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] px-2 py-0.5 rounded shadow-sm font-bold ml-3 transition">📌 บังคับโชว์</button>
+            <button onclick="window.setActiveStorefrontDraw()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] px-2 py-0.5 rounded shadow-sm font-bold ml-3 transition">📌 บังคับโชว์</button>
           </div>
         </div>
         
-        <button id="btn-export-excel" onclick="exportToExcel()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📊 โหลดรายงาน</button>
+        <button id="btn-export-excel" onclick="window.exportToExcel()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📊 โหลดรายงาน</button>
         <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🏪 ไปหน้าร้าน</button>
-        <button onclick="toggleSales()" id="btn-toggle-sales" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🛒 สถานะขาย: เปิด</button>
-        <button id="btn-design-modal" onclick="openDesignModal()" class="bg-teal-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">🖼️ จัดการระบบร้าน</button>
-        <button id="btn-promo-modal" onclick="openPromoModal()" class="bg-fuchsia-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📣 โปรโมชัน</button>
-        <button id="btn-fs-modal" onclick="openFlashSaleModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md">⚡ Flash Sale</button>
-        <button id="btn-new-month" onclick="addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
-        <button id="btn-win-modal" onclick="openWinningModal()" class="gold-gradient text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md hover:opacity-90">🏆 บันทึกผลรางวัล</button>
-        <button id="btn-stock-modal" onclick="openStockCheckModal()" class="bg-sky-500 hover:bg-sky-400 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md border border-sky-600">🔍 เช็ค/ตัดสต๊อกจริง</button>
-        <button id="btn-add-lottery" onclick="openModal()" class="bg-slate-700 border border-slate-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">➕ ลงทะเบียนสลาก</button>
-        <!-- ปุ่มจัดการแอดมิน (เฉพาะ Superadmin) -->
-        <button id="btn-manage-admin" onclick="openAdminManageModal()" class="hidden bg-slate-100 text-slate-800 hover:bg-white font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md">👥 จัดการทีมงาน</button>
+        <button onclick="window.toggleSales()" id="btn-toggle-sales" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🛒 สถานะขาย: เปิด</button>
+        <button id="btn-design-modal" onclick="window.openDesignModal()" class="bg-teal-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">🖼️ จัดการระบบร้าน</button>
+        <button id="btn-promo-modal" onclick="window.openPromoModal()" class="bg-fuchsia-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📣 โปรโมชัน</button>
+        <button id="btn-fs-modal" onclick="window.openFlashSaleModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md">⚡ Flash Sale</button>
+        <button id="btn-new-month" onclick="window.addNewMonthPopup()" class="bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">📅 เปิดงวดใหม่</button>
+        <button id="btn-win-modal" onclick="window.openWinningModal()" class="gold-gradient text-slate-900 font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md hover:opacity-90">🏆 บันทึกผลรางวัล</button>
+        <button id="btn-stock-modal" onclick="window.openStockCheckModal()" class="bg-sky-500 hover:bg-sky-400 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md border border-sky-600">🔍 เช็ค/ตัดสต๊อกจริง</button>
+        <button id="btn-add-lottery" onclick="window.openModal()" class="bg-slate-700 border border-slate-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">➕ ลงทะเบียนสลาก</button>
+        <button id="btn-support-ticket" onclick="window.openSupportModal()" class="bg-orange-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">🎫 แจ้งปัญหา (Support)</button>
+        <button id="btn-manage-admin" onclick="window.openAdminManageModal()" class="hidden bg-slate-100 text-slate-800 hover:bg-white font-black px-4 py-2.5 rounded-lg text-sm transition shadow-md">👥 จัดการทีมงาน</button>
       </div>
     </div>
   </div>
@@ -113,7 +115,7 @@
         <div class="dash-box p-4 bg-amber-50 border-t-4 border-t-amber-500"><div class="dash-title text-amber-700">💰 ยอดขายรวม</div><h3 class="dash-val text-amber-600 text-2xl" id="sum-total">฿0</h3></div>
         <div class="dash-box p-4 bg-emerald-50 border-t-4 border-t-emerald-500"><div class="dash-title text-emerald-700">🟢 รับเงินแล้ว</div><h3 class="dash-val text-emerald-600 text-2xl" id="sum-paid">฿0</h3></div>
         <div class="dash-box p-4 bg-rose-50 border-t-4 border-t-rose-500"><div class="dash-title text-rose-700">⚠️ ค้างชำระ</div><h3 class="dash-val text-rose-600 text-2xl" id="sum-unpaid">฿0</h3></div>
-        <div class="dash-box p-4 bg-cyan-50 border-t-4 border-t-cyan-500 cursor-pointer hover:bg-cyan-100 transition shadow-sm" onclick="openAnalyticsModal()">
+        <div class="dash-box p-4 bg-cyan-50 border-t-4 border-t-cyan-500 cursor-pointer hover:bg-cyan-100 transition shadow-sm" onclick="window.openAnalyticsModal()">
             <div class="dash-title text-cyan-700">👁️ เข้าชม (คลิกดู)</div>
             <h3 class="dash-val text-cyan-700 text-2xl flex items-center gap-2">
                 <span id="sum-realtime" class="text-rose-500 animate-pulse text-3xl">0</span> 
@@ -128,27 +130,27 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-12">
         <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
           <div class="flex flex-wrap p-1.5 bg-slate-200/70 rounded-xl w-full xl:w-auto gap-1">
-            <button onclick="switchTab('all')" id="tab-all" class="tab-btn tab-active relative">🌐 ทั้งหมด <span id="badge-all" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-slate-800 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
-            <button onclick="switchTab('empty')" id="tab-empty" class="tab-btn text-slate-600 hover:bg-white relative">🎟️ ยังไม่มีผู้ซื้อ <span id="badge-empty" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-slate-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
-            <button onclick="switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white relative">🟢 ชำระแล้ว <span id="badge-paid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
-            <button onclick="switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white relative">🔴 ค้างชำระ/จอง <span id="badge-unpaid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm animate-pulse flex items-center justify-center">0</span></button>
-            <button onclick="switchTab('pending_slip')" id="tab-pending_slip" class="tab-btn text-slate-600 hover:bg-white relative">⏳ รอตรวจสลิป <span id="badge-pending_slip" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center animate-pulse">0</span></button>
-            <button onclick="switchTab('winners')" id="tab-winners" class="tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative ml-2">🎉 คนที่ถูกรางวัล <span id="badge-winners" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-yellow-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
-            <button onclick="switchTab('flashsale')" id="tab-flashsale" class="tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2">⚡ คลัง Flash Sale <span id="badge-flashsale" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-amber-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="window.switchTab('all')" id="tab-all" class="tab-btn tab-active relative">🌐 ทั้งหมด <span id="badge-all" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-slate-800 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="window.switchTab('empty')" id="tab-empty" class="tab-btn text-slate-600 hover:bg-white relative">🎟️ ยังไม่มีผู้ซื้อ <span id="badge-empty" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-slate-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="window.switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white relative">🟢 ชำระแล้ว <span id="badge-paid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="window.switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white relative">🔴 ค้างชำระ/จอง <span id="badge-unpaid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm animate-pulse flex items-center justify-center">0</span></button>
+            <button onclick="window.switchTab('pending_slip')" id="tab-pending_slip" class="tab-btn text-slate-600 hover:bg-white relative">⏳ รอตรวจสลิป <span id="badge-pending_slip" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center animate-pulse">0</span></button>
+            <button onclick="window.switchTab('winners')" id="tab-winners" class="tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative ml-2">🎉 คนที่ถูกรางวัล <span id="badge-winners" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-yellow-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button onclick="window.switchTab('flashsale')" id="tab-flashsale" class="tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2">⚡ คลัง Flash Sale <span id="badge-flashsale" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-amber-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             
-            <button id="tab-crm" onclick="switchTab('crm')" class="hidden tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative">👥 ลูกค้า <span id="badge-crm" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-indigo-900 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
-            <button id="tab-withdraw" onclick="switchTab('withdraw')" class="hidden tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative">💸 แจ้งถอนเงิน <span id="badge-withdraw" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-white text-rose-600 rounded-full text-[10px] font-black border border-rose-300 shadow-sm animate-bounce flex items-center justify-center">0</span></button>
-            <button id="tab-chats" onclick="switchTab('chats')" class="hidden tab-btn text-purple-700 bg-purple-100/50 hover:bg-purple-100 border border-purple-200 relative ml-2 font-bold transition">💬 แชทลูกค้า <span id="badge-chats" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-purple-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center animate-pulse">0</span></button>
+            <button id="tab-crm" onclick="window.switchTab('crm')" class="hidden tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative">👥 ลูกค้า <span id="badge-crm" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-indigo-900 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
+            <button id="tab-withdraw" onclick="window.switchTab('withdraw')" class="hidden tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative">💸 แจ้งถอนเงิน <span id="badge-withdraw" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-white text-rose-600 rounded-full text-[10px] font-black border border-rose-300 shadow-sm animate-bounce flex items-center justify-center">0</span></button>
+            <button id="tab-chats" onclick="window.switchTab('chats')" class="hidden tab-btn text-purple-700 bg-purple-100/50 hover:bg-purple-100 border border-purple-200 relative ml-2 font-bold transition">💬 แชทลูกค้า <span id="badge-chats" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-purple-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center animate-pulse">0</span></button>
           </div>
           <div id="controls-wrapper" class="flex flex-col sm:flex-row items-center gap-2 w-full xl:w-auto">
-            <select id="sort-selector" onchange="filterData()" class="w-full sm:w-auto px-3 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500 bg-white shadow-sm font-bold text-slate-600">
+            <select id="sort-selector" onchange="window.filterData()" class="w-full sm:w-auto px-3 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500 bg-white shadow-sm font-bold text-slate-600">
               <option value="updated_desc" selected>อัปเดตล่าสุด: ใหม่ ➜ เก่า</option>
               <option value="num_asc">เรียงตาม: เลข 0 ➜ 9</option>
               <option value="num_desc">เรียงตาม: เลข 9 ➜ 0</option>
               <option value="qty_desc">จำนวนใบ: มาก ➜ น้อย</option>
               <option value="qty_asc">จำนวนใบ: น้อย ➜ มาก</option>
             </select>
-            <input type="text" id="search-input" oninput="filterData()" placeholder="🔍 ค้นหาเลข, ชื่อ หรือ รหัส..." class="w-full sm:w-64 px-4 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500 shadow-sm">
+            <input type="text" id="search-input" oninput="window.filterData()" placeholder="🔍 ค้นหาเลข, ชื่อ หรือ รหัส..." class="w-full sm:w-64 px-4 py-2.5 rounded-lg border border-slate-300 outline-none text-sm focus:border-indigo-500 shadow-sm">
           </div>
         </div>
 
@@ -179,7 +181,7 @@
             <div class="w-2/3 flex flex-col bg-white" id="admin-chat-room">
                 <div class="p-4 border-b border-slate-200 bg-white flex justify-between items-center shadow-sm z-10">
                     <h3 class="font-black text-slate-800 text-lg flex items-center gap-2" id="admin-chat-name"><i class="fa-solid fa-comments text-purple-500"></i> เลือกแชทเพื่อสนทนา</h3>
-                    <button id="btn-close-chat" class="hidden bg-rose-100 text-rose-600 hover:bg-rose-200 transition px-4 py-1.5 rounded-lg font-bold text-xs shadow-sm border border-rose-200" onclick="closeChatCase()">❌ ปิดเคสสนทนา</button>
+                    <button id="btn-close-chat" class="hidden bg-rose-100 text-rose-600 hover:bg-rose-200 transition px-4 py-1.5 rounded-lg font-bold text-xs shadow-sm border border-rose-200" onclick="window.closeChatCase()">❌ ปิดเคสสนทนา</button>
                 </div>
                 <div class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-100 chat-scroll" id="admin-chat-messages">
                     <div class="text-center text-slate-400 text-sm mt-20 font-bold"><i class="fa-solid fa-hand-pointer text-4xl mb-3 block text-slate-300"></i> กรุณาเลือกรายการสนทนาจากเมนูด้านซ้าย</div>
@@ -187,10 +189,10 @@
                 <div class="p-4 border-t border-slate-200 bg-white flex gap-2 hidden items-center" id="admin-chat-input-area">
                     <label class="cursor-pointer text-slate-400 hover:text-purple-600 transition p-2">
                         <i class="fa-solid fa-image text-2xl"></i>
-                        <input type="file" id="admin-chat-image-input" accept="image/*" class="hidden" onchange="sendChatImage()">
+                        <input type="file" id="admin-chat-image-input" accept="image/*" class="hidden" onchange="window.sendChatImage()">
                     </label>
-                    <input type="text" id="admin-chat-input" class="flex-1 border border-slate-300 p-3 rounded-xl outline-none focus:border-purple-500 bg-slate-50" placeholder="พิมพ์ข้อความตอบกลับลูกค้า..." onkeypress="if(event.key==='Enter') sendAdminMessage()">
-                    <button onclick="sendAdminMessage()" class="bg-purple-600 hover:bg-purple-700 transition text-white px-6 py-2 rounded-xl font-bold shadow-md"><i class="fa-solid fa-paper-plane"></i> ส่ง</button>
+                    <input type="text" id="admin-chat-input" class="flex-1 border border-slate-300 p-3 rounded-xl outline-none focus:border-purple-500 bg-slate-50" placeholder="พิมพ์ข้อความตอบกลับลูกค้า..." onkeypress="if(event.key==='Enter') window.sendAdminMessage()">
+                    <button onclick="window.sendAdminMessage()" class="bg-purple-600 hover:bg-purple-700 transition text-white px-6 py-2 rounded-xl font-bold shadow-md"><i class="fa-solid fa-paper-plane"></i> ส่ง</button>
                 </div>
             </div>
         </div>
@@ -201,17 +203,68 @@
 
   <!-- ==================== MODALS ==================== -->
 
+  <!-- My Profile Modal -->
+  <div id="myProfileModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4 z-[60] overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border-t-4 border-sky-500">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-user-pen text-sky-400"></i> ตั้งค่าบัญชีของฉัน</h2>
+        <button onclick="window.closeMyProfileModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button>
+      </div>
+      <form onsubmit="window.saveMyProfile(event)" class="p-6 space-y-4">
+        <div><label class="block text-xs font-bold text-slate-700 mb-1">ชื่อแสดงผลของคุณ (ชื่อแอดมิน)</label><input type="text" id="myProfileName" required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-sky-500"></div>
+        <div><label class="block text-xs font-bold text-slate-700 mb-1">รหัสผ่านใหม่ (ปล่อยว่างถ้าไม่เปลี่ยน)</label><input type="password" id="myProfilePass" placeholder="******" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-sky-500 tracking-widest"></div>
+        <div class="pt-2 flex gap-2"><button type="button" onclick="window.closeMyProfileModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-sm">ยกเลิก</button><button type="submit" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Support Ticket Modal -->
+  <div id="supportModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden my-8 border-t-4 border-orange-500">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-headset text-orange-400"></i> ระบบแจ้งปัญหา / คำร้อง (Support Tickets)</h2>
+        <button onclick="window.closeSupportModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button>
+      </div>
+      <div class="flex flex-col md:flex-row h-[70vh]">
+          <div class="w-full md:w-1/3 p-6 bg-orange-50/50 border-r border-slate-200 overflow-y-auto">
+              <h3 class="font-bold text-slate-800 mb-4" id="ticketFormTitle">➕ สร้างรายการแจ้งปัญหาใหม่</h3>
+              <form id="ticketForm" onsubmit="window.submitTicket(event)" class="space-y-4">
+                  <div><label class="block text-xs font-bold text-slate-700 mb-1">หมวดหมู่ปัญหา</label><select id="ticketCategory" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-orange-500 bg-white"><option value="ปัญหาการโอนเงิน">ปัญหาการโอนเงิน / สลิป</option><option value="ปัญหาล็อกเลข">ลูกค้าจอง/ล็อกเลขผิดพลาด</option><option value="ระบบ Coin มีปัญหา">ระบบ Coin มีปัญหา</option><option value="ระบบหน้าร้านขัดข้อง">ระบบหน้าร้านขัดข้อง (Bug)</option><option value="เสนอแนะเพิ่มเติม">ข้อเสนอแนะเพิ่มเติม</option><option value="อื่นๆ">อื่นๆ</option></select></div>
+                  <div><label class="block text-xs font-bold text-slate-700 mb-1">หัวข้อ / ออเดอร์ที่เกี่ยวข้อง</label><input type="text" id="ticketSubject" placeholder="เช่น รหัสออเดอร์ #1234abcd" required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-orange-500"></div>
+                  <div><label class="block text-xs font-bold text-slate-700 mb-1">รายละเอียดปัญหา</label><textarea id="ticketDetail" rows="4" placeholder="อธิบายปัญหาที่คุณพบ..." required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-orange-500"></textarea></div>
+                  <div class="pt-2"><button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-lg text-sm shadow-md">🚀 ส่งเรื่องให้ผู้ดูแลระบบ</button></div>
+              </form>
+          </div>
+          <div class="w-full md:w-2/3 p-6 overflow-y-auto bg-slate-50 relative">
+              <h3 class="font-bold text-slate-800 mb-4">สถานะคำร้องทั้งหมด</h3>
+              <div id="ticketListContainer" class="space-y-3 pb-20"></div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Reply Modal (เฉพาะ Superadmin) -->
+  <div id="ticketReplyModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4 z-[60] overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border-t-4 border-indigo-500">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2">ตอบกลับ Ticket</h2><button onclick="window.closeTicketReplyModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
+      <form onsubmit="window.saveTicketReply(event)" class="p-6 space-y-4">
+        <input type="hidden" id="replyTicketId">
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-sm mb-4"><div class="font-bold text-slate-700" id="replySubject">หัวข้อ: </div><div class="text-xs text-slate-500 mt-1" id="replyDetail">รายละเอียด: </div></div>
+        <div><label class="block text-xs font-bold text-slate-700 mb-1">อัปเดตสถานะ</label><select id="replyStatus" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-indigo-500 bg-white font-bold"><option value="รอดำเนินการ">🔴 รอดำเนินการ</option><option value="กำลังตรวจสอบ">🟡 กำลังตรวจสอบ</option><option value="แก้ไขเสร็จสิ้น">🟢 แก้ไขเสร็จสิ้น</option></select></div>
+        <div><label class="block text-xs font-bold text-slate-700 mb-1">ข้อความตอบกลับ (ถึงผู้แจ้ง)</label><textarea id="replyMessage" rows="3" placeholder="ระบุผลการตรวจสอบ..." required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-indigo-500"></textarea></div>
+        <div class="pt-2 flex gap-2"><button type="button" onclick="window.closeTicketReplyModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-sm">ยกเลิก</button><button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
+      </form>
+    </div>
+  </div>
+
   <!-- Admin Management Modal -->
   <div id="adminManageModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden my-8 border-t-4 border-slate-800">
-      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
-        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-users-gear text-amber-400"></i> ระบบจัดการทีมงาน (Admin Roles)</h2>
-        <button onclick="closeAdminManageModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button>
-      </div>
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-users-gear text-amber-400"></i> ระบบจัดการทีมงาน (Admin Roles)</h2><button onclick="window.closeAdminManageModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
       <div class="flex flex-col md:flex-row h-[70vh]">
           <div class="w-full md:w-1/3 p-6 bg-slate-50 border-r border-slate-200 overflow-y-auto">
               <h3 class="font-bold text-slate-800 mb-4" id="adminFormTitle">➕ สร้างบัญชีแอดมินใหม่</h3>
-              <form id="adminForm" onsubmit="saveAdminData(event)" class="space-y-4">
+              <form id="adminForm" onsubmit="window.saveAdminData(event)" class="space-y-4">
                   <input type="hidden" id="adminDocId">
                   <div><label class="block text-xs font-bold text-slate-700 mb-1">ID สำหรับเข้าสู่ระบบ</label><input type="text" id="editAdminId" required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-indigo-500"></div>
                   <div><label class="block text-xs font-bold text-slate-700 mb-1">รหัสผ่าน</label><input type="text" id="editAdminPass" required class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-indigo-500"></div>
@@ -224,7 +277,7 @@
                       <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 shadow-sm"><span class="text-xs font-bold text-slate-700"><i class="fa-solid fa-money-bill-wave text-emerald-500"></i> จัดการการเงิน</span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" id="perm_finance" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 transition-all duration-300"/><label for="perm_finance" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label></div></div>
                       <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 shadow-sm"><span class="text-xs font-bold text-slate-700"><i class="fa-solid fa-comments text-purple-500"></i> ตอบแชทลูกค้า</span><div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" id="perm_chat" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer z-10 top-0 transition-all duration-300"/><label for="perm_chat" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label></div></div>
                   </div>
-                  <div class="pt-4 flex gap-2"><button type="button" onclick="resetAdminForm()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-sm">ล้างฟอร์ม</button><button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-sm shadow-md">💾 บันทึกสิทธิ์</button></div>
+                  <div class="pt-4 flex gap-2"><button type="button" onclick="window.resetAdminForm()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-sm">ล้างฟอร์ม</button><button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-sm shadow-md">💾 บันทึกสิทธิ์</button></div>
               </form>
           </div>
           <div class="w-full md:w-2/3 p-6 overflow-y-auto">
@@ -239,7 +292,7 @@
   <!-- Analytics Modal -->
   <div id="analyticsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden my-8 border-t-4 border-cyan-500">
-      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2 text-cyan-400"><i class="fa-solid fa-chart-pie"></i> สถิติผู้เข้าชมเชิงลึก</h2><button onclick="closeAnalyticsModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2 text-cyan-400"><i class="fa-solid fa-chart-pie"></i> สถิติผู้เข้าชมเชิงลึก</h2><button onclick="window.closeAnalyticsModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
       <div class="p-6 space-y-4 bg-slate-50">
           <div class="grid grid-cols-2 gap-4"><div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center"><div class="text-[10px] font-bold text-slate-500">กำลังออนไลน์ (Real-time)</div><div class="text-3xl font-black text-rose-500 animate-pulse mt-1" id="stat-realtime">0</div></div><div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center"><div class="text-[10px] font-bold text-slate-500">ผู้ชมไม่ซ้ำ (Unique IP/Device)</div><div class="text-3xl font-black text-indigo-600 mt-1" id="stat-unique">0</div></div></div>
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><div class="text-xs font-bold text-slate-700 mb-3 border-b pb-2">แยกตามประเภทอุปกรณ์ (ยอดวิวทั้งหมด)</div><div class="flex justify-between items-center mb-2"><div class="text-sm font-bold text-slate-600"><i class="fa-solid fa-mobile-screen-button text-cyan-500 mr-2"></i> โทรศัพท์มือถือ</div><div class="text-sm font-black text-slate-800" id="stat-mobile">0</div></div><div class="flex justify-between items-center"><div class="text-sm font-bold text-slate-600"><i class="fa-solid fa-desktop text-indigo-400 mr-2"></i> คอมพิวเตอร์ (PC/Tablet)</div><div class="text-sm font-black text-slate-800" id="stat-desktop">0</div></div></div>
@@ -252,25 +305,25 @@
   <!-- Design Modal -->
   <div id="designModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-8">
-      <div class="bg-teal-600 text-white px-6 py-4 flex justify-between items-center rounded-t-2xl"><h2 class="text-lg font-bold flex items-center gap-2">🖼️ ตั้งค่าระบบร้านค้าหน้าร้าน</h2><button onclick="closeDesignModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
-      <form id="designForm" onsubmit="saveDesignSettings(event)" class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+      <div class="bg-teal-600 text-white px-6 py-4 flex justify-between items-center rounded-t-2xl"><h2 class="text-lg font-bold flex items-center gap-2">🖼️ ตั้งค่าระบบร้านค้าหน้าร้าน</h2><button onclick="window.closeDesignModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
+      <form id="designForm" onsubmit="window.saveDesignSettings(event)" class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
         <div><label class="block text-xs font-bold text-slate-700 mb-1">1. ชื่อร้านค้า (มุมซ้ายบน)</label><input type="text" id="storeNameInput" placeholder="เช่น BAS ลอตเตอรี่" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 focus:border-teal-500"></div>
-        <div class="bg-purple-50 p-4 rounded-xl border border-purple-200 shadow-inner mt-4"><label class="block text-xs font-bold text-purple-700 mb-1">🎵 เสียงแจ้งเตือนแชท/ระบบ</label><div class="flex gap-2"><select id="adminSoundSelect" class="flex-1 border border-purple-300 p-2.5 rounded-lg text-sm font-bold outline-none text-purple-900 bg-white"><option value="https://actions.google.com/sounds/v1/communications/incoming_message.ogg">เสียงที่ 1 (ป๊อป / คล้าย LINE)</option><option value="https://actions.google.com/sounds/v1/alarms/ding.ogg">เสียงที่ 2 (กริ๊งสั้นๆ)</option><option value="https://actions.google.com/sounds/v1/water/water_drop.ogg">เสียงที่ 3 (หยดน้ำ)</option></select><button type="button" onclick="playNotificationSound(document.getElementById('adminSoundSelect').value)" class="bg-purple-200 text-purple-800 px-3 rounded-lg font-bold text-xs shadow-sm hover:bg-purple-300">ทดสอบเสียง</button></div></div>
+        <div class="bg-purple-50 p-4 rounded-xl border border-purple-200 shadow-inner mt-4"><label class="block text-xs font-bold text-purple-700 mb-1">🎵 เสียงแจ้งเตือนแชท/ระบบ</label><div class="flex gap-2"><select id="adminSoundSelect" class="flex-1 border border-purple-300 p-2.5 rounded-lg text-sm font-bold outline-none text-purple-900 bg-white"><option value="https://actions.google.com/sounds/v1/communications/incoming_message.ogg">เสียงที่ 1 (ป๊อป / คล้าย LINE)</option><option value="https://actions.google.com/sounds/v1/alarms/ding.ogg">เสียงที่ 2 (กริ๊งสั้นๆ)</option><option value="https://actions.google.com/sounds/v1/water/water_drop.ogg">เสียงที่ 3 (หยดน้ำ)</option></select><button type="button" onclick="window.playNotificationSound(document.getElementById('adminSoundSelect').value)" class="bg-purple-200 text-purple-800 px-3 rounded-lg font-bold text-xs shadow-sm hover:bg-purple-300">ทดสอบเสียง</button></div></div>
         <hr class="border-slate-100">
-        <div><label class="block text-xs font-bold text-slate-700 mb-1">2. รูปโลโก้แบรนด์</label><input type="file" id="logoImageFile" accept="image/*" onchange="previewDesignImage('logo')" class="w-full border border-slate-300 p-2 rounded-lg text-xs outline-none bg-slate-50 cursor-pointer mb-2"><img id="logoPreview" class="max-h-16 rounded shadow-sm border border-slate-200 hidden bg-gray-100 p-1"></div>
+        <div><label class="block text-xs font-bold text-slate-700 mb-1">2. รูปโลโก้แบรนด์</label><input type="file" id="logoImageFile" accept="image/*" onchange="window.previewDesignImage('logo')" class="w-full border border-slate-300 p-2 rounded-lg text-xs outline-none bg-slate-50 cursor-pointer mb-2"><img id="logoPreview" class="max-h-16 rounded shadow-sm border border-slate-200 hidden bg-gray-100 p-1"></div>
         <hr class="border-slate-100">
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3"><h3 class="text-xs font-black text-slate-700">✍️ แก้ไขข้อความทั่วไปในหน้าร้าน</h3><div><label class="block text-[10px] font-bold text-slate-500 mb-1">ข้อความวิ่งประกาศ (แถบบนสุด)</label><input type="text" id="announcementInput" class="w-full border p-2 rounded text-xs bg-white outline-none"></div><div><label class="block text-[10px] font-bold text-slate-500 mb-1">หัวข้อกล่องค้นหาเลข</label><input type="text" id="searchHeaderInput" class="w-full border p-2 rounded text-xs bg-white outline-none"></div><div><label class="block text-[10px] font-bold text-slate-500 mb-1">คำใบ้ในช่องพิมพ์ค้นหา</label><input type="text" id="searchPlaceholderInput" class="w-full border p-2 rounded text-xs bg-white outline-none"></div><div><label class="block text-[10px] font-bold text-slate-500 mb-1">หัวข้อเหนือแผงสลาก</label><input type="text" id="gridHeaderInput" class="w-full border p-2 rounded text-xs bg-white outline-none"></div></div>
         <hr class="border-slate-100">
         <div class="bg-rose-50 p-4 rounded-xl border border-rose-100 shadow-inner"><label class="block text-xs font-bold text-rose-600 mb-1">ข้อความเหนือเวลานับถอยหลัง</label><input type="text" id="countdownTitleInput" class="w-full border border-rose-200 p-2.5 rounded-lg text-sm mb-2 outline-none focus:border-rose-400"><div class="flex gap-3 mb-3"><div class="flex-1"><label class="block text-[10px] font-bold text-slate-500 mb-1">ขนาดข้อความ</label><select id="countdownTitleSize" class="w-full border border-rose-200 p-2 rounded-lg text-xs outline-none"><option value="text-sm">เล็ก (Small)</option><option value="text-base" selected>กลาง (Normal)</option><option value="text-lg">ใหญ่ (Large)</option><option value="text-xl">ใหญ่มาก (XL)</option><option value="text-2xl">จัมโบ้ (2XL)</option></select></div><div class="flex-1"><label class="block text-[10px] font-bold text-slate-500 mb-1">สีข้อความ</label><input type="color" id="countdownTitleColor" value="#1f2937" class="w-full h-8 border border-rose-200 rounded cursor-pointer p-0.5"></div></div><label class="block text-xs font-bold text-rose-600 mb-1">วัน/เวลา เปิดแผง (นับถอยหลัง)</label><input type="datetime-local" id="countdownInput" class="w-full border border-rose-300 p-2.5 rounded-lg text-sm font-bold outline-none text-rose-700"></div>
         <hr class="border-slate-100">
-        <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-3"><h3 class="text-xs font-black text-indigo-700">แบนเนอร์แคมเปญ (สไลด์อัตโนมัติ)</h3><div><div class="flex justify-between items-center mb-1"><label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 1</label><button type="button" onclick="removeSlide('slide1')" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-200 transition">🗑️ ลบรูปนี้</button></div><input type="file" id="slide1File" accept="image/*" onchange="previewDesignImage('slide1')" class="w-full border border-indigo-200 p-1.5 rounded text-xs bg-white mb-1 outline-none"><img id="slide1Preview" class="max-h-16 rounded shadow-sm hidden"></div><div><div class="flex justify-between items-center mb-1"><label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 2</label><button type="button" onclick="removeSlide('slide2')" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-200 transition">🗑️ ลบรูปนี้</button></div><input type="file" id="slide2File" accept="image/*" onchange="previewDesignImage('slide2')" class="w-full border border-indigo-200 p-1.5 rounded text-xs bg-white mb-1 outline-none"><img id="slide2Preview" class="max-h-16 rounded shadow-sm hidden"></div><div><div class="flex justify-between items-center mb-1"><label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 3</label><button type="button" onclick="removeSlide('slide3')" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-200 transition">🗑️ ลบรูปนี้</button></div><input type="file" id="slide3File" accept="image/*" onchange="previewDesignImage('slide3')" class="w-full border border-indigo-200 p-1.5 rounded text-xs bg-white mb-1 outline-none"><img id="slide3Preview" class="max-h-16 rounded shadow-sm hidden"></div></div>
+        <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-3"><h3 class="text-xs font-black text-indigo-700">แบนเนอร์แคมเปญ (สไลด์อัตโนมัติ)</h3><div><div class="flex justify-between items-center mb-1"><label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 1</label><button type="button" onclick="window.removeSlide('slide1')" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-200 transition">🗑️ ลบรูปนี้</button></div><input type="file" id="slide1File" accept="image/*" onchange="window.previewDesignImage('slide1')" class="w-full border border-indigo-200 p-1.5 rounded text-xs bg-white mb-1 outline-none"><img id="slide1Preview" class="max-h-16 rounded shadow-sm hidden"></div><div><div class="flex justify-between items-center mb-1"><label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 2</label><button type="button" onclick="window.removeSlide('slide2')" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-200 transition">🗑️ ลบรูปนี้</button></div><input type="file" id="slide2File" accept="image/*" onchange="window.previewDesignImage('slide2')" class="w-full border border-indigo-200 p-1.5 rounded text-xs bg-white mb-1 outline-none"><img id="slide2Preview" class="max-h-16 rounded shadow-sm hidden"></div><div><div class="flex justify-between items-center mb-1"><label class="text-[10px] font-bold text-slate-600">รูปสไลด์ที่ 3</label><button type="button" onclick="window.removeSlide('slide3')" class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold hover:bg-red-200 transition">🗑️ ลบรูปนี้</button></div><input type="file" id="slide3File" accept="image/*" onchange="window.previewDesignImage('slide3')" class="w-full border border-indigo-200 p-1.5 rounded text-xs bg-white mb-1 outline-none"><img id="slide3Preview" class="max-h-16 rounded shadow-sm hidden"></div></div>
         <hr class="border-slate-100">
-        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-3"><h3 class="text-xs font-black text-amber-800">📸 จัดการรูปแบนเนอร์เมนู 3 ช่อง (หน้าแรก)</h3><div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 1: สุ่มหยิบโชค (ซ้ายแนวตั้ง)</label><input type="file" id="mbMascotFile" accept="image/*" onchange="previewMenuBanner('mascot')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbMascotPreview" class="max-h-16 rounded mt-1 hidden"></div><div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 2: 10 อันดับเลขดัง (ขวาบน)</label><input type="file" id="mbTop10File" accept="image/*" onchange="previewMenuBanner('top10')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbTop10Preview" class="max-h-16 rounded mt-1 hidden"></div><div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 3: แบนเนอร์เสริม/ทำนายฝัน (ขวาล่าง)</label><input type="file" id="mbExtraFile" accept="image/*" onchange="previewMenuBanner('extra')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbExtraPreview" class="max-h-16 rounded mt-1 hidden"></div></div>
+        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-3"><h3 class="text-xs font-black text-amber-800">📸 จัดการรูปแบนเนอร์เมนู 3 ช่อง (หน้าแรก)</h3><div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 1: สุ่มหยิบโชค (ซ้ายแนวตั้ง)</label><input type="file" id="mbMascotFile" accept="image/*" onchange="window.previewMenuBanner('mascot')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbMascotPreview" class="max-h-16 rounded mt-1 hidden"></div><div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 2: 10 อันดับเลขดัง (ขวาบน)</label><input type="file" id="mbTop10File" accept="image/*" onchange="window.previewMenuBanner('top10')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbTop10Preview" class="max-h-16 rounded mt-1 hidden"></div><div><label class="block text-[10px] font-bold text-slate-600 mb-1">รูปเมนูที่ 3: แบนเนอร์เสริม/ทำนายฝัน (ขวาล่าง)</label><input type="file" id="mbExtraFile" accept="image/*" onchange="window.previewMenuBanner('extra')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbExtraPreview" class="max-h-16 rounded mt-1 hidden"></div></div>
         <hr class="border-slate-100">
-        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 space-y-3"><h3 class="text-xs font-black text-yellow-800">🎉 รูปป๊อปอัปเมื่อลูกค้าถูกรางวัล (อลังการ)</h3><div><label class="block text-[10px] font-bold text-slate-600 mb-1">อัปโหลดแบนเนอร์พื้นหลังแสดงความยินดี (แนวตั้ง 3:4 หรือ 9:16)</label><input type="file" id="winningBannerFile" accept="image/*" onchange="previewMenuBanner('winBanner')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbWinBannerPreview" class="max-h-32 rounded mt-2 border-2 border-yellow-400 hidden mx-auto"><p class="text-[9px] text-gray-500 mt-1">*ควรเว้นพื้นที่ด้านล่างของรูปไว้ให้ระบบวางตัวเลขสลาก</p></div></div>
+        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 space-y-3"><h3 class="text-xs font-black text-yellow-800">🎉 รูปป๊อปอัปเมื่อลูกค้าถูกรางวัล (อลังการ)</h3><div><label class="block text-[10px] font-bold text-slate-600 mb-1">อัปโหลดแบนเนอร์พื้นหลังแสดงความยินดี (แนวตั้ง 3:4 หรือ 9:16)</label><input type="file" id="winningBannerFile" accept="image/*" onchange="window.previewMenuBanner('winBanner')" class="w-full text-xs p-1 bg-white border rounded"><img id="mbWinBannerPreview" class="max-h-32 rounded mt-2 border-2 border-yellow-400 hidden mx-auto"><p class="text-[9px] text-gray-500 mt-1">*ควรเว้นพื้นที่ด้านล่างของรูปไว้ให้ระบบวางตัวเลขสลาก</p></div></div>
         <hr class="border-slate-100">
-        <div><label class="block text-xs font-bold text-slate-700 mb-1">ภาพพื้นหลังใบสลากดิจิทัล</label><input type="file" id="ticketBgImageFile" accept="image/*" onchange="previewDesignImage('ticket')" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none bg-slate-50 cursor-pointer mb-2"><img id="ticketPreview" class="max-h-20 rounded shadow-sm border border-slate-200 hidden"></div>
-        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="closeDesignModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึกระบบ</button></div>
+        <div><label class="block text-xs font-bold text-slate-700 mb-1">ภาพพื้นหลังใบสลากดิจิทัล</label><input type="file" id="ticketBgImageFile" accept="image/*" onchange="window.previewDesignImage('ticket')" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none bg-slate-50 cursor-pointer mb-2"><img id="ticketPreview" class="max-h-20 rounded shadow-sm border border-slate-200 hidden"></div>
+        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="window.closeDesignModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึกระบบ</button></div>
       </form>
     </div>
   </div>
@@ -278,15 +331,14 @@
   <!-- Form Modal (จัดการออเดอร์) -->
   <div id="formModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
-      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center border-b-4 border-amber-400"><h2 class="text-lg font-bold text-amber-400" id="modalTitle">ลงทะเบียนสลาก / จัดการสลาก</h2><button onclick="closeModal()" class="text-slate-400 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
-      <form id="lotteryForm" onsubmit="submitForm(event)" class="p-6 space-y-5">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center border-b-4 border-amber-400"><h2 class="text-lg font-bold text-amber-400" id="modalTitle">ลงทะเบียนสลาก / จัดการสลาก</h2><button onclick="window.closeModal()" class="text-slate-400 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
+      <form id="lotteryForm" onsubmit="window.submitForm(event)" class="p-6 space-y-5">
         <input type="hidden" id="formRowIndex" name="rowIndex">
-        <div class="grid grid-cols-2 gap-4"><div><label class="block text-[11px] font-bold text-slate-700 mb-1">หมายเลข (หลายเลขเว้นวรรคได้)</label><textarea name="number" id="formNumberInput" rows="2" required oninput="autoFormatNumbers(this, 6)" placeholder="เช่น 123456 987654" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-mono font-black text-center outline-none bg-slate-50"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">จำนวนใบ</label><input type="number" name="quantity" id="formQty" required min="1" value="1" oninput="calculateAmount()" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-bold text-center outline-none"></div></div>
+        <div class="grid grid-cols-2 gap-4"><div><label class="block text-[11px] font-bold text-slate-700 mb-1">หมายเลข (หลายเลขเว้นวรรคได้)</label><textarea name="number" id="formNumberInput" rows="2" required oninput="window.autoFormatNumbers(this, 6)" placeholder="เช่น 123456 987654" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-mono font-black text-center outline-none bg-slate-50"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">จำนวนใบ</label><input type="number" name="quantity" id="formQty" required min="1" value="1" oninput="window.calculateAmount()" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-bold text-center outline-none"></div></div>
         <div><label class="block text-xs font-bold text-slate-700 mb-1">ชื่อผู้สั่งซื้อ</label><input type="text" name="name" id="formBuyerName" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-semibold outline-none"></div>
         <div class="grid grid-cols-2 gap-4"><div><label class="block text-xs font-bold text-slate-700 mb-1">สถานะดีล</label><select name="status" id="formStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none"><option value="ยังไม่ชำระ">🔴 ยังไม่ชำระ / จอง</option><option value="รอตรวจสอบสลิป">⏳ รอตรวจสอบสลิป</option><option value="ชำระแล้ว">🟢 ชำระสำเร็จ</option></select></div><div><label class="block text-xs font-bold text-slate-700 mb-1">ยอดเงินปกติ</label><input type="text" id="formAmount" readonly class="w-full bg-slate-100 border border-slate-200 p-3 rounded-lg text-lg font-black text-rose-600 text-right outline-none"></div></div>
-        
-        <div id="slip-management-area" class="border border-slate-200 p-4 rounded-xl bg-slate-50"><div class="flex items-center gap-2 border border-amber-200 p-2.5 rounded-lg bg-amber-50 mb-2"><input type="checkbox" id="formIsFlashSale" onchange="toggleFlashSalePrice()" class="w-5 h-5 accent-amber-600 cursor-pointer"><label for="formIsFlashSale" class="text-xs font-black text-amber-900 cursor-pointer select-none">⚡ บรรจุเข้าคลัง Flash Sale</label></div><div id="fsPriceDiv" style="display: none;" class="mb-4 bg-amber-100/50 p-3 rounded-lg border border-amber-300 shadow-inner"><label class="block text-xs font-bold text-amber-900 mb-1">💰 ราคาพิเศษ Flash Sale (บาท)</label><input type="number" id="formFsPrice" placeholder="ระบุราคาที่ต้องการขาย เช่น 90" class="w-full border border-amber-400 p-2.5 rounded-lg text-base font-black text-amber-700 outline-none focus:ring-2 focus:ring-amber-500"><p class="text-[10px] text-amber-700 mt-1">* หากเว้นว่าง ระบบจะใช้ราคาปกติ</p></div><label class="block text-xs font-bold text-slate-700 mb-2">📸 หลักฐานการโอนเงิน (สลิป)</label><div id="slip-display" class="mb-3 hidden"><img id="adminSlipImg" src="" alt="Slip" class="w-full max-w-[200px] mx-auto rounded-lg shadow-sm border border-slate-300 cursor-pointer hover:opacity-90" onclick="window.open(this.src, '_blank')"></div><input type="file" id="adminSlipFile" accept="image/*" class="w-full text-xs text-slate-600 border border-slate-300 p-2 rounded-lg bg-white outline-none"></div>
-        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="closeModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-slate-800 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
+        <div id="slip-management-area" class="border border-slate-200 p-4 rounded-xl bg-slate-50"><div class="flex items-center gap-2 border border-amber-200 p-2.5 rounded-lg bg-amber-50 mb-2"><input type="checkbox" id="formIsFlashSale" onchange="window.toggleFlashSalePrice()" class="w-5 h-5 accent-amber-600 cursor-pointer"><label for="formIsFlashSale" class="text-xs font-black text-amber-900 cursor-pointer select-none">⚡ บรรจุเข้าคลัง Flash Sale</label></div><div id="fsPriceDiv" style="display: none;" class="mb-4 bg-amber-100/50 p-3 rounded-lg border border-amber-300 shadow-inner"><label class="block text-xs font-bold text-amber-900 mb-1">💰 ราคาพิเศษ Flash Sale (บาท)</label><input type="number" id="formFsPrice" placeholder="ระบุราคาที่ต้องการขาย เช่น 90" class="w-full border border-amber-400 p-2.5 rounded-lg text-base font-black text-amber-700 outline-none focus:ring-2 focus:ring-amber-500"><p class="text-[10px] text-amber-700 mt-1">* หากเว้นว่าง ระบบจะใช้ราคาปกติ</p></div><label class="block text-xs font-bold text-slate-700 mb-2">📸 หลักฐานการโอนเงิน (สลิป)</label><div id="slip-display" class="mb-3 hidden"><img id="adminSlipImg" src="" alt="Slip" class="w-full max-w-[200px] mx-auto rounded-lg shadow-sm border border-slate-300 cursor-pointer hover:opacity-90" onclick="window.open(this.src, '_blank')"></div><input type="file" id="adminSlipFile" accept="image/*" class="w-full text-xs text-slate-600 border border-slate-300 p-2 rounded-lg bg-white outline-none"></div>
+        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="window.closeModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-slate-800 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
       </form>
     </div>
   </div>
@@ -294,12 +346,12 @@
   <!-- Winning Modal -->
   <div id="winningModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8 border-2 border-yellow-400">
-      <div class="gold-gradient text-slate-900 px-6 py-4 flex justify-between items-center border-b border-yellow-500"><h2 class="text-xl font-black flex items-center gap-2"><span class="text-2xl">🏆</span> บันทึกผลการออกรางวัล</h2><button onclick="closeWinningModal()" class="text-slate-800 text-2xl font-black leading-none hover:text-white transition">&times;</button></div>
-      <form id="winningForm" onsubmit="saveWinningData(event)" class="p-6 space-y-5 bg-yellow-50/30">
+      <div class="gold-gradient text-slate-900 px-6 py-4 flex justify-between items-center border-b border-yellow-500"><h2 class="text-xl font-black flex items-center gap-2"><span class="text-2xl">🏆</span> บันทึกผลการออกรางวัล</h2><button onclick="window.closeWinningModal()" class="text-slate-800 text-2xl font-black leading-none hover:text-white transition">&times;</button></div>
+      <form id="winningForm" onsubmit="window.saveWinningData(event)" class="p-6 space-y-5 bg-yellow-50/30">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-yellow-200 shadow-sm"><div><label class="block text-sm font-black text-rose-600 mb-1">รางวัลที่ 1</label><input type="text" id="win_prize1" maxlength="6" class="w-full border-2 border-rose-200 p-3 rounded-lg text-2xl font-mono font-black text-center outline-none focus:border-rose-500 bg-rose-50 text-rose-700 tracking-widest"></div><div><label class="block text-sm font-black text-indigo-600 mb-1">เลขท้าย 2 ตัว</label><input type="text" id="win_last2" maxlength="2" class="w-full border-2 border-indigo-200 p-3 rounded-lg text-2xl font-mono font-black text-center outline-none focus:border-indigo-500 bg-indigo-50 text-indigo-700 tracking-widest"></div></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-yellow-200 shadow-sm"><div><label class="block text-xs font-bold text-slate-700 mb-1">เลขหน้า 3 ตัว</label><input type="text" id="win_front3" oninput="autoFormatNumbers(this, 3)" class="w-full border border-slate-300 p-2.5 rounded-lg text-lg font-mono font-bold text-center outline-none focus:border-yellow-500"></div><div><label class="block text-xs font-bold text-slate-700 mb-1">เลขท้าย 3 ตัว</label><input type="text" id="win_last3" oninput="autoFormatNumbers(this, 3)" class="w-full border border-slate-300 p-2.5 rounded-lg text-lg font-mono font-bold text-center outline-none focus:border-yellow-500"></div></div>
-        <div class="bg-white p-4 rounded-xl border border-yellow-200 shadow-sm space-y-3"><div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 2</label><textarea id="win_prize2" rows="2" oninput="autoFormatNumbers(this, 6)" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 3</label><textarea id="win_prize3" rows="2" oninput="autoFormatNumbers(this, 6)" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 4</label><textarea id="win_prize4" rows="3" oninput="autoFormatNumbers(this, 6)" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 5</label><textarea id="win_prize5" rows="3" oninput="autoFormatNumbers(this, 6)" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none"></textarea></div></div>
-        <div class="flex justify-end pt-4 border-t border-yellow-200"><button type="button" onclick="closeWinningModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ยกเลิก</button><button type="submit" class="px-6 py-2.5 gold-gradient text-slate-900 font-black rounded-lg text-sm shadow-md hover:scale-105 transition transform">ประกาศผล 📢</button></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-yellow-200 shadow-sm"><div><label class="block text-xs font-bold text-slate-700 mb-1">เลขหน้า 3 ตัว</label><input type="text" id="win_front3" oninput="window.autoFormatNumbers(this, 3)" class="w-full border border-slate-300 p-2.5 rounded-lg text-lg font-mono font-bold text-center outline-none focus:border-yellow-500"></div><div><label class="block text-xs font-bold text-slate-700 mb-1">เลขท้าย 3 ตัว</label><input type="text" id="win_last3" oninput="window.autoFormatNumbers(this, 3)" class="w-full border border-slate-300 p-2.5 rounded-lg text-lg font-mono font-bold text-center outline-none focus:border-yellow-500"></div></div>
+        <div class="bg-white p-4 rounded-xl border border-yellow-200 shadow-sm space-y-3"><div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 2</label><textarea id="win_prize2" rows="2" oninput="window.autoFormatNumbers(this, 6)" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 3</label><textarea id="win_prize3" rows="2" oninput="window.autoFormatNumbers(this, 6)" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 4</label><textarea id="win_prize4" rows="3" oninput="window.autoFormatNumbers(this, 6)" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">รางวัลที่ 5</label><textarea id="win_prize5" rows="3" oninput="window.autoFormatNumbers(this, 6)" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-mono outline-none"></textarea></div></div>
+        <div class="flex justify-end pt-4 border-t border-yellow-200"><button type="button" onclick="window.closeWinningModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ยกเลิก</button><button type="submit" class="px-6 py-2.5 gold-gradient text-slate-900 font-black rounded-lg text-sm shadow-md hover:scale-105 transition transform">ประกาศผล 📢</button></div>
       </form>
     </div>
   </div>
@@ -307,11 +359,11 @@
   <!-- Promo Modal -->
   <div id="promoModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
-      <div class="bg-fuchsia-600 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2">📣 โปรโมชัน Pop-up</h2><button onclick="closePromoModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
-      <form id="promoForm" onsubmit="savePromotion(event)" class="p-6 space-y-5">
-        <div><label class="block text-xs font-bold text-slate-700 mb-1">รูปภาพ</label><input type="file" id="promoImageFile" accept="image/*" onchange="previewPromoImage()" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 cursor-pointer"><div class="mt-3 border border-dashed border-slate-300 rounded-lg p-2 text-center bg-slate-50 min-h-[100px] flex items-center justify-center"><img id="promoPreview" class="max-h-40 rounded shadow-sm hidden"><span id="promoPreviewPlaceholder" class="text-xs text-slate-400 font-bold">ยังไม่ได้เลือกรูปภาพ</span></div><div class="mt-2 text-center"><button type="button" id="btn-remove-promo" onclick="removePromoImage()" class="hidden text-xs bg-rose-100 text-rose-600 hover:bg-rose-200 font-bold py-1.5 px-4 rounded-lg transition shadow-sm border border-rose-200">🗑️ ลบรูปออก</button></div></div>
+      <div class="bg-fuchsia-600 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2">📣 โปรโมชัน Pop-up</h2><button onclick="window.closePromoModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
+      <form id="promoForm" onsubmit="window.savePromotion(event)" class="p-6 space-y-5">
+        <div><label class="block text-xs font-bold text-slate-700 mb-1">รูปภาพ</label><input type="file" id="promoImageFile" accept="image/*" onchange="window.previewPromoImage()" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none bg-slate-50 cursor-pointer"><div class="mt-3 border border-dashed border-slate-300 rounded-lg p-2 text-center bg-slate-50 min-h-[100px] flex items-center justify-center"><img id="promoPreview" class="max-h-40 rounded shadow-sm hidden"><span id="promoPreviewPlaceholder" class="text-xs text-slate-400 font-bold">ยังไม่ได้เลือกรูปภาพ</span></div><div class="mt-2 text-center"><button type="button" id="btn-remove-promo" onclick="window.removePromoImage()" class="hidden text-xs bg-rose-100 text-rose-600 hover:bg-rose-200 font-bold py-1.5 px-4 rounded-lg transition shadow-sm border border-rose-200">🗑️ ลบรูปออก</button></div></div>
         <div><label class="block text-xs font-bold text-slate-700 mb-1">สถานะ</label><select id="promoStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none"><option value="true">🟢 เปิดใช้งาน</option><option value="false">🔴 ปิดใช้งาน</option></select></div>
-        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="closePromoModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-fuchsia-600 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
+        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="window.closePromoModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-fuchsia-600 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
       </form>
     </div>
   </div>
@@ -319,46 +371,46 @@
   <!-- Flash Sale Modal -->
   <div id="flashSaleModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-      <div class="bg-gradient-to-r from-amber-500 to-rose-600 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2">⚡ ตั้งค่าระบบ Flash Sale</h2><button onclick="closeFlashSaleModal()" class="text-white/70 text-2xl font-bold hover:text-white leading-none">&times;</button></div>
-      <form id="flashSaleForm" onsubmit="saveFlashSaleSettings(event)" class="p-6 space-y-4">
+      <div class="bg-gradient-to-r from-amber-500 to-rose-600 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2">⚡ ตั้งค่าระบบ Flash Sale</h2><button onclick="window.closeFlashSaleModal()" class="text-white/70 text-2xl font-bold hover:text-white leading-none">&times;</button></div>
+      <form id="flashSaleForm" onsubmit="window.saveFlashSaleSettings(event)" class="p-6 space-y-4">
         <div><label class="block text-xs font-bold text-slate-700 mb-1">หัวข้อแถบ Flash Sale หน้าร้าน</label><input type="text" id="fsTitleInput" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-semibold outline-none focus:border-rose-500"></div>
         <div><label class="block text-xs font-bold text-slate-700 mb-1">วัน/เวลา สิ้นสุด Flash Sale</label><input type="datetime-local" id="fsEndTimeInput" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm font-bold text-rose-600 outline-none"></div>
         <div><label class="block text-xs font-bold text-slate-700 mb-1">สถานะ</label><select id="fsStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none"><option value="true">🟢 เปิดใช้งาน</option><option value="false">🔴 ปิดใช้งาน</option></select></div>
-        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="closeFlashSaleModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-rose-600 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
+        <div class="flex justify-end pt-4 border-t border-slate-200"><button type="button" onclick="window.closeFlashSaleModal()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-lg text-sm mr-2">ปิด</button><button type="submit" class="px-6 py-2.5 bg-rose-600 text-white font-bold rounded-lg text-sm shadow-md">💾 บันทึก</button></div>
       </form>
     </div>
   </div>
 
   <!-- Stock Check Modal -->
-  <div id="stockCheckModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
+  <div id="stockCheckModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8 border-t-4 border-sky-500" id="stockModalContainer">
-      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2 text-sky-400" id="stockModalTitle">🔍 ระบบสแกนจัดการสต๊อก</h2><button onclick="closeStockCheckModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center"><h2 class="text-lg font-bold flex items-center gap-2 text-sky-400" id="stockModalTitle">🔍 ระบบสแกนจัดการสต๊อก</h2><button onclick="window.closeStockCheckModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
       <div class="p-6 space-y-4 bg-slate-50">
          <div class="flex gap-2 mb-4 bg-slate-200/50 p-1.5 rounded-xl border border-slate-200 overflow-x-auto">
-           <button type="button" id="mode-check" onclick="setScanMode('check')" class="shrink-0 flex-1 bg-sky-500 text-white py-2.5 px-2 rounded-lg text-[11px] sm:text-sm font-bold shadow-md border border-sky-600 transition">🔍 เช็คสถานะ</button>
-           <button type="button" id="mode-sell" onclick="setScanMode('sell')" class="shrink-0 flex-1 bg-transparent text-slate-500 py-2.5 px-2 rounded-lg text-[11px] sm:text-sm font-bold hover:bg-slate-200 transition">💸 ตัดขาย</button>
-           <button type="button" id="mode-audit" onclick="setScanMode('audit')" class="shrink-0 flex-1 bg-transparent text-slate-500 py-2.5 px-2 rounded-lg text-[11px] sm:text-sm font-bold hover:bg-slate-200 transition">📦 กระทบยอด</button>
+           <button type="button" id="mode-check" onclick="window.setScanMode('check')" class="shrink-0 flex-1 bg-sky-500 text-white py-2.5 px-2 rounded-lg text-[11px] sm:text-sm font-bold shadow-md border border-sky-600 transition">🔍 เช็คสถานะ</button>
+           <button type="button" id="mode-sell" onclick="window.setScanMode('sell')" class="shrink-0 flex-1 bg-transparent text-slate-500 py-2.5 px-2 rounded-lg text-[11px] sm:text-sm font-bold hover:bg-slate-200 transition">💸 ตัดขาย</button>
+           <button type="button" id="mode-audit" onclick="window.setScanMode('audit')" class="shrink-0 flex-1 bg-transparent text-slate-500 py-2.5 px-2 rounded-lg text-[11px] sm:text-sm font-bold hover:bg-slate-200 transition">📦 กระทบยอด</button>
          </div>
          <div id="reader-container" class="hidden mb-4 rounded-xl overflow-hidden border-2 border-sky-300">
             <div id="reader" width="100%"></div>
-            <button type="button" onclick="stopScanner()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm transition shadow-inner">❌ ปิดกล้อง</button>
+            <button type="button" onclick="window.stopScanner()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm transition shadow-inner">❌ ปิดกล้อง</button>
          </div>
-         <form onsubmit="performStockCheck(event)" class="flex gap-2 items-end">
+         <form onsubmit="window.performStockCheck(event)" class="flex gap-2 items-end">
            <div class="flex-1">
              <label class="block text-xs font-bold text-slate-700 mb-1" id="scanLabel">พิมพ์ตัวเลข หรือสแกนบาร์โค้ด (6 หลัก) เพื่อเช็คสถานะ</label>
              <input type="text" id="stockCheckInput" maxlength="6" class="w-full border-2 border-sky-300 p-4 rounded-xl text-3xl font-mono font-black text-center outline-none focus:border-sky-600 shadow-inner bg-white text-sky-900" placeholder="000000" autocomplete="off">
            </div>
-           <button type="button" onclick="startScanner()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 h-[72px] rounded-xl shadow-md transition flex flex-col items-center justify-center shrink-0"><i class="fa-solid fa-camera text-2xl mb-1"></i><span class="text-[10px] font-bold">สแกน</span></button>
+           <button type="button" onclick="window.startScanner()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 h-[72px] rounded-xl shadow-md transition flex flex-col items-center justify-center shrink-0"><i class="fa-solid fa-camera text-2xl mb-1"></i><span class="text-[10px] font-bold">สแกน</span></button>
          </form>
          <div id="stockCheckResult" class="hidden rounded-xl p-4 text-center shadow-sm border transition-all mt-4"></div>
          <div id="auditPanel" class="hidden mt-4 bg-white p-4 rounded-xl border border-indigo-200 shadow-sm">
            <div class="flex justify-between items-center mb-3"><div class="text-center"><div class="text-[10px] font-bold text-slate-500">สต๊อกในระบบ</div><div class="font-black text-xl text-slate-700" id="auditTotal">0</div></div><div class="text-center"><div class="text-[10px] font-bold text-emerald-600">สแกนเจอแล้ว</div><div class="font-black text-xl text-emerald-600" id="auditFound">0</div></div><div class="text-center"><div class="text-[10px] font-bold text-rose-600">หาไม่เจอ (ส่วนต่าง)</div><div class="font-black text-xl text-rose-600" id="auditMissing">0</div></div></div>
-           <button onclick="massCutMissingTickets()" class="w-full bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 font-bold py-2 rounded-lg text-xs transition mb-3 shadow-sm">🗑️ ตัดยอดสลากที่หาไม่เจอ เป็นขายเงินสด</button>
+           <button onclick="window.massCutMissingTickets()" class="w-full bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 font-bold py-2 rounded-lg text-xs transition mb-3 shadow-sm">🗑️ ตัดยอดสลากที่หาไม่เจอ เป็นขายเงินสด</button>
            <h3 class="text-[10px] font-bold text-slate-500 mb-1">รายการเลขสลากที่ยังหาไม่เจอ:</h3>
            <div class="max-h-32 overflow-y-auto bg-slate-50 rounded border border-slate-200 p-2"><div id="auditMissingList" class="flex flex-wrap gap-1.5"></div></div>
          </div>
          <div id="scanHistorySection" class="mt-6">
-           <div class="flex justify-between items-end mb-2"><h3 class="text-xs font-bold text-slate-500">ประวัติการสแกนล่าสุด</h3><button type="button" onclick="clearScanHistory()" class="text-[10px] text-rose-500 hover:text-rose-600 font-bold bg-rose-50 px-2 py-1 rounded border border-rose-200">ล้างประวัติ</button></div>
+           <div class="flex justify-between items-end mb-2"><h3 class="text-xs font-bold text-slate-500">ประวัติการสแกนล่าสุด</h3><button type="button" onclick="window.clearScanHistory()" class="text-[10px] text-rose-500 hover:text-rose-600 font-bold bg-rose-50 px-2 py-1 rounded border border-rose-200">ล้างประวัติ</button></div>
            <div class="bg-white border border-slate-200 rounded-xl h-48 overflow-y-auto"><table class="w-full text-left whitespace-nowrap text-sm"><tbody id="stockCheckHistory" class="divide-y divide-slate-100"><tr><td class="text-center py-4 text-slate-400 font-bold text-xs" id="emptyHistoryRow">ยังไม่มีการสแกน</td></tr></tbody></table></div>
          </div>
       </div>
@@ -409,76 +461,170 @@
     let auditFoundNumbers = new Set();
     let html5QrCode = null;
 
-    // กู้คืนฟังก์ชันจัดการสต็อกและกล้องทั้งหมด
-    window.initAuditMode = function() {
-        auditAvailableTickets = allTicketsList.filter(t => t.status === 'ยังไม่ชำระ' || t.name === '-' || t.name === '');
-        auditFoundNumbers.clear();
-        window.updateAuditUI();
-    }
+    // --- Profile & Support Functions ---
+    window.openMyProfileModal = function() {
+        document.getElementById('myProfileName').value = currentAdmin.name;
+        document.getElementById('myProfilePass').value = '';
+        document.getElementById('myProfileModal').classList.remove('hidden');
+        document.getElementById('myProfileModal').classList.add('flex');
+    };
 
-    window.updateAuditUI = function() {
-        const total = auditAvailableTickets.length;
-        const found = auditFoundNumbers.size;
-        const missing = total - found;
-        
-        document.getElementById('auditTotal').innerText = total;
-        document.getElementById('auditFound').innerText = found;
-        document.getElementById('auditMissing').innerText = missing;
+    window.closeMyProfileModal = function() {
+        document.getElementById('myProfileModal').classList.add('hidden');
+        document.getElementById('myProfileModal').classList.remove('flex');
+    };
 
-        const listEl = document.getElementById('auditMissingList');
-        listEl.innerHTML = '';
-        
-        if (missing === 0) {
-            listEl.innerHTML = '<div class="text-xs text-emerald-600 font-bold w-full text-center py-2">🎉 ยอดเยี่ยม! สต๊อกในระบบและของจริงตรงกัน 100%</div>';
-        } else {
-            auditAvailableTickets.forEach(t => {
-                if(!auditFoundNumbers.has(t.number)) {
-                    listEl.innerHTML += `<span class="bg-white border border-rose-200 text-rose-600 px-2 py-1 rounded text-xs font-mono shadow-sm cursor-pointer hover:bg-rose-50" onclick="document.getElementById('stockCheckInput').value='${t.number}'; window.performStockCheck(new Event('submit'));">${t.number}</span>`;
-                }
-            });
+    window.saveMyProfile = function(e) {
+        e.preventDefault();
+        const newName = document.getElementById('myProfileName').value.trim();
+        const newPass = document.getElementById('myProfilePass').value.trim();
+
+        if(currentAdmin.isSuper) {
+            Swal.fire('ข้อผิดพลาด', 'บัญชี Superadmin ไม่สามารถเปลี่ยนรหัสผ่านผ่านหน้านี้ได้', 'warning');
+            return;
         }
-    }
 
-    window.massCutMissingTickets = function() {
-        const missingTickets = auditAvailableTickets.filter(t => !auditFoundNumbers.has(t.number));
-        if(missingTickets.length === 0) return Swal.fire('ข้อมูลถูกต้อง', 'ไม่มีสลากส่วนต่างที่ต้องตัด', 'info');
-        
-        Swal.fire({
-            title: `ยืนยันการตัดขายเงินสด ${missingTickets.length} ใบ?`,
-            html: 'สลากส่วนต่างที่หาไม่เจอ จะถูกเปลี่ยนเป็น <b>"ขายหน้าร้าน (เงินสด)"</b> ทั้งหมด',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#e11d48',
-            confirmButtonText: 'ใช่, ตัดขายเดี๋ยวนี้!'
-        }).then(r => {
-            if(r.isConfirmed) {
-                Swal.fire({title: 'กำลังตัดสต๊อก...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-                const batch = db.batch();
-                missingTickets.forEach(t => {
-                    const ref = db.collection('lotteries').doc(t.id);
-                    batch.update(ref, {
-                        status: 'sold',
-                        name: 'ขายหน้าร้าน (เงินสด)',
-                        updatedAt: Date.now()
-                    });
+        Swal.fire({title: 'กำลังอัปเดต...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+
+        db.collection('admins').where('username', '==', currentAdmin.username).get().then(snap => {
+            if(!snap.empty) {
+                const docId = snap.docs[0].id;
+                let payload = { name: newName, updatedAt: Date.now() };
+                if(newPass) payload.password = newPass;
+
+                db.collection('admins').doc(docId).update(payload).then(() => {
+                    currentAdmin.name = newName;
+                    document.getElementById('adminDisplayName').innerText = newName;
+                    localStorage.setItem('meowto_admin_session', JSON.stringify(currentAdmin));
+                    Swal.fire('สำเร็จ', 'อัปเดตโปรไฟล์เรียบร้อย', 'success');
+                    window.closeMyProfileModal();
                 });
-                batch.commit().then(() => {
-                    Swal.fire('สำเร็จ', 'ตัดสลากส่วนต่างออกจากระบบเรียบร้อยแล้ว', 'success');
-                    window.initAuditMode();
-                }).catch(e => Swal.fire('Error', e.message, 'error'));
             }
         });
-    }
+    };
 
-    window.clearScanHistory = function() {
-        const historyTable = document.getElementById('stockCheckHistory');
-        if(historyTable) {
-            historyTable.innerHTML = '<tr><td class="text-center py-4 text-slate-400 font-bold text-xs" id="emptyHistoryRow">ยังไม่มีการสแกน</td></tr>';
+    window.openSupportModal = function() {
+        document.getElementById('supportModal').classList.remove('hidden');
+        document.getElementById('supportModal').classList.add('flex');
+        window.loadSupportTickets();
+    };
+
+    window.closeSupportModal = function() {
+        document.getElementById('supportModal').classList.add('hidden');
+        document.getElementById('supportModal').classList.remove('flex');
+    };
+
+    window.submitTicket = function(e) {
+        e.preventDefault();
+        const category = document.getElementById('ticketCategory').value;
+        const subject = document.getElementById('ticketSubject').value.trim();
+        const detail = document.getElementById('ticketDetail').value.trim();
+
+        Swal.fire({title: 'กำลังส่งข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+
+        db.collection('support_tickets').add({
+            category: category,
+            subject: subject,
+            detail: detail,
+            createdBy: currentAdmin.name,
+            creatorId: currentAdmin.username,
+            status: 'รอดำเนินการ',
+            adminReply: '',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        }).then(() => {
+            Swal.fire('ส่งเรื่องสำเร็จ', 'แอดมินระบบจะรีบตรวจสอบให้เร็วที่สุดครับ', 'success');
+            document.getElementById('ticketForm').reset();
+            window.loadSupportTickets();
+        }).catch(err => Swal.fire('Error', err.message, 'error'));
+    };
+
+    window.loadSupportTickets = function() {
+        let query = db.collection('support_tickets');
+        if(!currentAdmin.isSuper) {
+            query = query.where('creatorId', '==', currentAdmin.username);
         }
-        const inputEl = document.getElementById('stockCheckInput');
-        if(inputEl) inputEl.focus();
-    }
 
+        query.orderBy('createdAt', 'desc').onSnapshot(snap => {
+            const container = document.getElementById('ticketListContainer');
+            container.innerHTML = '';
+            
+            if(snap.empty) {
+                container.innerHTML = '<div class="text-center py-10 text-slate-400 font-bold">ยังไม่มีรายการแจ้งปัญหา</div>';
+                return;
+            }
+
+            snap.forEach(doc => {
+                const data = doc.data();
+                const timeStr = new Date(data.createdAt).toLocaleString('th-TH');
+                
+                let statusColor = 'bg-rose-100 text-rose-600 border-rose-200';
+                if(data.status === 'กำลังตรวจสอบ') statusColor = 'bg-amber-100 text-amber-600 border-amber-200';
+                if(data.status === 'แก้ไขเสร็จสิ้น') statusColor = 'bg-emerald-100 text-emerald-600 border-emerald-200';
+
+                let replyHtml = '';
+                if(data.adminReply) {
+                    replyHtml = `<div class="mt-3 bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded-r-lg text-xs"><div class="font-bold text-indigo-700 mb-1">💬 ตอบกลับจากผู้ดูแลระบบ:</div><div class="text-indigo-900">${data.adminReply}</div></div>`;
+                }
+
+                let manageBtnHtml = '';
+                if(currentAdmin.isSuper) {
+                    const safeData = JSON.stringify({id: doc.id, ...data}).replace(/"/g, '&quot;');
+                    manageBtnHtml = `<div class="mt-3 border-t border-slate-200 pt-3 text-right"><button onclick='window.openTicketReplyModal(${safeData})' class="bg-slate-800 text-white text-[10px] font-bold px-3 py-1.5 rounded shadow-sm">ตอบกลับ / อัปเดตสถานะ</button></div>`;
+                }
+
+                container.innerHTML += `
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative">
+                    <div class="absolute top-4 right-4 text-[10px] font-bold ${statusColor} border px-2 py-0.5 rounded-full">${data.status}</div>
+                    <div class="text-[10px] font-bold text-orange-600 mb-1">[${data.category}]</div>
+                    <h4 class="font-black text-slate-800 text-sm mb-1">${data.subject}</h4>
+                    <p class="text-xs text-slate-600">${data.detail}</p>
+                    <div class="text-[9px] text-slate-400 mt-2 flex justify-between items-center">
+                        <span>แจ้งโดย: <b class="text-slate-600">${data.createdBy}</b></span>
+                        <span>${timeStr}</span>
+                    </div>
+                    ${replyHtml}
+                    ${manageBtnHtml}
+                </div>`;
+            });
+        });
+    };
+
+    window.openTicketReplyModal = function(data) {
+        document.getElementById('replyTicketId').value = data.id;
+        document.getElementById('replySubject').innerText = 'หัวข้อ: ' + data.subject;
+        document.getElementById('replyDetail').innerText = 'รายละเอียด: ' + data.detail;
+        document.getElementById('replyStatus').value = data.status;
+        document.getElementById('replyMessage').value = data.adminReply || '';
+        
+        document.getElementById('ticketReplyModal').classList.remove('hidden');
+        document.getElementById('ticketReplyModal').classList.add('flex');
+    };
+
+    window.closeTicketReplyModal = function() {
+        document.getElementById('ticketReplyModal').classList.add('hidden');
+        document.getElementById('ticketReplyModal').classList.remove('flex');
+    };
+
+    window.saveTicketReply = function(e) {
+        e.preventDefault();
+        const id = document.getElementById('replyTicketId').value;
+        const status = document.getElementById('replyStatus').value;
+        const msg = document.getElementById('replyMessage').value.trim();
+
+        Swal.fire({title: 'กำลังอัปเดต...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+
+        db.collection('support_tickets').doc(id).update({
+            status: status,
+            adminReply: msg,
+            updatedAt: Date.now()
+        }).then(() => {
+            Swal.fire('สำเร็จ', 'อัปเดต Ticket เรียบร้อย', 'success');
+            window.closeTicketReplyModal();
+        });
+    };
+
+    // --- ฟังก์ชันจัดการสต็อกและกล้อง ---
     window.openStockCheckModal = function() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดสลากก่อนครับ', 'warning');
         const modal = document.getElementById('stockCheckModal');
@@ -486,14 +632,14 @@
         modal.classList.add('flex');
         window.setScanMode('check');
         window.clearScanHistory();
-    }
-    
+    };
+
     window.closeStockCheckModal = function() {
         window.stopScanner();
         const modal = document.getElementById('stockCheckModal');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
-    }
+    };
 
     window.setScanMode = function(mode) {
         scanMode = mode;
@@ -542,7 +688,76 @@
         inputEl.value = '';
         inputEl.focus();
         document.getElementById('stockCheckResult').classList.add('hidden');
-    }
+    };
+
+    window.initAuditMode = function() {
+        auditAvailableTickets = allTicketsList.filter(t => t.status === 'ยังไม่ชำระ' || t.name === '-' || t.name === '');
+        auditFoundNumbers.clear();
+        window.updateAuditUI();
+    };
+
+    window.updateAuditUI = function() {
+        const total = auditAvailableTickets.length;
+        const found = auditFoundNumbers.size;
+        const missing = total - found;
+        
+        document.getElementById('auditTotal').innerText = total;
+        document.getElementById('auditFound').innerText = found;
+        document.getElementById('auditMissing').innerText = missing;
+
+        const listEl = document.getElementById('auditMissingList');
+        listEl.innerHTML = '';
+        
+        if (missing === 0) {
+            listEl.innerHTML = '<div class="text-xs text-emerald-600 font-bold w-full text-center py-2">🎉 ยอดเยี่ยม! สต๊อกในระบบและของจริงตรงกัน 100%</div>';
+        } else {
+            auditAvailableTickets.forEach(t => {
+                if(!auditFoundNumbers.has(t.number)) {
+                    listEl.innerHTML += `<span class="bg-white border border-rose-200 text-rose-600 px-2 py-1 rounded text-xs font-mono shadow-sm cursor-pointer hover:bg-rose-50" onclick="document.getElementById('stockCheckInput').value='${t.number}'; window.performStockCheck(new Event('submit'));">${t.number}</span>`;
+                }
+            });
+        }
+    };
+
+    window.massCutMissingTickets = function() {
+        const missingTickets = auditAvailableTickets.filter(t => !auditFoundNumbers.has(t.number));
+        if(missingTickets.length === 0) return Swal.fire('ข้อมูลถูกต้อง', 'ไม่มีสลากส่วนต่างที่ต้องตัด', 'info');
+        
+        Swal.fire({
+            title: `ยืนยันการตัดขายเงินสด ${missingTickets.length} ใบ?`,
+            html: 'สลากส่วนต่างที่หาไม่เจอ จะถูกเปลี่ยนเป็น <b>"ขายหน้าร้าน (เงินสด)"</b> ทั้งหมด',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            confirmButtonText: 'ใช่, ตัดขายเดี๋ยวนี้!'
+        }).then(r => {
+            if(r.isConfirmed) {
+                Swal.fire({title: 'กำลังตัดสต๊อก...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                const batch = db.batch();
+                missingTickets.forEach(t => {
+                    const ref = db.collection('lotteries').doc(t.id);
+                    batch.update(ref, {
+                        status: 'sold',
+                        name: 'ขายหน้าร้าน (เงินสด)',
+                        updatedAt: Date.now()
+                    });
+                });
+                batch.commit().then(() => {
+                    Swal.fire('สำเร็จ', 'ตัดสลากส่วนต่างออกจากระบบเรียบร้อยแล้ว', 'success');
+                    window.initAuditMode();
+                }).catch(e => Swal.fire('Error', e.message, 'error'));
+            }
+        });
+    };
+
+    window.clearScanHistory = function() {
+        const historyTable = document.getElementById('stockCheckHistory');
+        if(historyTable) {
+            historyTable.innerHTML = '<tr><td class="text-center py-4 text-slate-400 font-bold text-xs" id="emptyHistoryRow">ยังไม่มีการสแกน</td></tr>';
+        }
+        const inputEl = document.getElementById('stockCheckInput');
+        if(inputEl) inputEl.focus();
+    };
 
     window.startScanner = function() {
         document.getElementById('reader-container').classList.remove('hidden');
@@ -559,7 +774,7 @@
             Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตให้เบราว์เซอร์ใช้งานกล้องของคุณ', 'error');
             document.getElementById('reader-container').classList.add('hidden');
         });
-    }
+    };
 
     window.onScanSuccess = function(decodedText, decodedResult) {
         let numMatches = decodedText.match(/\d{6}/);
@@ -569,24 +784,17 @@
             document.getElementById('stockCheckInput').value = numMatches[0];
             window.performStockCheck(new Event('submit'));
         }
-    }
+    };
 
     window.stopScanner = function() {
-        if(html5QrCode) {
-            try {
-                html5QrCode.stop().then(() => {
-                    html5QrCode.clear();
-                    document.getElementById('reader-container').classList.add('hidden');
-                }).catch(err => {
-                    document.getElementById('reader-container').classList.add('hidden');
-                });
-            } catch (e) {
+        if(html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => {
                 document.getElementById('reader-container').classList.add('hidden');
-            }
+            }).catch(err => console.log("Stop error:", err));
         } else {
             document.getElementById('reader-container').classList.add('hidden');
         }
-    }
+    };
 
     window.performStockCheck = function(e) {
         e.preventDefault();
@@ -690,13 +898,13 @@
             inputEl.value = '';
             inputEl.focus();
         }
-    }
+    };
 
     window.onload = function() {
         if (!window.checkAdminSession()) {
             document.getElementById('adminAuthOverlay').style.display = 'flex';
         }
-    }
+    };
 
     window.checkAdminSession = function() {
         const stored = localStorage.getItem('meowto_admin_session');
@@ -711,7 +919,7 @@
             }
         }
         return false;
-    }
+    };
 
     window.updateAdminActivity = function() {
         if (currentAdmin) {
@@ -720,8 +928,7 @@
         }
     };
 
-    const activityEvents = ['click', 'mousemove', 'keypress', 'scroll'];
-    activityEvents.forEach(evt => 
+    ;['click', 'mousemove', 'keypress', 'scroll'].forEach(evt => 
         window.addEventListener(evt, () => {
             if(!window.activityTimer && currentAdmin) {
                 window.activityTimer = setTimeout(() => {
@@ -756,7 +963,7 @@
                 Swal.fire('ปฏิเสธการเข้าถึง', 'ID หรือ รหัสผ่านไม่ถูกต้อง', 'error');
             }
         }).catch(err => Swal.fire('ข้อผิดพลาด', err.message, 'error'));
-    }
+    };
 
     window.loginSuccess = function(sessionData) {
         currentAdmin = sessionData;
@@ -776,7 +983,7 @@
         window.listenToRealtimeVisitors(); 
         window.listenToChatsCount(); 
         window.startAdminCountdown();
-    }
+    };
 
     window.adminLogout = function() {
         Swal.fire({ title: 'ออกจากระบบ?', icon: 'question', showCancelButton: true, confirmButtonColor: '#e11d48' }).then(r => {
@@ -785,7 +992,7 @@
                 window.location.reload();
             }
         });
-    }
+    };
 
     window.applyAdminPermissions = function() {
         if(currentAdmin.isSuper) {
@@ -814,20 +1021,20 @@
         if(!p.manage_chat) {
             document.getElementById('tab-chats').style.display = 'none';
         }
-    }
+    };
 
     window.openAdminManageModal = function() {
         const modal = document.getElementById('adminManageModal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         window.loadAdminList();
-    }
+    };
 
     window.closeAdminManageModal = function() {
         const modal = document.getElementById('adminManageModal');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
-    }
+    };
 
     window.loadAdminList = function() {
         db.collection('admins').get().then(snap => {
@@ -860,7 +1067,7 @@
                 </tr>`;
             });
         });
-    }
+    };
 
     window.resetAdminForm = function() {
         document.getElementById('adminDocId').value = '';
@@ -873,7 +1080,7 @@
         document.getElementById('perm_finance').checked = false;
         document.getElementById('perm_chat').checked = false;
         document.getElementById('adminFormTitle').innerText = '➕ สร้างบัญชีแอดมินใหม่';
-    }
+    };
 
     window.editAdminData = function(data) {
         document.getElementById('adminDocId').value = data.id;
@@ -889,7 +1096,7 @@
         document.getElementById('perm_chat').checked = !!p.manage_chat;
 
         document.getElementById('adminFormTitle').innerText = '📝 แก้ไขข้อมูลแอดมิน';
-    }
+    };
 
     window.saveAdminData = function(e) {
         e.preventDefault();
@@ -929,7 +1136,7 @@
                 }
             });
         }
-    }
+    };
 
     window.deleteAdminData = function(docId) {
         Swal.fire({ title: 'ลบบัญชีนี้?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48' }).then(r => {
@@ -939,9 +1146,9 @@
                 });
             }
         });
-    }
+    };
 
-    window.saveSeenCounts = function() { localStorage.setItem('admin_seen_counts', JSON.stringify(seenCounts)); }
+    window.saveSeenCounts = function() { localStorage.setItem('admin_seen_counts', JSON.stringify(seenCounts)); };
 
     window.updateTabBadge = function(tabKey) {
         if(tabKey === 'chats') return; 
@@ -951,13 +1158,13 @@
         if (unread < 0) { seenCounts[tabKey] = currentCounts[tabKey]; window.saveSeenCounts(); unread = 0; }
         if(unread > 0) { el.innerText = unread > 99 ? '99+' : unread; el.classList.remove('hidden'); el.classList.add('flex', 'items-center', 'justify-center'); } 
         else { el.classList.add('hidden'); el.classList.remove('flex', 'items-center', 'justify-center'); }
-    }
+    };
 
     window.playNotificationSound = function(testUrl = null) {
         let soundToPlay = testUrl ? testUrl : adminSoundUrl;
         const audio = new Audio(soundToPlay);
         audio.play().catch(e => console.log("Audio play prevented by browser"));
-    }
+    };
 
     window.updateChatBadgeUI = function(count) {
         const el = document.getElementById('badge-chats');
@@ -972,7 +1179,7 @@
             el.classList.remove('flex', 'items-center', 'justify-center');
             if (currentTab === 'chats') unreadChatCount = 0;
         }
-    }
+    };
 
     window.listenToChatsCount = function() {
         db.collection('chats').where('status', '==', 'active').onSnapshot(snap => {
@@ -1006,7 +1213,7 @@
             }
             isFirstLoadChats = false;
         });
-    }
+    };
 
     window.startAdminCountdown = function() {
         setInterval(() => {
@@ -1022,7 +1229,7 @@
                 }
             });
         }, 1000);
-    }
+    };
 
     window.exportToExcel = function() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดที่ต้องการดึงรายงานก่อนครับ', 'warning');
@@ -1077,7 +1284,7 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
+    };
 
     window.approveSlip = function(id, userId, quantity, numStr) {
         Swal.fire({
@@ -1104,7 +1311,7 @@
                 });
             }
         });
-    }
+    };
 
     window.sendCustomerPushMessage = function(userId, message) {
         const GAS_URL = "ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้"; 
@@ -1113,7 +1320,7 @@
             method: 'POST',
             body: JSON.stringify({ action: "push", userId: userId, message: message })
         }).catch(e => console.log("Push Error:", e));
-    }
+    };
 
     window.resizeImage = function(file, maxWidth, maxHeight, quality = 0.7) {
         return new Promise((resolve) => {
@@ -1129,18 +1336,18 @@
                 };
             };
         });
-    }
+    };
 
     window.setActiveStorefrontDraw = function() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดสลากก่อนครับ', 'warning');
         Swal.fire({ title: 'ตั้งงวดนี้ขายหน้าร้าน?', text: `ต้องการให้ลูกค้าเห็นสลากของ "${currentSelectedSheet}" ใช่หรือไม่?`, icon: 'question', showCancelButton: true, confirmButtonText: 'ตั้งเป็นงวดปัจจุบัน', confirmButtonColor: '#10b981' })
         .then(r => { if(r.isConfirmed) { db.collection('settings').doc('storefront').set({ activeDraw: currentSelectedSheet }, { merge: true }).then(() => Swal.fire({toast:true, position: 'top-end', title: 'ตั้งงวดหน้าร้านสำเร็จ', icon: 'success', timer: 2000, showConfirmButton:false})); } });
-    }
+    };
 
     window.toggleSales = function() {
         const newStatus = !isSalesOpen;
         db.collection('settings').doc('storefront').set({ isSalesOpen: newStatus }, { merge: true }).then(() => { Swal.fire({ toast: true, position: 'top-end', title: newStatus ? 'เปิดแผงขายแล้ว' : 'ปิดรับการซื้อสลากแล้ว', icon: 'success', timer: 2000, showConfirmButton: false }); });
-    }
+    };
 
     window.listenToStorefrontSettings = function() { 
         db.collection('settings').doc('design').onSnapshot(doc => {
@@ -1169,7 +1376,7 @@
                 if(d.winBanner) { document.getElementById('mbWinBannerPreview').src = d.winBanner; document.getElementById('mbWinBannerPreview').classList.remove('hidden'); tempWinBanner = d.winBanner; }
             }
         });
-    }
+    };
 
     window.previewDesignImage = async function(type) {
         let fileInput, previewImg;
@@ -1187,7 +1394,7 @@
             previewImg.src = base64; 
             previewImg.classList.remove('hidden'); 
         }
-    }
+    };
 
     window.previewMenuBanner = async function(type) {
         let input = document.getElementById(type === 'winBanner' ? 'winningBannerFile' : `mb${type.charAt(0).toUpperCase() + type.slice(1)}File`);
@@ -1200,7 +1407,7 @@
             if(type === 'winBanner') tempWinBanner = base64;
             preview.src = base64; preview.classList.remove('hidden');
         }
-    }
+    };
 
     window.listenToVisitorCount = function() {
         db.collection('settings').doc('analytics').onSnapshot(doc => {
@@ -1215,7 +1422,7 @@
                 document.getElementById('sum-visitors').innerText = '0';
             }
         });
-    }
+    };
 
     window.listenToRealtimeVisitors = function() {
         const oneMinuteAgo = Date.now() - 60000;
@@ -1236,7 +1443,7 @@
                 });
             }
         });
-    }
+    };
 
     window.loadAdminChatList = function(snap) {
         const listDiv = document.getElementById('admin-chat-list');
@@ -1269,7 +1476,7 @@
                 </div>
             </div>`;
         });
-    }
+    };
 
     window.openAdminChatRoom = function(userId, userName, userImage) {
         currentChatUserId = userId;
@@ -1301,12 +1508,18 @@
                 const imgHtml = msg.imageUrl ? `<img src="${msg.imageUrl}" class="w-full max-w-[200px] rounded-lg ${msg.text ? 'mt-2' : ''} cursor-pointer shadow-sm border border-gray-200" onclick="window.open(this.src, '_blank')">` : '';
                 const contentHtml = textHtml + imgHtml;
                 
+                let adminNameLabel = '';
+                if(isMe) {
+                    adminNameLabel = `<div class="text-[8px] text-purple-300 font-bold mb-0.5 text-right w-full">ตอบโดย: ${currentAdmin.name}</div>`;
+                }
+                
                 const userImgHtml = userImage ? `<img src="${userImage}" class="w-8 h-8 rounded-full object-cover shrink-0 shadow-sm border border-slate-200">` : `<div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center shrink-0 shadow-sm border border-slate-300"><i class="fa-solid fa-user text-xs"></i></div>`;
 
                 messagesDiv.innerHTML += `
                 <div class="flex ${isMe ? 'justify-end' : 'justify-start'} w-full gap-2 mb-3">
                     ${!isMe ? userImgHtml : ''}
                     <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
+                        ${adminNameLabel}
                         <div class="${isMe ? 'bg-purple-600 text-white rounded-tr-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'} px-4 py-2.5 rounded-2xl text-sm shadow-sm">
                             ${contentHtml}
                         </div>
@@ -1317,7 +1530,7 @@
             });
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
-    }
+    };
 
     window.sendAdminMessage = function() {
         const input = document.getElementById('admin-chat-input');
@@ -1332,7 +1545,7 @@
         db.collection('chats').doc(currentChatUserId).update({
             lastMessage: text, updatedAt: now
         });
-    }
+    };
 
     window.sendChatImage = async function() {
         if (!currentChatUserId) return;
@@ -1359,7 +1572,7 @@
                 Swal.close();
             };
         };
-    }
+    };
 
     window.closeChatCase = function() {
         if(!currentChatUserId) return;
@@ -1383,28 +1596,29 @@
                 });
             }
         });
-    }
+    };
 
     window.openAnalyticsModal = function() { 
         const modal = document.getElementById('analyticsModal');
         modal.classList.remove('hidden'); 
         modal.classList.add('flex');
-    }
+    };
+    
     window.closeAnalyticsModal = function() { 
         const modal = document.getElementById('analyticsModal');
         modal.classList.add('hidden'); 
         modal.classList.remove('flex');
-    }
+    };
 
-    window.listenToWithdrawals = function() { db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => { currentCounts['withdraw'] = snap.size; window.updateTabBadge('withdraw'); if(currentTab === 'withdraw') window.loadWithdrawalsCRM(); }); }
-    window.listenToCustomersCount = function() { db.collection('users').onSnapshot(snap => { currentCounts['crm'] = snap.size; window.updateTabBadge('crm'); }); }
+    window.listenToWithdrawals = function() { db.collection('withdrawals').where('status', '==', 'รอโอน').onSnapshot(snap => { currentCounts['withdraw'] = snap.size; window.updateTabBadge('withdraw'); if(currentTab === 'withdraw') window.loadWithdrawalsCRM(); }); };
+    window.listenToCustomersCount = function() { db.collection('users').onSnapshot(snap => { currentCounts['crm'] = snap.size; window.updateTabBadge('crm'); }); };
 
     window.openDesignModal = function() {
         tempLogoBase64 = ""; tempTicketBgBase64 = ""; tempSlide1 = ""; tempSlide2 = ""; tempSlide3 = ""; 
         tempMascot = ""; tempTop10 = ""; tempExtra = ""; tempWinBanner = "";
         document.getElementById('designForm').reset();
         
-        ['logo','ticket','slide1','slide2','slide3','mbMascot','mbTop10','mbExtra','mbWinBanner'].forEach(id => { 
+        ;['logo','ticket','slide1','slide2','slide3','mbMascot','mbTop10','mbExtra','mbWinBanner'].forEach(id => { 
             let el = document.getElementById(id+'Preview');
             if(el) { el.classList.add('hidden'); el.src = ""; }
         });
@@ -1435,7 +1649,7 @@
                 modal.classList.add('flex');
             });
         });
-    }
+    };
 
     window.removeSlide = function(slideId) { 
         if(slideId === 'slide1') tempSlide1 = ""; 
@@ -1444,13 +1658,13 @@
         document.getElementById(slideId + 'File').value = ""; 
         document.getElementById(slideId + 'Preview').src = ""; 
         document.getElementById(slideId + 'Preview').classList.add('hidden'); 
-    }
+    };
 
     window.closeDesignModal = function() { 
         const modal = document.getElementById('designModal');
         modal.classList.add('hidden'); 
         modal.classList.remove('flex');
-    }
+    };
 
     window.saveDesignSettings = async function(e) {
         e.preventDefault(); Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
@@ -1467,7 +1681,7 @@
             Swal.fire({ title: 'อัปเดตข้อมูลสำเร็จ!', icon: 'success', confirmButtonColor: '#0d9488' }); 
             window.closeDesignModal();
         } catch (error) { Swal.fire('เกิดข้อผิดพลาด', error.message, 'error'); }
-    }
+    };
 
     window.openFlashSaleModal = function() { 
         document.getElementById('flashSaleForm').reset(); 
@@ -1482,18 +1696,20 @@
             modal.classList.remove('hidden'); 
             modal.classList.add('flex');
         }); 
-    }
+    };
+    
     window.closeFlashSaleModal = function() { 
         const modal = document.getElementById('flashSaleModal');
         modal.classList.add('hidden'); 
         modal.classList.remove('flex');
-    }
-    window.saveFlashSaleSettings = async function(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() }); try { await db.collection('settings').doc('flashsale').set({ title: document.getElementById('fsTitleInput').value.trim(), endTime: document.getElementById('fsEndTimeInput').value, isActive: document.getElementById('fsStatus').value === "true" }, { merge: true }); Swal.fire('สำเร็จ', 'อัปเดตแผงเดล Flash Sale เรียบร้อย', 'success'); window.closeFlashSaleModal(); } catch(err) { Swal.fire('ข้อผิดพลาด', err.message, 'error'); } }
+    };
+    
+    window.saveFlashSaleSettings = async function(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() }); try { await db.collection('settings').doc('flashsale').set({ title: document.getElementById('fsTitleInput').value.trim(), endTime: document.getElementById('fsEndTimeInput').value, isActive: document.getElementById('fsStatus').value === "true" }, { merge: true }); Swal.fire('สำเร็จ', 'อัปเดตแผงเดล Flash Sale เรียบร้อย', 'success'); window.closeFlashSaleModal(); } catch(err) { Swal.fire('ข้อผิดพลาด', err.message, 'error'); } };
 
     window.switchTab = function(t) { 
         currentTab = t; seenCounts[t] = currentCounts[t]; window.updateTabBadge(t);
         
-        ['all','empty','paid','unpaid','pending_slip','winners','flashsale','chats'].forEach(k => { 
+        ;['all','empty','paid','unpaid','pending_slip','winners','flashsale','chats'].forEach(k => { 
             const btn = document.getElementById('tab-'+k); 
             if(!btn) return;
             if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative ml-2" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative ml-2"; } 
@@ -1535,7 +1751,7 @@
                 window.renderTable(); 
             }
         }
-    }
+    };
 
     window.filterData = function() { 
         if (currentTab === 'crm' || currentTab === 'withdraw') { 
@@ -1548,7 +1764,7 @@
         } else { 
             window.renderTable(document.getElementById('search-input').value.trim()); 
         } 
-    }
+    };
 
     window.loadWithdrawalsCRM = function() {
       document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อ หรือ รหัสออเดอร์..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดข้อมูลการถอน...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
@@ -1562,10 +1778,10 @@
           body.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50 border-b border-slate-100 text-sm"><td class="py-3 px-4 text-slate-500 text-xs">${dateStr}</td><td class="py-3 px-6"><div class="font-bold text-[#dc2626] text-lg tracking-widest">${data.ticketNumber || 'รวบยอด'}</div><div class="font-bold text-slate-800">${data.displayName}</div><div class="text-[10px] text-gray-400 mt-0.5">งวด: ${data.draw} | รหัสออเดอร์: #${doc.id.substring(0,8)}</div></td><td class="py-3 px-4"><div class="font-black text-emerald-600 text-xl drop-shadow-sm">฿${netAmount.toLocaleString()}</div><div class="text-[11px] text-gray-500 font-bold mt-0.5">หักค่าธรรมเนียม 2% (฿${fee.toLocaleString()})</div><div class="text-[10px] text-gray-400">จากยอดเดิม: ฿${totalAmount.toLocaleString()}</div></td><td class="py-3 px-6"><div class="text-indigo-700 font-bold text-xs">${data.bankName}</div><div class="text-gray-800 font-bold tracking-widest my-0.5 select-all">${data.bankAccountNumber}</div><div class="text-gray-500 text-xs">ชื่อ: ${data.bankAccountName}</div></td><td class="py-3 px-4 text-center">${statusBadge}</td><td class="py-3 px-4 text-center">${actionBtn} ${deleteBtn}</td></tr>`);
         });
       });
-    }
+    };
 
-    window.approveWithdrawal = function(docId) { Swal.fire({ title: 'ยืนยันการโอนสำเร็จ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'โอนแล้ว' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => { Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success'); }); } }); }
-    window.deleteWithdrawal = function(docId) { Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ลบทิ้ง' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลถูกลบแล้ว', 'success'); }); } }); }
+    window.approveWithdrawal = function(docId) { Swal.fire({ title: 'ยืนยันการโอนสำเร็จ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#10b981', confirmButtonText: 'โอนแล้ว' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).update({ status: 'สำเร็จ', completedAt: Date.now() }).then(() => { Swal.fire('เรียบร้อย!', 'ปรับสถานะเป็นโอนสำเร็จแล้ว', 'success'); }); } }); };
+    window.deleteWithdrawal = function(docId) { Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ลบทิ้ง' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลถูกลบแล้ว', 'success'); }); } }); };
 
     window.loadCustomerCRM = function() {
       document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
@@ -1584,7 +1800,7 @@
           body.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50 border-b border-slate-100 text-sm"><td class="py-3 px-4 text-center">${img}</td><td class="py-3 px-6 font-bold text-slate-800"><div class="flex items-center gap-1">${user.displayName || 'ไม่ระบุ'} ${user.consentGiven ? '<span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200">✅ ยืนยันแล้ว</span>' : '<span class="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded border border-red-200">รอการยืนยัน</span>'}</div></td><td class="py-3 px-4 text-indigo-600 font-bold">${user.phone || 'ยังไม่กรอก'}</td><td class="py-3 px-6">${bankInfo}${coinsInfo}</td><td class="py-3 px-4 text-center text-slate-400 text-xs">${dateStr}</td><td class="py-3 px-4 text-center">${editBtn}</td></tr>`);
         });
       });
-    }
+    };
 
     window.editCustomerProfile = function(userId, phone, bankName, bankAccName, bankAccNum, coins) {
         Swal.fire({
@@ -1605,17 +1821,27 @@
                 db.collection('users').doc(userId).set({ phone: result.value.phone, bankName: result.value.bankName, bankAccountName: result.value.bankAccountName, bankAccountNumber: result.value.bankAccountNumber, coins: result.value.coins, updatedAt: Date.now() }, { merge: true }).then(() => { Swal.fire('สำเร็จ!', 'อัปเดตข้อมูลลูกค้าเรียบร้อยแล้ว', 'success'); window.loadCustomerCRM(); }).catch((error) => { Swal.fire('เกิดข้อผิดพลาด', error.message, 'error'); });
             }
         });
-    }
+    };
 
     window.toggleFlashSalePrice = function() {
         const isFs = document.getElementById('formIsFlashSale').checked;
         document.getElementById('fsPriceDiv').style.display = isFs ? 'block' : 'none';
         if(!isFs) document.getElementById('formFsPrice').value = '';
-    }
+    };
 
     window.editRow = function(item) { 
-        window.openModal(); document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์"; document.getElementById('formRowIndex').value = item.id; document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); document.getElementById('formQty').value = item.quantity; document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); 
+        const modal = document.getElementById('formModal');
+        modal.classList.remove('hidden'); 
+        modal.classList.add('flex');
+        
+        document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์"; 
+        document.getElementById('formRowIndex').value = item.id; 
+        document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); 
+        document.getElementById('formQty').value = item.quantity; 
+        document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; 
+        document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); 
         document.getElementById('formIsFlashSale').checked = item.isFlashSale === true; 
+        
         window.toggleFlashSalePrice();
         document.getElementById('formFsPrice').value = item.flashSalePrice || '';
         document.getElementById('adminSlipFile').value = ""; 
@@ -1634,7 +1860,7 @@
             else document.getElementById('slip-display').classList.add('hidden');
         } 
         window.calculateAmount(); 
-    }
+    };
 
     window.submitForm = async function(e) { 
         e.preventDefault(); 
@@ -1685,9 +1911,9 @@
                 window.closeModal(); 
             }).catch(err => Swal.fire('Error', err.message, 'error'));
         } 
-    }
+    };
 
-    window.calculateAmount = function() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); }
+    window.calculateAmount = function() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); };
     
     window.autoFormatNumbers = function(inputEl, chunkLength) {
         let raw = inputEl.value.replace(/\D/g, ''); 
@@ -1698,26 +1924,29 @@
             if(matches) formatted = matches.join(' ');
         }
         inputEl.value = formatted;
-    }
+    };
 
     window.openModal = function() { 
-        window.document.getElementById('formModal').classList.remove('hidden'); 
-        window.document.getElementById('formModal').classList.add('flex');
+        const modal = document.getElementById('formModal');
+        modal.classList.remove('hidden'); 
+        modal.classList.add('flex');
         document.getElementById('lotteryForm').reset(); 
         document.getElementById('formRowIndex').value = ""; 
         document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; 
         document.getElementById('slip-display').classList.add('hidden'); 
         document.getElementById('fsPriceDiv').style.display = 'none'; 
         window.calculateAmount(); 
-    }
-    window.closeModal = function() { 
-        window.document.getElementById('formModal').classList.add('hidden'); 
-        window.document.getElementById('formModal').classList.remove('flex');
-    }
+    };
     
-    window.clearTicket = function(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null, isFlashSale: false, flashSalePrice: null, discountCoins: null, updatedAt: Date.now() }); } }); }
-    window.deleteTicket = function(id) { Swal.fire({ title: 'ยืนยันการลบสลาก?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#64748b', confirmButtonText: 'ใช่, ลบทิ้งเลย!', cancelButtonText: 'ยกเลิก' }).then((result) => { if (result.isConfirmed) { Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); db.collection('lotteries').doc(id).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success'); }); } }); }
-    window.addNewMonthPopup = function() { Swal.fire({ title: "สร้างแผ่นงานงวดใหม่", input: "text", inputPlaceholder: "งวด 1 กรกฎาคม 2569", showCancelButton: true, confirmButtonColor: '#1e293b' }).then(r => { if(r.value) db.collection('draws').add({ name: r.value.trim(), createdAt: new Date() }); }); }
+    window.closeModal = function() { 
+        const modal = document.getElementById('formModal');
+        modal.classList.add('hidden'); 
+        modal.classList.remove('flex');
+    };
+    
+    window.clearTicket = function(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null, isFlashSale: false, flashSalePrice: null, discountCoins: null, updatedAt: Date.now() }); } }); };
+    window.deleteTicket = function(id) { Swal.fire({ title: 'ยืนยันการลบสลาก?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', cancelButtonColor: '#64748b', confirmButtonText: 'ใช่, ลบทิ้งเลย!', cancelButtonText: 'ยกเลิก' }).then((result) => { if (result.isConfirmed) { Swal.fire({title: 'กำลังลบข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); db.collection('lotteries').doc(id).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลสลากถูกลบออกจากฐานข้อมูลแล้ว', 'success'); }); } }); };
+    window.addNewMonthPopup = function() { Swal.fire({ title: "สร้างแผ่นงานงวดใหม่", input: "text", inputPlaceholder: "งวด 1 กรกฎาคม 2569", showCancelButton: true, confirmButtonColor: '#1e293b' }).then(r => { if(r.value) db.collection('draws').add({ name: r.value.trim(), createdAt: new Date() }); }); };
 
     window.openWinningModal = function() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดสลากก่อนครับ', 'warning');
@@ -1739,14 +1968,16 @@
             modal.classList.remove('hidden'); 
             modal.classList.add('flex');
         });
-    }
+    };
+    
     window.closeWinningModal = function() { 
         const modal = document.getElementById('winningModal');
         modal.classList.add('hidden'); 
         modal.classList.remove('flex');
-    }
-    window.parseNumberString = function(str) { return str.split(/[\s,]+/).filter(item => item.trim() !== ""); }
-    window.saveWinningData = function(e) { e.preventDefault(); const payload = { prize1: document.getElementById('win_prize1').value.trim(), last2: document.getElementById('win_last2').value.trim(), front3: window.parseNumberString(document.getElementById('win_front3').value), last3: window.parseNumberString(document.getElementById('win_last3').value), prize2: window.parseNumberString(document.getElementById('win_prize2').value), prize3: window.parseNumberString(document.getElementById('win_prize3').value), prize4: window.parseNumberString(document.getElementById('win_prize4').value), prize5: window.parseNumberString(document.getElementById('win_prize5').value), updatedAt: new Date() }; db.collection('winning_results').doc(currentSelectedSheet).set(payload, { merge: true }).then(() => { Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', confirmButtonColor: '#b38728' }); window.closeWinningModal(); }); }
+    };
+    
+    window.parseNumberString = function(str) { return str.split(/[\s,]+/).filter(item => item.trim() !== ""); };
+    window.saveWinningData = function(e) { e.preventDefault(); const payload = { prize1: document.getElementById('win_prize1').value.trim(), last2: document.getElementById('win_last2').value.trim(), front3: window.parseNumberString(document.getElementById('win_front3').value), last3: window.parseNumberString(document.getElementById('win_last3').value), prize2: window.parseNumberString(document.getElementById('win_prize2').value), prize3: window.parseNumberString(document.getElementById('win_prize3').value), prize4: window.parseNumberString(document.getElementById('win_prize4').value), prize5: window.parseNumberString(document.getElementById('win_prize5').value), updatedAt: new Date() }; db.collection('winning_results').doc(currentSelectedSheet).set(payload, { merge: true }).then(() => { Swal.fire({ title: 'บันทึกสำเร็จ!', icon: 'success', confirmButtonColor: '#b38728' }); window.closeWinningModal(); }); };
 
     window.openPromoModal = function() { 
         tempPromoImageBase64 = ""; 
@@ -1770,15 +2001,17 @@
             modal.classList.remove('hidden'); 
             modal.classList.add('flex');
         }); 
-    }
-    window.previewPromoImage = async function() { const fileInput = document.getElementById('promoImageFile'); if (fileInput.files && fileInput.files[0]) { tempPromoImageBase64 = await window.resizeImage(fileInput.files[0], 800, 800, 0.75); document.getElementById('promoPreview').src = tempPromoImageBase64; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); } }
-    window.removePromoImage = function() { tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = ""; document.getElementById('promoPreview').src = ""; document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); }
+    };
+    
+    window.previewPromoImage = async function() { const fileInput = document.getElementById('promoImageFile'); if (fileInput.files && fileInput.files[0]) { tempPromoImageBase64 = await window.resizeImage(fileInput.files[0], 800, 800, 0.75); document.getElementById('promoPreview').src = tempPromoImageBase64; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); } };
+    window.removePromoImage = function() { tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = ""; document.getElementById('promoPreview').src = ""; document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); };
     window.closePromoModal = function() { 
         const modal = document.getElementById('promoModal');
         modal.classList.add('hidden'); 
         modal.classList.remove('flex');
-    }
-    window.savePromotion = async function(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" }; try { await db.collection('settings').doc('promotion').set(payload); Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' }); window.closePromoModal(); } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); } }
+    };
+    
+    window.savePromotion = async function(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" }; try { await db.collection('settings').doc('promotion').set(payload); Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' }); window.closePromoModal(); } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); } };
 
     window.loadInitialData = function() {
       db.collection('draws').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
@@ -1787,9 +2020,9 @@
         snapshot.forEach(doc => { const opt = document.createElement('option'); opt.value = doc.data().name; opt.innerText = doc.data().name; sel.appendChild(opt); });
         db.collection('settings').doc('storefront').get().then(doc => { if(doc.exists && doc.data().activeDraw) { currentSelectedSheet = doc.data().activeDraw; sel.value = currentSelectedSheet; } else { currentSelectedSheet = sel.value; } window.onSheetChange(); });
       });
-    }
+    };
 
-    window.onSheetChange = function() { currentSelectedSheet = document.getElementById('sheet-selector').value; if (currentTab === 'crm' || currentTab === 'withdraw' || currentTab === 'chats') window.switchTab('all'); document.getElementById('search-input').value = ""; db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => { currentWinData = doc.exists ? doc.data() : null; window.loadLotteryDataFromServer(currentSelectedSheet); }); }
+    window.onSheetChange = function() { currentSelectedSheet = document.getElementById('sheet-selector').value; if (currentTab === 'crm' || currentTab === 'withdraw' || currentTab === 'chats') window.switchTab('all'); document.getElementById('search-input').value = ""; db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => { currentWinData = doc.exists ? doc.data() : null; window.loadLotteryDataFromServer(currentSelectedSheet); }); };
 
     window.checkWinningPrize = function(ticketNumber, qty, winData) {
         if (!winData) return { won: false, total: 0, labels: [] };
@@ -1804,7 +2037,7 @@
         if (winData.prize4 && winData.prize4.includes(numStr)) { totalPrize += 40000; labels.push("รางวัลที่ 4"); }
         if (winData.prize5 && winData.prize5.includes(numStr)) { totalPrize += 20000; labels.push("รางวัลที่ 5"); }
         return { won: totalPrize > 0, total: totalPrize * qty, labels: [...new Set(labels)] };
-    }
+    };
 
     window.loadLotteryDataFromServer = function(drawName) {
       if(unsubListener) unsubListener(); if(!drawName) return;
@@ -1841,7 +2074,7 @@
             if(ticket.isFlashSale) cFlashSale++;
           });
           currentCounts['all'] = allTicketsList.length; currentCounts['empty'] = cEmpty; currentCounts['paid'] = cPaid; currentCounts['unpaid'] = cUnpaid; currentCounts['pending_slip'] = cPendingSlip; currentCounts['winners'] = cWinners; currentCounts['flashsale'] = cFlashSale;
-          ['all','empty','paid','unpaid','pending_slip','winners','flashsale'].forEach(k => window.updateTabBadge(k));
+          ;['all','empty','paid','unpaid','pending_slip','winners','flashsale'].forEach(k => window.updateTabBadge(k));
           
           document.getElementById('sum-buyers').innerText = totalBuyers + ' ท่าน'; 
           document.getElementById('sum-stock').innerText = stockQty.toLocaleString('th-TH') + ' ใบ'; 
@@ -1852,7 +2085,7 @@
           
           if(currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') window.renderTable(document.getElementById('search-input').value.trim());
         }, error => { console.error("Error:", error); });
-    }
+    };
 
     window.renderTable = function(filterText = '') {
       const body = document.getElementById('table-body'); body.innerHTML = ''; let list = allTicketsList;
@@ -1956,7 +2189,7 @@
         body.appendChild(tr);
       });
       document.getElementById('no-data').className = hasRows ? "hidden" : "block";
-    }
+    };
   </script>
 </body>
 </html>
