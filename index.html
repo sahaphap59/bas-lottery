@@ -576,7 +576,7 @@
     }
 
     window.sendLineNotify = function(msg) {
-        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้")) return;
+        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec")) return;
         fetch(GAS_NOTIFY_URL, { method: 'POST', body: JSON.stringify({ message: msg }) }).catch(e => console.log("Notify Error:", e));
     }
 
