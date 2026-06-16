@@ -2173,10 +2173,13 @@
                 soldQty += qty;
                 totalBuyers++; 
                 sumTotal += price; 
+                
+                // ย้ายการเช็คถูกรางวัลมาไว้ตรงนี้ เพื่อให้นับรวมทุกสถานะ (จอง, รอตรวจ, ชำระแล้ว)
+                if(ticket.prizeInfo && ticket.prizeInfo.won) cWinners++;
+
                 if(ticket.status === "ชำระแล้ว") {
                     cPaid++; 
                     sumPaid += price;
-                    if(ticket.prizeInfo && ticket.prizeInfo.won) cWinners++; 
                 } else {
                     cUnpaid++; 
                     sumUnpaid += price;
@@ -2202,7 +2205,8 @@
 
     window.renderTable = function(filterText = '') {
       const body = document.getElementById('table-body'); body.innerHTML = ''; let list = allTicketsList;
-      if(currentTab === 'empty') list = list.filter(x => x.name === "-" || x.name === ""); else if(currentTab === 'paid') list = list.filter(x => x.status === "ชำระแล้ว"); else if(currentTab === 'unpaid') list = list.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== ""); else if(currentTab === 'pending_slip') list = list.filter(x => x.status === "รอตรวจสอบสลิป"); else if(currentTab === 'winners') list = list.filter(x => x.prizeInfo && x.prizeInfo.won === true && x.status === "ชำระแล้ว"); else if(currentTab === 'flashsale') list = list.filter(x => x.isFlashSale === true);
+      // ปรับให้แท็บ "คนที่ถูกรางวัล" แสดงทุกคนที่ถูกรางวัล (รวมค้างชำระ)
+      if(currentTab === 'empty') list = list.filter(x => x.name === "-" || x.name === ""); else if(currentTab === 'paid') list = list.filter(x => x.status === "ชำระแล้ว"); else if(currentTab === 'unpaid') list = list.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== ""); else if(currentTab === 'pending_slip') list = list.filter(x => x.status === "รอตรวจสอบสลิป"); else if(currentTab === 'winners') list = list.filter(x => x.prizeInfo && x.prizeInfo.won === true && x.name !== "-" && x.name !== ""); else if(currentTab === 'flashsale') list = list.filter(x => x.isFlashSale === true);
       if (filterText) { const text = filterText.toLowerCase(); list = list.filter(item => String(item.number || "").includes(text) || String(item.name || "").toLowerCase().includes(text) || String(item.id || "").toLowerCase().includes(text)); }
       
       const sortVal = document.getElementById('sort-selector') ? document.getElementById('sort-selector').value : 'updated_desc';
@@ -2271,7 +2275,8 @@
         let statusBadge = isFree ? `<span class="bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-md font-bold text-xs">✨ ว่างแผง</span>` : `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1 rounded-md font-bold text-xs">${item.status}</span>`;
         if(!isFree && item.status === "ชำระแล้ว") statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-md font-bold text-xs">🟢 ชำระแล้ว</span>`;
         if(item.status === 'รอตรวจสอบสลิป') statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 px-3 py-1 rounded-md font-black text-xs animate-pulse">⏳ รอตรวจสอบสลิป</span>`;
-        if(item.prizeInfo && item.prizeInfo.won && item.status === "ชำระแล้ว") { statusBadge += `<br><div class="mt-2 inline-block gold-gradient-anim text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md border border-yellow-400">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`; }
+        // ปรับให้ป้ายถูกรางวัลแสดงกับทุกคนที่ไม่ใช่แผงว่าง
+        if(item.prizeInfo && item.prizeInfo.won && !isFree) { statusBadge += `<br><div class="mt-2 inline-block gold-gradient-anim text-slate-900 px-3 py-1.5 rounded-lg text-xs font-black shadow-md border border-yellow-400">🎉 ถูกรางวัล<br>ยอดจ่าย: ฿${item.prizeInfo.total.toLocaleString()}</div>`; }
         if(item.status === 'จอง' && item.expiresAt) { statusBadge += `<br><span class="admin-timer text-[10px] text-rose-500 font-bold block mt-1" data-expire="${item.expiresAt}">กำลังโหลดเวลา...</span>`; }
         if(item.isFlashSale) { statusBadge += `<br><div class="mt-1 inline-block bg-amber-500 text-white px-2 py-0.5 rounded text-[10px] font-bold">⚡ Flash Sale</div>`; }
 
