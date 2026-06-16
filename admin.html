@@ -1239,7 +1239,7 @@
         });
     };
 
-    window.startAdminCountdown = function() {
+        window.startAdminCountdown = function() {
         setInterval(() => {
             const now = Date.now();
             document.querySelectorAll('.admin-timer').forEach(el => {
@@ -1255,12 +1255,41 @@
         }, 1000);
     };
 
-    window.exportToExcel = function() {
+    window.exportToExcel = async function() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดที่ต้องการดึงรายงานก่อนครับ', 'warning');
         
+        // 1. สร้างหน้าต่างตัวเลือกให้แอดมิน
+        const { value: reportType } = await Swal.fire({
+            title: '📊 โหลดรายงาน (Excel)',
+            text: 'กรุณาเลือกประเภทข้อมูลที่ต้องการส่งออก',
+            input: 'select',
+            inputOptions: {
+                'all': '🌐 ทั้งหมด (ชำระแล้ว + ค้างชำระ)',
+                'paid': '🟢 เฉพาะยอดชำระแล้ว',
+                'unpaid': '🔴 เฉพาะยอดค้างชำระ/จอง',
+                'pending_slip': '⏳ เฉพาะรอตรวจสลิป',
+                'winners': '🎉 เฉพาะคนที่ถูกรางวัล'
+            },
+            inputPlaceholder: '-- เลือกประเภทรายงาน --',
+            showCancelButton: true,
+            confirmButtonText: 'ดาวน์โหลด',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#16a34a'
+        });
+
+        if (!reportType) return; // ยกเลิกการโหลดหากไม่เลือก
+
+        // 2. แปลงชื่อประเภทเพื่อนำไปแสดงในหัวตาราง
+        let reportTypeName = "";
+        if(reportType === 'all') reportTypeName = "ออเดอร์ทั้งหมด";
+        if(reportType === 'paid') reportTypeName = "ชำระแล้ว";
+        if(reportType === 'unpaid') reportTypeName = "ค้างชำระและจอง";
+        if(reportType === 'pending_slip') reportTypeName = "รอตรวจสลิป";
+        if(reportType === 'winners') reportTypeName = "ผู้ถูกรางวัล";
+
         let table = `<table border="1">
             <thead>
-                <tr><th colspan="7" style="font-size: 20px; font-weight: bold; text-align:center;">รายงานยอดขายลอตเตอรี่ งวด: ${currentSelectedSheet}</th></tr>
+                <tr><th colspan="7" style="font-size: 20px; font-weight: bold; text-align:center;">รายงานยอดขายลอตเตอรี่ งวด: ${currentSelectedSheet} (${reportTypeName})</th></tr>
                 <tr>
                     <th style="background-color: #f1f5f9;">รหัสออเดอร์</th>
                     <th style="background-color: #f1f5f9;">หมายเลขสลาก</th>
@@ -1274,28 +1303,43 @@
             <tbody>`;
         
         let tQty = 0, tPrice = 0;
-        allTicketsList.forEach(t => {
-            if(t.name !== "-" && t.name !== "") {
-                let price = t.isFlashSale && t.flashSalePrice ? parseInt(t.flashSalePrice) : (parseInt(t.quantity)*100);
-                let numStr = String(t.number).padStart(6, '0');
-                
-                table += `<tr>
-                    <td>${t.id}</td>
-                    <td style='mso-number-format:"\\@";'>${numStr}</td>
-                    <td>${t.name}</td>
-                    <td style='mso-number-format:"\\@";'>${t.email || ''}</td>
-                    <td style="text-align:center;">${t.quantity}</td>
-                    <td style="text-align:right;">${price}</td>
-                    <td style="text-align:center;">${t.status}</td>
-                </tr>`;
-                tQty += parseInt(t.quantity);
-                tPrice += price;
-            }
+        
+        // 3. กรองข้อมูลสลาก (ตัดแผงว่างทิ้งก่อนเสมอ)
+        let filteredList = allTicketsList.filter(t => t.name !== "-" && t.name !== "");
+
+        // 4. กรองข้อมูลตามที่แอดมินเลือก
+        if (reportType === 'paid') {
+            filteredList = filteredList.filter(t => t.status === 'ชำระแล้ว');
+        } else if (reportType === 'unpaid') {
+            filteredList = filteredList.filter(t => t.status !== 'ชำระแล้ว');
+        } else if (reportType === 'pending_slip') {
+            filteredList = filteredList.filter(t => t.status === 'รอตรวจสอบสลิป');
+        } else if (reportType === 'winners') {
+            filteredList = filteredList.filter(t => t.prizeInfo && t.prizeInfo.won === true);
+        }
+
+        // 5. นำข้อมูลที่กรองมาลงในตาราง Excel
+        filteredList.forEach(t => {
+            let price = t.isFlashSale && t.flashSalePrice ? parseInt(t.flashSalePrice) : (parseInt(t.quantity)*100);
+            let numStr = String(t.number).padStart(6, '0');
+            
+            table += `<tr>
+                <td>${t.id}</td>
+                <td style='mso-number-format:"\\@";'>${numStr}</td>
+                <td>${t.name}</td>
+                <td style='mso-number-format:"\\@";'>${t.email || ''}</td>
+                <td style="text-align:center;">${t.quantity}</td>
+                <td style="text-align:right;">${price}</td>
+                <td style="text-align:center;">${t.status}</td>
+            </tr>`;
+            tQty += parseInt(t.quantity);
+            tPrice += price;
         });
         
-        table += `<tr><td colspan="4" align="right" style="font-weight:bold;">รวมยอดขายทั้งหมด</td><td style="text-align:center; font-weight:bold;">${tQty}</td><td style="text-align:right; font-weight:bold; color:green;">${tPrice}</td><td></td></tr>`;
+        table += `<tr><td colspan="4" align="right" style="font-weight:bold;">รวมยอดทั้งหมด</td><td style="text-align:center; font-weight:bold;">${tQty}</td><td style="text-align:right; font-weight:bold; color:green;">${tPrice}</td><td></td></tr>`;
         table += `</tbody></table>`;
         
+        // 6. แปลงเป็นไฟล์ และตั้งชื่อไฟล์ตามประเภทข้อมูล
         const uri = 'data:application/vnd.ms-excel;base64,';
         const template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>{table}</body></html>';
         const base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) };
@@ -1304,7 +1348,7 @@
         const ctx = { worksheet: 'Report', table: table };
         const link = document.createElement("a");
         link.href = uri + base64(format(template, ctx));
-        link.download = `รายงานยอดขาย_${currentSelectedSheet}.xls`;
+        link.download = `รายงาน_${reportTypeName}_${currentSelectedSheet}.xls`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
