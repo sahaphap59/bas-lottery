@@ -134,6 +134,10 @@
             <button onclick="window.switchTab('empty')" id="tab-empty" class="tab-btn text-slate-600 hover:bg-white relative">🎟️ ยังไม่มีผู้ซื้อ <span id="badge-empty" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-slate-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="window.switchTab('paid')" id="tab-paid" class="tab-btn text-slate-600 hover:bg-white relative">🟢 ชำระแล้ว <span id="badge-paid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="window.switchTab('unpaid')" id="tab-unpaid" class="tab-btn text-slate-600 hover:bg-white relative">🔴 ค้างชำระ/จอง <span id="badge-unpaid" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-rose-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm animate-pulse flex items-center justify-center">0</span></button>
+            
+            <!-- ✅ แถบเมนูสรุปยอดค้าง (ใหม่) -->
+            <button onclick="window.switchTab('unpaid_summary')" id="tab-unpaid_summary" class="tab-btn text-slate-600 hover:bg-white relative">📝 สรุปยอดค้าง (รายคน)</button>
+            
             <button onclick="window.switchTab('pending_slip')" id="tab-pending_slip" class="tab-btn text-slate-600 hover:bg-white relative">⏳ รอตรวจสลิป <span id="badge-pending_slip" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-blue-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center animate-pulse">0</span></button>
             <button onclick="window.switchTab('winners')" id="tab-winners" class="tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative ml-2">🎉 คนที่ถูกรางวัล <span id="badge-winners" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-yellow-600 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
             <button onclick="window.switchTab('flashsale')" id="tab-flashsale" class="tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2">⚡ คลัง Flash Sale <span id="badge-flashsale" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-amber-500 text-white rounded-full text-[10px] font-black border border-white shadow-sm flex items-center justify-center">0</span></button>
@@ -1372,7 +1376,9 @@
     window.listenToStorefrontSettings = function() { 
         db.collection('settings').doc('design').onSnapshot(doc => {
             if(doc.exists && doc.data().ticketBgUrl) { globalTicketBg = doc.data().ticketBgUrl; } else { globalTicketBg = ""; }
-            if(currentSelectedSheet && currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') window.renderTable(document.getElementById('search-input').value.trim());
+            
+            if(currentTab === 'unpaid_summary') window.renderUnpaidSummaryTable(document.getElementById('search-input').value.trim());
+            else if(currentSelectedSheet && currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') window.renderTable(document.getElementById('search-input').value.trim());
         });
         db.collection('settings').doc('storefront').onSnapshot(doc => { 
             const data = doc.exists ? doc.data() : {}; const activeDraw = data.activeDraw || "ยังไม่ได้ตั้งค่า"; 
@@ -1729,13 +1735,14 @@
     window.switchTab = function(t) { 
         currentTab = t; seenCounts[t] = currentCounts[t]; window.updateTabBadge(t);
         
-        ;['all','empty','paid','unpaid','pending_slip','winners','flashsale','chats'].forEach(k => { 
+        ;['all','empty','paid','unpaid','unpaid_summary','pending_slip','winners','flashsale','chats'].forEach(k => { 
             const btn = document.getElementById('tab-'+k); 
             if(!btn) return;
             if(k === 'winners') { btn.className = (k===t) ? "tab-btn gold-gradient-anim font-black shadow-inner border border-yellow-500 scale-105 transform relative ml-2" : "tab-btn gold-gradient-anim font-black shadow-sm opacity-80 hover:opacity-100 transition relative ml-2"; } 
             else if (k === 'flashsale') { btn.className = (k===t) ? "tab-btn text-amber-900 bg-amber-200 border border-amber-400 shadow-inner relative ml-2" : "tab-btn text-amber-700 bg-amber-100/50 hover:bg-amber-100 border border-amber-200 relative ml-2"; }
             else if (k === 'pending_slip') { btn.className = (k===t) ? "tab-btn text-blue-900 bg-blue-200 border border-blue-400 shadow-inner relative" : "tab-btn text-slate-600 hover:bg-white relative"; }
             else if (k === 'chats') { btn.className = (k===t) ? "tab-btn text-purple-900 bg-purple-200 border border-purple-400 shadow-inner relative ml-2 font-bold" : "tab-btn text-purple-700 bg-purple-100/50 hover:bg-purple-100 border border-purple-200 relative ml-2 font-bold transition"; }
+            else if (k === 'unpaid_summary') { btn.className = (k===t) ? "tab-btn text-rose-900 bg-rose-200 border border-rose-400 shadow-inner relative" : "tab-btn text-slate-600 hover:bg-white relative"; }
             else { btn.className = (k===t) ? "tab-btn tab-active relative" : "tab-btn text-slate-600 hover:bg-white relative"; } 
         }); 
         document.getElementById('tab-crm').className = (t === 'crm') ? "tab-btn text-white bg-indigo-600 font-bold ml-2 shadow-inner relative" : "tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative"; 
@@ -1763,6 +1770,12 @@
             } else if (t === 'withdraw') { 
                 document.getElementById('sort-selector').style.display = 'none';
                 window.loadWithdrawalsCRM(); 
+            } else if (t === 'unpaid_summary') {
+                document.getElementById('sort-selector').style.display = 'none';
+                document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">ลำดับ</th><th class="py-4 px-6">ชื่อลูกค้า (กรรมสิทธิ์)</th><th class="py-4 px-4 text-center">เบอร์โทรติดต่อ</th><th class="py-4 px-4 text-center">รวมจำนวนใบ</th><th class="py-4 px-6 text-right">ยอดค้างชำระรวม</th><th class="py-4 px-4 text-center">จัดการ</th></tr>`;
+                document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า...";
+                document.getElementById('search-input').value = "";
+                window.renderUnpaidSummaryTable();
             } else { 
                 document.getElementById('sort-selector').style.display = 'block';
                 document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">No.</th><th class="py-4 px-4 text-center">สลากดิจิทัล</th><th class="py-4 px-6">ชื่อกรรมสิทธิ์ผู้ซื้อ</th><th class="py-4 px-4 text-center">จำนวน</th><th class="py-4 px-6 text-right">ยอดชำระ</th><th class="py-4 px-4 text-center">สถานะ</th><th class="py-4 px-4 text-center">แผงควบคุม</th></tr>`; 
@@ -1781,9 +1794,88 @@
                 if(row.innerText.toLowerCase().includes(text)) row.style.display = ''; 
                 else row.style.display = 'none'; 
             }); 
+        } else if (currentTab === 'unpaid_summary') {
+            window.renderUnpaidSummaryTable(document.getElementById('search-input').value.trim());
         } else { 
             window.renderTable(document.getElementById('search-input').value.trim()); 
         } 
+    };
+
+    window.renderUnpaidSummaryTable = function(filterText = '') {
+        const body = document.getElementById('table-body');
+        body.innerHTML = '';
+        
+        let unpaidList = allTicketsList.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== "");
+        let grouped = {};
+        
+        unpaidList.forEach(item => {
+            let name = item.name.trim();
+            if (!grouped[name]) {
+                grouped[name] = {
+                    name: name,
+                    phone: item.email || '-', 
+                    totalQty: 0,
+                    totalAmount: 0,
+                    tickets: []
+                };
+            }
+            let qty = parseInt(item.quantity) || 1;
+            let price = item.isFlashSale && item.flashSalePrice ? parseInt(item.flashSalePrice) : (qty * 100);
+            
+            grouped[name].totalQty += qty;
+            grouped[name].totalAmount += price;
+            grouped[name].tickets.push(String(item.number).padStart(6, '0'));
+        });
+
+        let list = Object.values(grouped);
+        
+        if (filterText) {
+            const text = filterText.toLowerCase();
+            list = list.filter(item => item.name.toLowerCase().includes(text));
+        }
+
+        // เรียงลำดับตามยอดเงินค้างชำระ (มากไปน้อย)
+        list.sort((a, b) => b.totalAmount - a.totalAmount);
+
+        let displayCounter = 1;
+        let hasRows = false;
+        
+        list.forEach(item => {
+            hasRows = true;
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+            
+            // ข้อความสรุปสำหรับคัดลอกส่งให้ลูกค้า
+            let summaryText = `🔔 แจ้งยอดค้างชำระ สลากฯออนไลน์\nชื่อ: ${item.name}\nจำนวน: ${item.totalQty} ใบ\nเลขที่จอง: ${item.tickets.join(', ')}\n\nยอดโอนสุทธิ: ${item.totalAmount} บาท`;
+            let safeSummary = encodeURIComponent(summaryText);
+            
+            let btnView = `<button onclick="document.getElementById('search-input').value='${item.name}'; window.switchTab('unpaid');" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm mb-1 w-full">🔍 ดูสลากที่จอง</button>`;
+            let btnCopy = `<button onclick="window.copyToClipboardText(decodeURIComponent('${safeSummary}'))" class="bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm w-full flex items-center justify-center gap-1"><i class="fa-regular fa-copy"></i> คัดลอกยอดส่งลูกค้า</button>`;
+            
+            let actionHtml = `<div class="flex flex-col gap-1 items-center justify-center w-[160px] mx-auto">${btnView}${btnCopy}</div>`;
+
+            tr.innerHTML = `
+                <td class="py-3 px-4 text-center text-slate-400 font-mono text-xs">${displayCounter++}</td>
+                <td class="py-3 px-6 font-bold text-slate-800 text-sm">${item.name}</td>
+                <td class="py-3 px-4 text-center font-bold text-indigo-600">${item.phone}</td>
+                <td class="py-3 px-4 text-center font-bold text-slate-600">${item.totalQty} ใบ</td>
+                <td class="py-3 px-6 text-right font-black text-rose-600 text-base">฿${item.totalAmount.toLocaleString()}</td>
+                <td class="py-3 px-4 text-center">${actionHtml}</td>
+            `;
+            body.appendChild(tr);
+        });
+
+        document.getElementById('no-data').className = hasRows ? "hidden" : "block";
+    };
+
+    window.copyToClipboardText = function(text) {
+        const el = document.createElement('textarea'); 
+        el.value = text; 
+        document.body.appendChild(el); 
+        el.select(); 
+        document.execCommand('copy'); 
+        document.body.removeChild(el);
+        Swal.fire({toast: true, position: 'top-end', title: 'คัดลอกข้อความสรุปยอดแล้ว', icon: 'success', timer: 1500, showConfirmButton: false});
     };
 
     window.loadWithdrawalsCRM = function() {
@@ -2042,7 +2134,7 @@
       });
     };
 
-    window.onSheetChange = function() { currentSelectedSheet = document.getElementById('sheet-selector').value; if (currentTab === 'crm' || currentTab === 'withdraw' || currentTab === 'chats') window.switchTab('all'); document.getElementById('search-input').value = ""; db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => { currentWinData = doc.exists ? doc.data() : null; window.loadLotteryDataFromServer(currentSelectedSheet); }); };
+    window.onSheetChange = function() { currentSelectedSheet = document.getElementById('sheet-selector').value; if (currentTab === 'crm' || currentTab === 'withdraw' || currentTab === 'chats' || currentTab === 'unpaid_summary') window.switchTab('all'); document.getElementById('search-input').value = ""; db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => { currentWinData = doc.exists ? doc.data() : null; window.loadLotteryDataFromServer(currentSelectedSheet); }); };
 
     window.checkWinningPrize = function(ticketNumber, qty, winData) {
         if (!winData) return { won: false, total: 0, labels: [] };
@@ -2103,7 +2195,8 @@
           document.getElementById('sum-paid').innerText = '฿' + sumPaid.toLocaleString('th-TH'); 
           document.getElementById('sum-unpaid').innerText = '฿' + sumUnpaid.toLocaleString('th-TH');
           
-          if(currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') window.renderTable(document.getElementById('search-input').value.trim());
+          if(currentTab === 'unpaid_summary') window.renderUnpaidSummaryTable(document.getElementById('search-input').value.trim());
+          else if(currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') window.renderTable(document.getElementById('search-input').value.trim());
         }, error => { console.error("Error:", error); });
     };
 
