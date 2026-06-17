@@ -1277,25 +1277,37 @@
         if (finalPrice > 0 && slipFile && SLIP2GO_API_KEY !== "ใส่_API_KEY_SLIP2GO_ตรงนี้") {
             try {
                 let formData = new FormData();
-                formData.append('files', slipFile);
-                let response = await fetch('https://api.slip2go.com/api/v1/verify', {
+                formData.append('file', slipFile); // Slip2Go ใช้ชื่อฟิลด์ 'file' ในการรับรูปภาพ
+                
+                let response = await fetch('https://api.slip2go.com/api/verify-slip/qr-image/info', {
                     method: 'POST',
-                    headers: { 'x-authorization': SLIP2GO_API_KEY },
+                    headers: { 
+                        'Authorization': `Bearer ${SLIP2GO_API_KEY}`
+                    },
                     body: formData
                 });
+                
                 let result = await response.json();
-                if (result.success && result.data && result.data.success) {
-                    let slipData = result.data.data;
-                    if (slipData.amount === finalPrice) {
+                
+                if (response.ok && result.data) {
+                    let slipData = result.data;
+                    let slipAmount = parseFloat(slipData.amount);
+                    
+                    if (!isNaN(slipAmount) && slipAmount === finalPrice) {
                         slipStatus = 'sold'; 
+                    } else if (!isNaN(slipAmount)) {
+                        Swal.close();
+                        return Swal.fire('ยอดเงินไม่ตรง', `ยอดเงินในสลิป ฿${slipAmount} แต่ยอดที่ต้องชำระคือ ฿${finalPrice}`, 'error');
                     } else {
-                        return Swal.fire('ยอดเงินไม่ตรง', 'ยอดเงินในสลิปไม่ตรงกับยอดที่ต้องชำระ กรุณาตรวจสอบอีกครั้ง', 'error');
+                        throw new Error("Amount missing");
                     }
                 } else {
-                    return Swal.fire('สลิปไม่ถูกต้อง', 'ไม่สามารถตรวจสอบสลิปได้ หรือสลิปอาจเป็นของปลอม', 'error');
+                    Swal.close();
+                    return Swal.fire('สลิปไม่ถูกต้อง', result.message || 'สลิปนี้ปลอม/ซ้ำ หรือไม่สามารถอ่าน QR Code ได้', 'error');
                 }
             } catch(e) {
                 console.error("Slip2go error:", e);
+                // หาก API ขัดข้อง ระบบจะปรับสถานะเป็น "รอตรวจสอบสลิป" ให้แอดมินมาตรวจเอง
                 slipStatus = 'รอตรวจสอบสลิป';
             }
         } else if (finalPrice === 0) {
