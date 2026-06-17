@@ -590,7 +590,7 @@
     }
 
     window.sendLineNotify = function(msg) {
-        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec")) return;
+        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้")) return;
         fetch(GAS_NOTIFY_URL, { 
             method: 'POST', 
             mode: 'no-cors', // 👈 ป้องกันเบราว์เซอร์บล็อก
@@ -606,7 +606,7 @@
     }
 
     window.sendCustomerPushMessage = function(userId, message) {
-        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec")) return;
+        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("ใส่_URL")) return;
         fetch(GAS_NOTIFY_URL, {
             method: 'POST',
             body: JSON.stringify({ action: "push", userId: userId, message: message })
@@ -1276,22 +1276,54 @@
         
         if (finalPrice > 0 && slipFile && SLIP2GO_API_KEY !== "ใส่_API_KEY_SLIP2GO_ตรงนี้") {
             try {
-                let formData = new FormData();
-                formData.append('file', slipFile); // Slip2Go ใช้ชื่อฟิลด์ 'file' ในการรับรูปภาพ
+                // 1. ให้เบราว์เซอร์สแกนหา QR Code จากสลิปก่อน (วิธีนี้เร็วและตรงตามคู่มือเป๊ะที่สุด)
+                let qrCodePayload = null;
+                let tempDiv = document.createElement('div');
+                tempDiv.id = "temp-qr-reader-" + Date.now();
+                tempDiv.style.display = "none";
+                document.body.appendChild(tempDiv);
                 
-                let response = await fetch('https://api.slip2go.com/api/verify-slip/qr-image/info', {
-                    method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${SLIP2GO_API_KEY}`
-                    },
-                    body: formData
-                });
+                try {
+                    let scanner = new Html5Qrcode(tempDiv.id);
+                    qrCodePayload = await scanner.scanFile(slipFile, false);
+                } catch(e) {
+                    console.log("Client QR decode failed, falling back to image upload");
+                } finally {
+                    if(document.body.contains(tempDiv)) { document.body.removeChild(tempDiv); }
+                }
+
+                let response;
+                let result;
                 
-                let result = await response.json();
+                if (qrCodePayload) {
+                    // แบบที่ 1: ตรวจสอบด้วย QR Code (ตามคู่มือเป๊ะๆ)
+                    response = await fetch('https://api.slip2go.com/api/verify-slip/qr-code/info', {
+                        method: 'POST',
+                        headers: { 
+                            'Authorization': `Bearer ${SLIP2GO_API_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ payload: { qrCode: qrCodePayload } })
+                    });
+                    result = await response.json();
+                } else {
+                    // แบบที่ 2: สำรองโยนไฟล์ภาพไปให้ระบบเช็คให้
+                    let formData = new FormData();
+                    formData.append('files', slipFile); 
+                    response = await fetch('https://api.slip2go.com/api/verify-slip/image/info', {
+                        method: 'POST',
+                        headers: { 
+                            'Authorization': `Bearer ${SLIP2GO_API_KEY}`
+                        },
+                        body: formData
+                    });
+                    result = await response.json();
+                }
                 
+                // ตรวจสอบความถูกต้องของสลิปที่ส่งกลับมา
                 if (response.ok && result.data) {
                     let slipData = result.data;
-                    let slipAmount = parseFloat(slipData.amount);
+                    let slipAmount = parseFloat(slipData.amount || slipData.transAmount);
                     
                     if (!isNaN(slipAmount) && slipAmount === finalPrice) {
                         slipStatus = 'sold'; 
@@ -1303,7 +1335,8 @@
                     }
                 } else {
                     Swal.close();
-                    return Swal.fire('สลิปไม่ถูกต้อง', result.message || 'สลิปนี้ปลอม/ซ้ำ หรือไม่สามารถอ่าน QR Code ได้', 'error');
+                    let errMsg = result.message || (result.error && result.error.message) || 'สลิปนี้ซ้ำ/ปลอม หรือระบบไม่สามารถอ่านข้อมูลได้';
+                    return Swal.fire('สลิปไม่ถูกต้อง', errMsg, 'error');
                 }
             } catch(e) {
                 console.error("Slip2go error:", e);
