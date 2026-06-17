@@ -7,10 +7,9 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Prompt:wght@300;400;500;600;700;800&family=Libre+Barcode+39&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
@@ -53,6 +52,9 @@
     .coin-box { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #fbbf24; border-radius: 12px; padding: 12px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5); }
     .chat-scroll::-webkit-scrollbar { width: 4px; }
     .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    
+    @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+    .animate-\\[marquee_15s_linear_infinite\\] { animation: marquee 15s linear infinite; }
   </style>
 </head>
 <body class="pb-32">
@@ -70,12 +72,6 @@
     </div>
   </header>
 
-  <style>
-    @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-    .animate-\\[marquee_15s_linear_infinite\\] { animation: marquee 15s linear infinite; }
-  </style>
-
-  <!-- ตะกร้าสินค้าแบบลอย (โชว์ตลอดเวลา) -->
   <div id="floating-cart" onclick="openPaymentModal()" class="hidden fixed bottom-[160px] right-4 z-40 flex-col items-center cursor-pointer animate-bounceIn transition-transform active:scale-95">
       <div class="bg-[#d31a1a] w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(211,26,26,0.4)] border-2 border-white relative transition-transform hover:scale-105">
           <i class="fa-solid fa-shopping-cart text-white text-xl mt-0.5"></i>
@@ -84,7 +80,6 @@
       <div id="cart-timer" class="hidden mt-1 bg-yellow-300 text-amber-900 text-[9px] font-black px-2.5 py-0.5 rounded-full border border-yellow-400 shadow-sm whitespace-nowrap">00:00</div>
   </div>
 
-  <!-- ปุ่มแชทลอย -->
   <div id="floating-chat" onclick="startChatPrompt()" class="fixed bottom-[85px] right-4 z-40 flex flex-col items-center cursor-pointer animate-bounceIn transition-transform active:scale-95">
       <div class="bg-white text-purple-600 font-bold text-[9px] px-2 py-0.5 rounded-md shadow-sm mb-1 border border-purple-100 whitespace-nowrap">💬 แชทแอดมิน</div>
       <div class="bg-purple-600 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(147,51,234,0.4)] border-2 border-white transition-transform hover:scale-105">
@@ -185,6 +180,7 @@
     </main>
   </div>
 
+  <!-- แถบยืนยันโอนเงินแบบทีละหลายใบ -->
   <div id="bulk-pay-bar" class="hidden fixed bottom-[58px] left-0 right-0 max-w-md mx-auto bg-white border-t border-red-200 p-3 flex justify-between items-center z-30 shadow-[0_-4px_15px_rgba(211,26,26,0.15)]">
      <div class="text-sm font-bold text-gray-700 leading-tight">เลือกแล้ว <span id="bulk-count" class="text-[#d31a1a] text-lg">0</span> ใบ<br>รวม: <span id="bulk-total" class="text-[#d31a1a] text-xl font-black tracking-wide">฿0</span></div>
      <button onclick="processBulkPayment()" id="btn-bulk-pay" class="bg-[#d31a1a] text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:bg-red-700 transition opacity-50 pointer-events-none">📸 แจ้งโอนทีเดียว</button>
@@ -366,9 +362,17 @@
         </div>
     </div>
 
-    <input type="text" id="copy-helper" class="absolute -left-[9999px]">
+  <input type="text" id="copy-helper" class="absolute -left-[9999px]">
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
   <script>
+    // ตรวจสอบการโหลด Firebase ป้องกัน Error "firebase is not defined"
+    if (typeof firebase === 'undefined') {
+        alert("ระบบไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณารีเฟรชหน้าเว็บอีกครั้งครับ");
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyCjlBUSa8LEL4j7ORix2p9piAnBU8hvvCY",
       authDomain: "bas-lottery.firebaseapp.com",
@@ -380,7 +384,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const LIFF_ID = "2010226176-jm6lSL41"; 
-    const GAS_NOTIFY_URL = "ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้";
+    const GAS_NOTIFY_URL = "https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec";
 
     window.generateUUID = function() { return 'user_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); };
 
@@ -518,7 +522,6 @@
         const userRef = db.collection('users').doc(profile.userId);
         const doc = await userRef.get();
         if (!doc.exists || !doc.data().consentGiven) {
-            // 🛠️ แก้ไข: เติม return เข้าไป เพื่อให้ระบบรอจนกว่าลูกค้าจะกดยอมรับเงื่อนไขจริงๆ แล้วค่อยรันโค้ดแจก Coin ด้านล่าง
             return Swal.fire({
                 title: 'ข้อตกลงและเงื่อนไขการใช้บริการ',
                 html: `<div class="text-left text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200"><p class="font-bold text-rose-600">กรุณาอ่านและกดยอมรับก่อนใช้งาน</p><p class="flex items-start gap-2"><span>1.</span><span>ข้าพเจ้ายืนยันว่ามีอายุ <strong>20 ปีบริบูรณ์ขึ้นไป</strong></span></p><p class="flex items-start gap-2"><span>2.</span><span>ข้าพเจ้ารับทราบและยินยอมให้คิดราคาสลาก <strong>80 บาท</strong> และมีค่าบริการฝากจัดเก็บ/ดำเนินการ <strong>20 บาท</strong> (รวมชำระ 100 บาท/ใบ)</span></p><p class="flex items-start gap-2"><span>3.</span><span>ข้าพเจ้ายินยอมให้ระบบบันทึกข้อมูลเพื่อใช้ในการขึ้นเงินรางวัล</span></p></div>`,
@@ -534,7 +537,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         let refId = urlParams.get('ref');
 
-        // 🛠️ แก้ไข: ดักจับกรณีที่ LINE LIFF ซ่อน URL ของคนแนะนำเอาไว้ใน liff.state
         if(!refId) {
             const liffState = urlParams.get('liff.state');
             if(liffState && liffState.includes('ref=')) {
@@ -548,7 +550,6 @@
                 const data = doc.exists ? doc.data() : {};
                 if(!data.referredBy) {
                     userRef.set({ referredBy: refId }, { merge: true });
-                    // 🛠️ แก้ไข: เปลี่ยนเป็น set + merge เพื่อรับประกันการเขียน Database
                     db.collection('users').doc(refId).set({ coins: firebase.firestore.FieldValue.increment(5) }, { merge: true });
                     db.collection('users').doc(profile.userId).set({ coins: firebase.firestore.FieldValue.increment(5) }, { merge: true });
                     Swal.fire({title: '🎉 ยินดีต้อนรับ!', text: 'คุณได้รับ 5 Coin จากการแนะนำของเพื่อน!', icon: 'success', confirmButtonColor: '#d31a1a'});
@@ -576,7 +577,7 @@
     }
 
     window.sendLineNotify = function(msg) {
-        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec")) return;
+        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้")) return;
         fetch(GAS_NOTIFY_URL, { method: 'POST', body: JSON.stringify({ message: msg }) }).catch(e => console.log("Notify Error:", e));
     }
 
@@ -1235,25 +1236,98 @@
 
         if(finalPrice > 0 && !slipFile) { return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาแนบรูปสลิปการโอนเงินด้วยครับ', 'warning'); }
 
-        Swal.fire({title: 'กำลังส่งข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+        Swal.fire({title: 'กำลังตรวจสอบสลิป...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
         let slipBase64 = null;
-        if(finalPrice > 0 && slipFile) { slipBase64 = await handleFileSelection('slip-file'); }
+        
+        if(finalPrice > 0 && slipFile) { 
+            slipBase64 = await handleFileSelection('slip-file'); 
+            
+            // --- Slip2go API Verification ---
+            const SLIP2GO_API_KEY = "8ZQWVx+JpIQjyIMEfz8x+Az1qkBYe0OZSdgbBDjK1e0=";
+            
+            try {
+                let base64Data = slipBase64.split(',')[1];
+                
+                const response = await fetch('https://api.slipok.com/api/line/branch/slip/verify', {
+                    method: 'POST',
+                    headers: {
+                        'x-authorization': SLIP2GO_API_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ data: base64Data })
+                });
+                
+                const result = await response.json();
+                
+                // ตรวจสอบสถานะการตรวจสอบสลิป
+                if (response.ok && result.success) {
+                    let slipAmount = parseFloat(result.data.amount);
+                    if (slipAmount < finalPrice) {
+                        return Swal.fire('ยอดเงินไม่ถูกต้อง', `ยอดในสลิป (฿${slipAmount}) ไม่ตรงกับยอดที่ต้องชำระ (฿${finalPrice})`, 'error');
+                    }
+                    // หมายเหตุ: สามารถเพิ่มเช็คผล result.data.receiver.account ได้ถ้ารู้เลขบัญชีร้าน
+                } else {
+                    // หาก API แจ้งว่าสลิปปลอม หรือไม่สำเร็จ
+                    throw new Error("สลิปไม่ถูกต้อง หรือเซิร์ฟเวอร์ปฏิเสธการตรวจสอบ");
+                }
+            } catch (err) {
+                console.log("ระบบตรวจสลิปอัตโนมัติขัดข้อง:", err);
+                
+                // --- ระบบสำรอง (Fallback): สลับเป็นระบบแอดมินตรวจมือ (Manual) ---
+                const batch = db.batch();
+                ids.forEach(id => {
+                    batch.update(db.collection('lotteries').doc(id), {
+                        status: 'รอตรวจสอบสลิป', slip: slipBase64, discountCoins: coinsUsed > 0 ? coinsUsed : null, updatedAt: Date.now()
+                    });
+                });
+                if(coinsUsed > 0) { batch.update(db.collection('users').doc(userProfile.userId), { coins: firebase.firestore.FieldValue.increment(-coinsUsed) }); }
+                await batch.commit();
 
+                sendLineNotify(`🔔 แจ้งโอนเงินใหม่ (รอตรวจสลิป)!\nจำนวน: ${ids.length} ใบ\nยอดโอน: ฿${finalPrice}\nจาก: ${userProfile.displayName}`); 
+                sendLiffMessage(`📸 คุณได้ส่งสลิปชำระเงินเรียบร้อยแล้ว\nแอดมินกำลังตรวจสอบสักครู่นะครับ`);
+                
+                return Swal.fire('ส่งสลิปสำเร็จ!', 'ระบบส่งสลิปให้แอดมินตรวจสอบแล้วครับ (เนื่องจากระบบตรวจอัตโนมัติขัดข้อง)', 'success').then(() => {
+                    closePaymentModal(); switchTab('orders'); setOrderTab('pending');
+                });
+            }
+            
+            // --- ผ่านด่านตรวจสอบ Slip2go: อนุมัติสลิปอัตโนมัติ ---
+            const batch = db.batch();
+            ids.forEach(id => {
+                batch.update(db.collection('lotteries').doc(id), {
+                    status: 'sold', slip: slipBase64, discountCoins: coinsUsed > 0 ? coinsUsed : null, updatedAt: Date.now()
+                });
+            });
+            
+            let coinsEarned = ids.length; // ได้รับ Coin คืน 1 Coin / 1 ใบ
+            if(coinsUsed > 0) { 
+                batch.update(db.collection('users').doc(userProfile.userId), { coins: firebase.firestore.FieldValue.increment(coinsEarned - coinsUsed) }); 
+            } else {
+                batch.update(db.collection('users').doc(userProfile.userId), { coins: firebase.firestore.FieldValue.increment(coinsEarned) });
+            }
+            
+            await batch.commit();
+
+            sendLineNotify(`🔔 ลูกค้าโอนเงิน (ยืนยันสลิปอัตโนมัติ)!\nจำนวน: ${ids.length} ใบ\nยอดโอน: ฿${finalPrice}\nจาก: ${userProfile.displayName}`); 
+            sendLiffMessage(`🎉 ยืนยันการชำระเงินสำเร็จ!\nระบบตรวจสลิปอัตโนมัติ คุณได้รับ +${coinsEarned} Coin เรียบร้อยแล้ว`);
+            return Swal.fire('ชำระเงินสำเร็จ!', 'ระบบตรวจสอบสลิปและอนุมัติออเดอร์เรียบร้อยแล้วครับ', 'success').then(() => {
+                closePaymentModal(); switchTab('orders'); setOrderTab('success');
+            });
+        }
+
+        // --- กรณีจ่ายด้วย Coin ทั้งหมด (ฟรี) ---
         const batch = db.batch();
         ids.forEach(id => {
             batch.update(db.collection('lotteries').doc(id), {
-                status: 'รอตรวจสอบสลิป', slip: slipBase64, discountCoins: coinsUsed > 0 ? coinsUsed : null, updatedAt: Date.now()
+                status: 'sold', slip: null, discountCoins: coinsUsed > 0 ? coinsUsed : null, updatedAt: Date.now()
             });
         });
-
         if(coinsUsed > 0) { batch.update(db.collection('users').doc(userProfile.userId), { coins: firebase.firestore.FieldValue.increment(-coinsUsed) }); }
-
         await batch.commit();
-
-        sendLineNotify(`🔔 แจ้งโอนเงินใหม่!\nจำนวน: ${ids.length} ใบ\nยอดโอน: ฿${finalPrice}\nจาก: ${userProfile.displayName}`); 
-        sendLiffMessage(`📸 คุณได้ส่งสลิปชำระเงินเรียบร้อยแล้ว\nแอดมินกำลังตรวจสอบสักครู่นะครับ`);
-        Swal.fire('สำเร็จ!', 'ส่งหลักฐานเรียบร้อย โปรดรอแอดมินตรวจสอบสักครู่ครับ', 'success').then(() => {
-            closePaymentModal(); switchTab('orders'); setOrderTab('pending');
+        sendLineNotify(`🔔 ออเดอร์ฟรี (ใช้ Coin 100%)!\nจำนวน: ${ids.length} ใบ\nจาก: ${userProfile.displayName}`); 
+        sendLiffMessage(`🎉 แลกสลากฟรีสำเร็จ! ขอบคุณที่ใช้ Coin ครับ`);
+        Swal.fire('แลกสลากสำเร็จ!', 'ใช้ Coin แลกสลากเรียบร้อยแล้วครับ', 'success').then(() => {
+            closePaymentModal(); switchTab('orders'); setOrderTab('success');
         });
     }
 

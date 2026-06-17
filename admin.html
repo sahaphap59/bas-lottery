@@ -1402,7 +1402,8 @@
     };
 
     window.sendCustomerPushMessage = function(userId, message) {
-        const GAS_URL = "ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้"; 
+        // ⚠️ นำ URL ของ Web App ที่ได้จาก Google Apps Script (ลิงก์เดียวกันกับหน้าร้าน) มาใส่ที่นี่ครับ
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec"; 
         if (!GAS_URL || GAS_URL.includes("ใส่_URL")) return;
         fetch(GAS_URL, {
             method: 'POST',
