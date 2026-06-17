@@ -590,7 +590,7 @@
     }
 
     window.sendLineNotify = function(msg) {
-        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("ใส่_URL_เว็บแอป_GOOGLE_ตรงนี้")) return;
+        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec")) return;
         fetch(GAS_NOTIFY_URL, { 
             method: 'POST', 
             mode: 'no-cors', // 👈 ป้องกันเบราว์เซอร์บล็อก
@@ -604,6 +604,14 @@
             liff.sendMessages([{ type: "text", text: msg }]).catch(err => console.log("LIFF MSG Error: ", err));
         }
     }
+
+    window.sendCustomerPushMessage = function(userId, message) {
+        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec")) return;
+        fetch(GAS_NOTIFY_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "push", userId: userId, message: message })
+        }).catch(e => console.log("Push Error:", e));
+    };
 
     window.startChatPrompt = function() {
         if (typeof liff === 'undefined' || !liff.isLoggedIn() || !userProfile) {
@@ -1169,7 +1177,12 @@
 
     window.openCheckout = function(docId, num, displayAmount) { 
       if (typeof liff === 'undefined' || !liff.isLoggedIn()) { forceLineLogin(); return; }
-      Swal.fire({ title: 'ยืนยันการสั่งซื้อ', html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ยอดชำระ <span class="text-gray-900 text-lg">฿${displayAmount.toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`, showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const phone = document.getElementById('checkoutPhone').value.trim(); if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; } return { phone }; } }).then((result) => { if (result.isConfirmed) { window.db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true }); window.db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000), updatedAt: Date.now() }).then(() => { sendLiffMessage(`☑️ คุณได้จองสลากเลข ${num}\nโปรดชำระเงินภายใน 30 นาทีครับ`); Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); }); } });
+      Swal.fire({ title: 'ยืนยันการสั่งซื้อ', html: `<div class="text-center mb-4"><div class="text-3xl font-black tracking-widest text-[#d31a1a] bg-red-50 py-3 rounded-xl border border-red-100 mb-2 shadow-inner">${num}</div><div class="text-sm font-bold text-gray-600">ยอดชำระ <span class="text-gray-900 text-lg">฿${displayAmount.toLocaleString()}</span></div></div><div class="text-left text-xs font-bold text-gray-700 mb-1">📱 เบอร์โทรศัพท์ (ติดต่อกรณีถูกรางวัล) <span class="text-red-500">*</span></div><input type="tel" id="checkoutPhone" value="${globalSavedPhone}" placeholder="08X-XXX-XXXX" class="w-full border border-gray-300 p-3 rounded-lg focus:border-[#d31a1a] outline-none font-bold text-sm mb-3"><div class="text-left text-xs font-bold text-gray-700 mb-1">💳 รูปแบบชำระเงิน</div><select id="checkoutMode" class="w-full border border-gray-300 p-3 rounded-lg outline-none font-bold text-sm text-gray-700 bg-gray-50"><option value="reserve">⏳ จองไว้ก่อน (ล็อกเลข 30 นาที)</option></select>`, showCancelButton: true, confirmButtonText: 'ยืนยันจองสลาก', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#d31a1a', preConfirm: async () => { const phone = document.getElementById('checkoutPhone').value.trim(); if (!phone) { Swal.showValidationMessage('กรุณากรอกเบอร์โทรศัพท์ด้วยครับ'); return false; } return { phone }; } }).then((result) => { if (result.isConfirmed) { window.db.collection('users').doc(userProfile.userId).set({ phone: result.value.phone, updatedAt: Date.now() }, { merge: true }); window.db.collection('lotteries').doc(docId).update({ name: userProfile.displayName, userId: userProfile.userId, email: result.value.phone, status: 'จอง', expiresAt: Date.now() + (30*60*1000), updatedAt: Date.now() }).then(() => { 
+          sendLineNotify(`📌 แจ้งเตือนการจองสลาก!\nลูกค้า: ${userProfile.displayName}\nสลากเลข: ${num}\nยอดชำระ: ฿${displayAmount}`);
+          window.sendCustomerPushMessage(userProfile.userId, `☑️ คุณได้จองสลากเลข ${num}\nยอดชำระ: ฿${displayAmount}\nโปรดชำระเงินภายใน 30 นาทีครับ`);
+          sendLiffMessage(`☑️ คุณได้จองสลากเลข ${num}\nโปรดชำระเงินภายใน 30 นาทีครับ`); 
+          Swal.fire('จองสลากสำเร็จ!', 'กรุณาชำระเงินภายใน 30 นาที ในเมนู "คำสั่งซื้อ" ครับ', 'success').then(()=> { switchTab('orders'); setOrderTab('unpaid'); }); 
+      }); } });
     }
 
     window.openPaymentModal = function(id = null, numStr = null, amount = null) {
@@ -1306,11 +1319,13 @@
         sendLineNotify(`🔔 แจ้งโอนเงินใหม่!\nจำนวน: ${ids.length} ใบ\nยอดโอน: ฿${finalPrice}\nจาก: ${userProfile.displayName}`); 
         
         if(slipStatus === 'sold') {
+            window.sendCustomerPushMessage(userProfile.userId, `🎉 ยืนยันการชำระเงินสำเร็จ!\nยอด: ${finalPrice} บาท\nแอดมินตรวจสอบสลิปอัตโนมัติเรียบร้อย\nคุณได้รับ +${cartTotalQty} Coin`);
             sendLiffMessage(`🎉 ยืนยันการชำระเงินสำเร็จ!\nคุณได้รับ +${cartTotalQty} Coin`);
             Swal.fire('สำเร็จ!', 'ตรวจสอบสลิปอัตโนมัติสำเร็จ! สลากเป็นของคุณแล้วครับ', 'success').then(() => {
                 closePaymentModal(); switchTab('orders'); setOrderTab('success');
             });
         } else {
+            window.sendCustomerPushMessage(userProfile.userId, `📸 คุณได้ส่งสลิปชำระเงินเรียบร้อยแล้ว\nแอดมินกำลังตรวจสอบสักครู่นะครับ`);
             sendLiffMessage(`📸 คุณได้ส่งสลิปชำระเงินเรียบร้อยแล้ว\nแอดมินกำลังตรวจสอบสักครู่นะครับ`);
             Swal.fire('สำเร็จ!', 'ส่งหลักฐานเรียบร้อย โปรดรอแอดมินตรวจสอบสักครู่ครับ', 'success').then(() => {
                 closePaymentModal(); switchTab('orders'); setOrderTab('pending');
