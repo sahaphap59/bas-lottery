@@ -428,7 +428,7 @@
     }
 
     const LIFF_ID = "2010423147-2Y6XBfMF"; // 👉 ลบของเดิมทิ้ง แล้วเอา LIFF ID อันใหม่มาใส่ในเครื่องหมายคำพูดนี้
-    const GAS_NOTIFY_URL = "https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec"; 
+    const GAS_NOTIFY_URL = "https://script.google.com/macros/s/AKfycbycE77u4uO3Jk5P14qLqA-_7Yy66-y8uV_L9O7lYc5vD0x5nQ1u0E2r6-231y0H3s_l/exec"; 
 
     window.generateUUID = function() { return 'user_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); };
 
@@ -691,7 +691,7 @@
     }
 
     window.sendCustomerPushMessage = function(userId, message) {
-        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("https://script.google.com/macros/s/AKfycbxSqFBbO-oLv69rB6ffW_M7GSbT_xdKlS59TBcxd_msbppSLjCiWeJURp19ddnznofgXA/exec")) return;
+        if(!GAS_NOTIFY_URL || GAS_NOTIFY_URL.includes("ใส่_URL")) return;
         fetch(GAS_NOTIFY_URL, {
             method: 'POST',
             body: JSON.stringify({ action: "push", userId: userId, message: message })
@@ -1398,6 +1398,7 @@
         
         if (finalPrice > 0 && slipFile && SLIP2GO_API_KEY !== "ใส่_API_KEY_SLIP2GO_ตรงนี้") {
             try {
+                // 1. สแกนหา QR Code จากไฟล์สลิปด้วย Html5Qrcode
                 let qrCodePayload = null;
                 let tempDiv = document.createElement('div');
                 tempDiv.id = "temp-qr-reader-" + Date.now();
@@ -1416,6 +1417,7 @@
                 let response;
                 let result;
                 
+                // 2. ส่งข้อมูลไปตรวจสอบที่ API Slip2Go
                 if (qrCodePayload) {
                     response = await fetch('https://api.slip2go.com/api/verify-slip/qr-code/info', {
                         method: 'POST',
@@ -1423,7 +1425,7 @@
                             'Authorization': `Bearer ${SLIP2GO_API_KEY}`,
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ data: qrCodePayload }) 
+                        body: JSON.stringify({ data: qrCodePayload }) // ปรับโครงสร้าง payload ตามมาตรฐาน API
                     });
                 } else {
                     let formData = new FormData();
@@ -1439,12 +1441,13 @@
                 
                 result = await response.json();
                 
+                // 3. ตรวจสอบเงื่อนไขยอดเงิน
                 if (response.ok && result.data) {
                     let slipData = result.data;
                     let slipAmount = parseFloat(slipData.amount || slipData.transAmount);
                     
                     if (!isNaN(slipAmount) && slipAmount === finalPrice) {
-                        slipStatus = 'sold'; 
+                        slipStatus = 'sold'; // ยอดตรง อนุมัติเลย
                     } else if (!isNaN(slipAmount)) {
                         Swal.close();
                         return Swal.fire('ยอดเงินไม่ตรง', `ยอดเงินในสลิป ฿${slipAmount} แต่ยอดที่ต้องชำระคือ ฿${finalPrice}`, 'error');
@@ -1458,12 +1461,14 @@
                 }
             } catch(e) {
                 console.error("Slip Verification error:", e);
+                // หากระบบตรวจสอบล่มหรือ CORS ติด จะเปลี่ยนสถานะให้แอดมินตรวจเอง (ปลอดภัยไว้ก่อน)
                 slipStatus = 'รอตรวจสอบสลิป';
             }
         } else if (finalPrice === 0) {
-            slipStatus = 'sold'; 
+            slipStatus = 'sold'; // จ่ายด้วย Coin เต็มจำนวน
         }
 
+        // 4. บันทึกข้อมูลลงฐานข้อมูล Firebase
         const batch = window.db.batch();
         ids.forEach(id => {
             batch.update(window.db.collection('lotteries').doc(id), {
