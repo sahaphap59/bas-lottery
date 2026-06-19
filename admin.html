@@ -19,7 +19,7 @@
     .premium-nav { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); border-bottom: 3px solid #fbbf24; }
     .dash-box { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .dash-title { font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-    .dash-val { font-family: 'IBM Plex Sans Thai', sans-serif; font-size: 32px; font-weight: 900; margin-top: 6px; }
+    .dash-val { font-family: 'IBM Plex Sans Thai', sans-serif; font-size: 28px; font-weight: 900; margin-top: 6px; }
     .tab-btn { padding: 10px 18px; font-weight: 700; font-size: 13px; transition: 0.2s; border-radius: 8px; }
     .tab-active { background-color: #0f172a; color: white; }
     .gold-gradient { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
@@ -90,7 +90,9 @@
         </div>
         
         <button id="btn-export-excel" onclick="window.exportToExcel()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📊 โหลดรายงาน</button>
-        <button onclick="window.open(window.location.origin, '_blank')" class="bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🏪 ไปหน้าร้าน</button>
+        <!-- ปุ่มทวงยอดค้าง -->
+        <button onclick="window.openUnpaidSummaryModal()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar"></i> สรุปยอดค้าง</button>
+        <button onclick="window.open(window.location.origin, '_blank')" class="bg-slate-500 hover:bg-slate-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">🏪 ไปหน้าร้าน</button>
         <button onclick="window.toggleSales()" id="btn-toggle-sales" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition">🛒 สถานะขาย: เปิด</button>
         <button id="btn-design-modal" onclick="window.openDesignModal()" class="bg-teal-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">🖼️ จัดการระบบร้าน</button>
         <button id="btn-promo-modal" onclick="window.openPromoModal()" class="bg-fuchsia-600 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-md">📣 โปรโมชัน</button>
@@ -108,21 +110,21 @@
   <div class="max-w-7xl mx-auto px-4">
     <div id="content" class="block">
       <!-- บอร์ดสรุปผล -->
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-8">
-        <div class="dash-box p-4 bg-white border-t-4 border-t-indigo-500"><div class="dash-title text-indigo-600">👥 ออเดอร์</div><h3 class="dash-val text-slate-800 text-2xl" id="sum-buyers">0</h3></div>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
+        <div class="dash-box p-4 bg-white border-t-4 border-t-indigo-500"><div class="dash-title text-indigo-600">👥 ออเดอร์ลูกค้า</div><h3 class="dash-val text-slate-800 text-2xl" id="sum-buyers">0</h3></div>
         <div class="dash-box p-4 bg-white border-t-4 border-t-slate-500"><div class="dash-title text-slate-600">📦 สต๊อกว่าง</div><h3 class="dash-val text-slate-800 text-2xl" id="sum-stock">0 ใบ</h3></div>
-        <div class="dash-box p-4 bg-white border-t-4 border-t-pink-500"><div class="dash-title text-pink-600">🎟️ ขาย/จองแล้ว</div><h3 class="dash-val text-slate-800 text-2xl" id="sum-sold-qty">0 ใบ</h3></div>
-        <div class="dash-box p-4 bg-amber-50 border-t-4 border-t-amber-500"><div class="dash-title text-amber-700">💰 ยอดขายรวม</div><h3 class="dash-val text-amber-600 text-2xl" id="sum-total">฿0</h3></div>
+        <div class="dash-box p-4 bg-white border-t-4 border-t-pink-500"><div class="dash-title text-pink-600">🎟️ สลากที่ขายออก</div><h3 class="dash-val text-slate-800 text-2xl" id="sum-sold-qty">0 ใบ</h3></div>
         <div class="dash-box p-4 bg-emerald-50 border-t-4 border-t-emerald-500"><div class="dash-title text-emerald-700">🟢 รับเงินแล้ว</div><h3 class="dash-val text-emerald-600 text-2xl" id="sum-paid">฿0</h3></div>
-        <div class="dash-box p-4 bg-rose-50 border-t-4 border-t-rose-500"><div class="dash-title text-rose-700">⚠️ ค้างชำระ</div><h3 class="dash-val text-rose-600 text-2xl" id="sum-unpaid">฿0</h3></div>
+        <div class="dash-box p-4 bg-amber-50 border-t-4 border-t-amber-500"><div class="dash-title text-amber-700">🟡 ยอดจอง (รอจ่าย)</div><h3 class="dash-val text-amber-600 text-2xl" id="sum-reserved">฿0</h3></div>
+        <div class="dash-box p-4 bg-blue-50 border-t-4 border-t-blue-500"><div class="dash-title text-blue-700">⏳ ยอดรอตรวจสลิป</div><h3 class="dash-val text-blue-600 text-2xl" id="sum-pending">฿0</h3></div>
+        <div class="dash-box p-4 bg-rose-50 border-t-4 border-t-rose-500"><div class="dash-title text-rose-700">🔴 ค้างชำระรวม</div><h3 class="dash-val text-rose-600 text-2xl" id="sum-unpaid">฿0</h3></div>
         <div class="dash-box p-4 bg-cyan-50 border-t-4 border-t-cyan-500 cursor-pointer hover:bg-cyan-100 transition shadow-sm" onclick="window.openAnalyticsModal()">
-            <div class="dash-title text-cyan-700">👁️ เข้าชม (คลิกดู)</div>
+            <div class="dash-title text-cyan-700">👁️ คนเข้าเว็บตอนนี้</div>
             <h3 class="dash-val text-cyan-700 text-2xl flex items-center gap-2">
                 <span id="sum-realtime" class="text-rose-500 animate-pulse text-3xl">0</span> 
                 <span class="text-sm text-slate-400 font-normal">/</span>
                 <span id="sum-visitors" class="text-xl">0</span>
             </h3>
-            <div class="text-[9px] text-cyan-600 mt-1 font-bold">ตอนนี้ / ดูทั้งหมด</div>
         </div>
       </div>
 
@@ -202,6 +204,32 @@
   </div>
 
   <!-- ==================== MODALS ==================== -->
+
+  <!-- Unpaid Summary Modal (บิลทวงยอดค้าง) -->
+  <div id="unpaidSummaryModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4 z-[70] overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border-t-4 border-rose-500">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-rose-400"></i> สรุปยอดค้างชำระทั้งหมด</h2>
+        <button onclick="window.closeUnpaidSummaryModal()" class="text-white/70 text-2xl font-bold leading-none hover:text-white">&times;</button>
+      </div>
+      <div class="p-6">
+        <div class="bg-rose-50 border border-rose-200 rounded-xl p-4 text-center mb-4 shadow-inner">
+            <p class="text-sm font-bold text-rose-800 mb-1">ยอดรวมที่ยังไม่ชำระ (สถานะจอง)</p>
+            <div id="summary-unpaid-amount" class="text-4xl font-black text-rose-600 drop-shadow-sm mb-1">฿0</div>
+            <p id="summary-unpaid-count" class="text-xs font-bold text-rose-500">รอชำระ 0 ออเดอร์</p>
+        </div>
+        <div class="mb-2 flex justify-between items-end">
+            <label class="block text-xs font-bold text-slate-700">ข้อความทวงยอด (แยกตามลูกค้า)</label>
+            <button onclick="window.copyUnpaidMessage()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold px-3 py-1 rounded-lg text-[10px] transition shadow-sm border border-indigo-200"><i class="fa-regular fa-copy"></i> คัดลอกข้อความ</button>
+        </div>
+        <textarea id="unpaid-message-textarea" rows="10" class="w-full border border-slate-300 p-3 rounded-lg text-sm outline-none focus:border-rose-500 bg-slate-50 font-medium"></textarea>
+        <div class="mt-4 flex gap-2">
+            <button type="button" onclick="window.closeUnpaidSummaryModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2.5 rounded-lg text-sm">ปิดหน้าต่าง</button>
+            <button type="button" onclick="window.copyUnpaidMessage()" class="flex-[2] bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-lg text-sm shadow-md">📋 คัดลอกแล้วส่งให้ลูกค้าเลย</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- My Profile Modal -->
   <div id="myProfileModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4 z-[60] overflow-y-auto">
@@ -334,7 +362,20 @@
       <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center border-b-4 border-amber-400"><h2 class="text-lg font-bold text-amber-400" id="modalTitle">ลงทะเบียนสลาก / จัดการสลาก</h2><button onclick="window.closeModal()" class="text-slate-400 text-2xl font-bold leading-none hover:text-white">&times;</button></div>
       <form id="lotteryForm" onsubmit="window.submitForm(event)" class="p-6 space-y-5">
         <input type="hidden" id="formRowIndex" name="rowIndex">
-        <div class="grid grid-cols-2 gap-4"><div><label class="block text-[11px] font-bold text-slate-700 mb-1">หมายเลข (หลายเลขเว้นวรรคได้)</label><textarea name="number" id="formNumberInput" rows="2" required oninput="window.autoFormatNumbers(this, 6)" placeholder="เช่น 123456 987654" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-mono font-black text-center outline-none bg-slate-50"></textarea></div><div><label class="block text-xs font-bold text-slate-700 mb-1">จำนวนใบ</label><input type="number" name="quantity" id="formQty" required min="1" value="1" oninput="window.calculateAmount()" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-bold text-center outline-none"></div></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <div class="flex justify-between items-center mb-1">
+                <label class="block text-[11px] font-bold text-slate-700">หมายเลข (เว้นวรรคได้)</label>
+                <button type="button" onclick="window.startAddScanner()" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-0.5 rounded font-bold transition shadow-sm border border-slate-300"><i class="fa-solid fa-camera"></i> สแกน</button>
+            </div>
+            <div id="add-reader-container" class="hidden mb-2 rounded-xl overflow-hidden border-2 border-slate-300 relative">
+                <div id="add-reader" width="100%"></div>
+                <button type="button" onclick="window.stopAddScanner()" class="w-full bg-rose-500 text-white text-[10px] py-1.5 font-bold absolute bottom-0 left-0 right-0 z-10 opacity-95">ปิดกล้อง</button>
+            </div>
+            <textarea name="number" id="formNumberInput" rows="2" required oninput="window.autoFormatNumbers(this, 6)" placeholder="เช่น 123456 987654" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-mono font-black text-center outline-none bg-slate-50 focus:border-slate-500"></textarea>
+          </div>
+          <div><label class="block text-xs font-bold text-slate-700 mb-1">จำนวนใบ</label><input type="number" name="quantity" id="formQty" required min="1" value="1" oninput="window.calculateAmount()" class="w-full border border-slate-300 p-3 rounded-lg text-lg font-bold text-center outline-none"></div>
+        </div>
         <div><label class="block text-xs font-bold text-slate-700 mb-1">ชื่อผู้สั่งซื้อ</label><input type="text" name="name" id="formBuyerName" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-semibold outline-none"></div>
         <div class="grid grid-cols-2 gap-4"><div><label class="block text-xs font-bold text-slate-700 mb-1">สถานะดีล</label><select name="status" id="formStatus" class="w-full border border-slate-300 p-3 rounded-lg text-sm font-bold text-slate-700 outline-none"><option value="ยังไม่ชำระ">🔴 ยังไม่ชำระ / จอง</option><option value="รอตรวจสอบสลิป">⏳ รอตรวจสอบสลิป</option><option value="ชำระแล้ว">🟢 ชำระสำเร็จ</option></select></div><div><label class="block text-xs font-bold text-slate-700 mb-1">ยอดเงินปกติ</label><input type="text" id="formAmount" readonly class="w-full bg-slate-100 border border-slate-200 p-3 rounded-lg text-lg font-black text-rose-600 text-right outline-none"></div></div>
         
@@ -456,6 +497,7 @@
     let currentAdmin = null;
     const SESSION_TIMEOUT = 3 * 60 * 60 * 1000; 
 
+    // ตัวแปรสำหรับระบบกล้อง
     let scanMode = 'check';
     let auditAvailableTickets = [];
     let auditFoundNumbers = new Set();
@@ -494,7 +536,7 @@
 
                 db.collection('admins').doc(docId).update(payload).then(() => {
                     currentAdmin.name = newName;
-                    document.getElementById('adminDisplayName').innerText = newName;
+                    const elName = document.getElementById('adminDisplayName'); if (elName) elName.innerText = newName;
                     localStorage.setItem('meowto_admin_session', JSON.stringify(currentAdmin));
                     Swal.fire('สำเร็จ', 'อัปเดตโปรไฟล์เรียบร้อย', 'success');
                     window.closeMyProfileModal();
@@ -540,8 +582,14 @@
     };
 
     window.loadSupportTickets = function() {
-        db.collection('support_tickets').onSnapshot(snap => {
+        let query = db.collection('support_tickets');
+        if(!currentAdmin.isSuper) {
+            query = query.where('creatorId', '==', currentAdmin.username);
+        }
+
+        query.orderBy('createdAt', 'desc').onSnapshot(snap => {
             const container = document.getElementById('ticketListContainer');
+            if(!container) return;
             container.innerHTML = '';
             
             if(snap.empty) {
@@ -549,25 +597,8 @@
                 return;
             }
 
-            let tickets = [];
             snap.forEach(doc => {
-                let data = doc.data();
-                data.id = doc.id;
-                tickets.push(data);
-            });
-
-            if(!currentAdmin.isSuper) {
-                tickets = tickets.filter(t => t.creatorId === currentAdmin.username);
-            }
-
-            tickets.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-            if(tickets.length === 0) {
-                container.innerHTML = '<div class="text-center py-10 text-slate-400 font-bold">ยังไม่มีรายการแจ้งปัญหา</div>';
-                return;
-            }
-
-            tickets.forEach(data => {
+                const data = doc.data();
                 const timeStr = new Date(data.createdAt).toLocaleString('th-TH');
                 
                 let statusColor = 'bg-rose-100 text-rose-600 border-rose-200';
@@ -581,7 +612,7 @@
 
                 let manageBtnHtml = '';
                 if(currentAdmin.isSuper) {
-                    const safeData = JSON.stringify(data).replace(/"/g, '&quot;');
+                    const safeData = JSON.stringify({id: doc.id, ...data}).replace(/"/g, '&quot;');
                     manageBtnHtml = `<div class="mt-3 border-t border-slate-200 pt-3 text-right"><button onclick='window.openTicketReplyModal(${safeData})' class="bg-slate-800 text-white text-[10px] font-bold px-3 py-1.5 rounded shadow-sm">ตอบกลับ / อัปเดตสถานะ</button></div>`;
                 }
 
@@ -589,7 +620,6 @@
                 <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative">
                     <div class="absolute top-4 right-4 text-[10px] font-bold ${statusColor} border px-2 py-0.5 rounded-full">${data.status}</div>
                     <div class="text-[10px] font-bold text-orange-600 mb-1">[${data.category}]</div>
-                    <div class="text-xs font-bold text-slate-500 mb-1">ID: #${data.id.substring(0,8).toUpperCase()}</div>
                     <h4 class="font-black text-slate-800 text-sm mb-1">${data.subject}</h4>
                     <p class="text-xs text-slate-600">${data.detail}</p>
                     <div class="text-[9px] text-slate-400 mt-2 flex justify-between items-center">
@@ -600,17 +630,13 @@
                     ${manageBtnHtml}
                 </div>`;
             });
-        }, error => {
-            console.error("Error fetching tickets:", error);
-            const container = document.getElementById('ticketListContainer');
-            container.innerHTML = `<div class="text-center py-10 text-rose-500 font-bold">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}</div>`;
         });
     };
 
     window.openTicketReplyModal = function(data) {
         document.getElementById('replyTicketId').value = data.id;
-        document.getElementById('replySubject').innerText = 'หัวข้อ: ' + data.subject;
-        document.getElementById('replyDetail').innerText = 'รายละเอียด: ' + data.detail;
+        const rSubj = document.getElementById('replySubject'); if (rSubj) rSubj.innerText = 'หัวข้อ: ' + data.subject;
+        const rDet = document.getElementById('replyDetail'); if (rDet) rDet.innerText = 'รายละเอียด: ' + data.detail;
         document.getElementById('replyStatus').value = data.status;
         document.getElementById('replyMessage').value = data.adminReply || '';
         
@@ -639,6 +665,87 @@
             Swal.fire('สำเร็จ', 'อัปเดต Ticket เรียบร้อย', 'success');
             window.closeTicketReplyModal();
         });
+    };
+
+    // --- ฟังก์ชันทวงยอดค้างชำระ (Group by Customer) ---
+    window.openUnpaidSummaryModal = function() {
+        if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดสลากก่อนครับ', 'warning');
+        
+        // กรองเฉพาะรายการที่สถานะเป็น "จอง" (หรือสถานะอื่นที่คุณต้องการทวง)
+        let unpaidList = allTicketsList.filter(t => t.name !== "-" && t.name !== "" && (t.status === "จอง" || t.status === "reserve" || t.status === "ยังไม่ชำระ"));
+        
+        if (unpaidList.length === 0) {
+            return Swal.fire('ไม่มียอดค้าง', 'งวดนี้ไม่มียอดค้างชำระ (สถานะจอง) เลยครับ', 'info');
+        }
+
+        // จัดกลุ่มตามชื่อลูกค้า
+        let groupedCustomers = {};
+        let grandTotal = 0;
+        let grandCount = 0;
+
+        unpaidList.forEach((t) => {
+            let price = t.isFlashSale && t.flashSalePrice ? parseInt(t.flashSalePrice) : (parseInt(t.quantity)*100);
+            grandTotal += price;
+            grandCount++;
+            
+            let customerName = t.name.trim();
+            if(!groupedCustomers[customerName]) {
+                groupedCustomers[customerName] = { total: 0, items: [] };
+            }
+            groupedCustomers[customerName].total += price;
+            groupedCustomers[customerName].items.push(`- เลข ${String(t.number).padStart(6, '0')} (${t.quantity} ใบ) = ฿${price}`);
+        });
+
+        // อัปเดต UI 
+        const sumCountEl = document.getElementById('summary-unpaid-count');
+        const sumAmtEl = document.getElementById('summary-unpaid-amount');
+        const msgTextarea = document.getElementById('unpaid-message-textarea');
+        
+        if (sumCountEl) sumCountEl.innerText = `รอชำระ ${grandCount} รายการ (${Object.keys(groupedCustomers).length} ท่าน)`;
+        if (sumAmtEl) sumAmtEl.innerText = `฿${grandTotal.toLocaleString()}`;
+        
+        // สร้างข้อความแยกตามลูกค้า
+        let messageText = `⚠️ [แจ้งเตือนยอดค้างชำระ - งวด ${currentSelectedSheet}]\n\nรบกวนลูกค้าตรวจสอบรายการจองสลากและชำระเงินเพื่อยืนยันสิทธิ์นะครับ ก่อนที่ระบบจะดึงสลากคืนแผงอัตโนมัติ 🙏\n\n`;
+        
+        for(let cName in groupedCustomers) {
+            messageText += `👤 คุณ ${cName} (ยอด ฿${groupedCustomers[cName].total.toLocaleString()})\n`;
+            messageText += groupedCustomers[cName].items.join('\n');
+            messageText += `\n\n`;
+        }
+        
+        messageText += `*กรุณาชำระเงินและแจ้งสลิปในระบบ ขอบคุณครับ*`;
+
+        if (msgTextarea) msgTextarea.value = messageText;
+
+        const modal = document.getElementById('unpaidSummaryModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    };
+
+    window.closeUnpaidSummaryModal = function() {
+        const modal = document.getElementById('unpaidSummaryModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    };
+
+    window.copyUnpaidMessage = function() {
+        const textarea = document.getElementById('unpaid-message-textarea');
+        if (textarea) {
+            textarea.select();
+            document.execCommand('copy');
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                title: 'คัดลอกข้อความทวงยอดแล้ว',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
     };
 
     // --- ฟังก์ชันจัดการสต็อกและกล้อง ---
@@ -945,7 +1052,8 @@
         }
     };
 
-    ;['click', 'mousemove', 'keypress', 'scroll'].forEach(evt => 
+    const activityEvents = ['click', 'mousemove', 'keypress', 'scroll'];
+    activityEvents.forEach(evt => {
         window.addEventListener(evt, () => {
             if(!window.activityTimer && currentAdmin) {
                 window.activityTimer = setTimeout(() => {
@@ -953,8 +1061,8 @@
                     window.activityTimer = null;
                 }, 5000); 
             }
-        })
-    );
+        });
+    });
 
     window.checkAdminLogin = function() {
         const id = document.getElementById('adminId').value.trim();
@@ -987,7 +1095,7 @@
         document.getElementById('adminAuthOverlay').style.display = 'none';
         document.getElementById('adminProfileUI').classList.remove('hidden');
         document.getElementById('adminProfileUI').classList.add('flex');
-        document.getElementById('adminDisplayName').innerText = currentAdmin.name;
+        const elName = document.getElementById('adminDisplayName'); if (elName) elName.innerText = currentAdmin.name;
 
         window.applyAdminPermissions();
         Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `ยินดีต้อนรับ ${currentAdmin.name}`, showConfirmButton: false, timer: 2000 });
@@ -1056,6 +1164,7 @@
     window.loadAdminList = function() {
         db.collection('admins').get().then(snap => {
             const tbody = document.getElementById('adminListBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
             snap.forEach(doc => {
                 const d = doc.data();
@@ -1096,7 +1205,7 @@
         document.getElementById('perm_lottery').checked = false;
         document.getElementById('perm_finance').checked = false;
         document.getElementById('perm_chat').checked = false;
-        document.getElementById('adminFormTitle').innerText = '➕ สร้างบัญชีแอดมินใหม่';
+        const elTitle = document.getElementById('adminFormTitle'); if (elTitle) elTitle.innerText = '➕ สร้างบัญชีแอดมินใหม่';
     };
 
     window.editAdminData = function(data) {
@@ -1112,7 +1221,7 @@
         document.getElementById('perm_finance').checked = !!p.manage_finance;
         document.getElementById('perm_chat').checked = !!p.manage_chat;
 
-        document.getElementById('adminFormTitle').innerText = '📝 แก้ไขข้อมูลแอดมิน';
+        const elTitle = document.getElementById('adminFormTitle'); if (elTitle) elTitle.innerText = '📝 แก้ไขข้อมูลแอดมิน';
     };
 
     window.saveAdminData = function(e) {
@@ -1251,9 +1360,48 @@
     window.exportToExcel = function() {
         if(!currentSelectedSheet) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกงวดที่ต้องการดึงรายงานก่อนครับ', 'warning');
         
+        Swal.fire({
+            title: 'ดึงรายงาน Excel',
+            html: `
+                <div class="text-left mt-2">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">เลือกหมวดหมู่ข้อมูลที่ต้องการโหลด</label>
+                    <select id="export-status" class="w-full border border-slate-300 p-3 rounded-lg outline-none font-bold text-sm bg-slate-50">
+                        <option value="all">🌐 ทุกสถานะ (ทั้งหมด)</option>
+                        <option value="paid">🟢 ชำระเงินแล้ว</option>
+                        <option value="pending">⏳ รอตรวจสอบสลิป</option>
+                        <option value="unpaid">🔴 ค้างชำระ / จอง</option>
+                    </select>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'โหลดรายงาน',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#10b981'
+        }).then((res) => {
+            if(res.isConfirmed) {
+                window.processExcelExport(document.getElementById('export-status').value);
+            }
+        });
+    };
+
+    window.processExcelExport = function(statusFilter) {
+        let filteredList = allTicketsList.filter(t => t.name !== "-" && t.name !== "");
+        let statusName = "ทั้งหมด";
+
+        if (statusFilter === 'paid') {
+            filteredList = filteredList.filter(t => t.status === "ชำระแล้ว");
+            statusName = "ชำระเงินแล้ว";
+        } else if (statusFilter === 'pending') {
+            filteredList = filteredList.filter(t => t.status === "รอตรวจสอบสลิป");
+            statusName = "รอตรวจสอบสลิป";
+        } else if (statusFilter === 'unpaid') {
+            filteredList = filteredList.filter(t => t.status !== "ชำระแล้ว" && t.status !== "รอตรวจสอบสลิป");
+            statusName = "ค้างชำระ-จอง";
+        }
+
         let table = `<table border="1">
             <thead>
-                <tr><th colspan="7" style="font-size: 20px; font-weight: bold; text-align:center;">รายงานยอดขายลอตเตอรี่ งวด: ${currentSelectedSheet}</th></tr>
+                <tr><th colspan="7" style="font-size: 20px; font-weight: bold; text-align:center;">รายงานยอดขายลอตเตอรี่ งวด: ${currentSelectedSheet} (${statusName})</th></tr>
                 <tr>
                     <th style="background-color: #f1f5f9;">รหัสออเดอร์</th>
                     <th style="background-color: #f1f5f9;">หมายเลขสลาก</th>
@@ -1267,23 +1415,21 @@
             <tbody>`;
         
         let tQty = 0, tPrice = 0;
-        allTicketsList.forEach(t => {
-            if(t.name !== "-" && t.name !== "") {
-                let price = t.isFlashSale && t.flashSalePrice ? parseInt(t.flashSalePrice) : (parseInt(t.quantity)*100);
-                let numStr = String(t.number).padStart(6, '0');
-                
-                table += `<tr>
-                    <td>${t.id}</td>
-                    <td style='mso-number-format:"\\@";'>${numStr}</td>
-                    <td>${t.name}</td>
-                    <td style='mso-number-format:"\\@";'>${t.email || ''}</td>
-                    <td style="text-align:center;">${t.quantity}</td>
-                    <td style="text-align:right;">${price}</td>
-                    <td style="text-align:center;">${t.status}</td>
-                </tr>`;
-                tQty += parseInt(t.quantity);
-                tPrice += price;
-            }
+        filteredList.forEach(t => {
+            let price = t.isFlashSale && t.flashSalePrice ? parseInt(t.flashSalePrice) : (parseInt(t.quantity)*100);
+            let numStr = String(t.number).padStart(6, '0');
+            
+            table += `<tr>
+                <td>${t.id}</td>
+                <td style='mso-number-format:"\\@";'>${numStr}</td>
+                <td>${t.name}</td>
+                <td style='mso-number-format:"\\@";'>${t.email || ''}</td>
+                <td style="text-align:center;">${t.quantity}</td>
+                <td style="text-align:right;">${price}</td>
+                <td style="text-align:center;">${t.status}</td>
+            </tr>`;
+            tQty += parseInt(t.quantity);
+            tPrice += price;
         });
         
         table += `<tr><td colspan="4" align="right" style="font-weight:bold;">รวมยอดขายทั้งหมด</td><td style="text-align:center; font-weight:bold;">${tQty}</td><td style="text-align:right; font-weight:bold; color:green;">${tPrice}</td><td></td></tr>`;
@@ -1297,7 +1443,7 @@
         const ctx = { worksheet: 'Report', table: table };
         const link = document.createElement("a");
         link.href = uri + base64(format(template, ctx));
-        link.download = `รายงานยอดขาย_${currentSelectedSheet}.xls`;
+        link.download = `รายงานยอดขาย_${currentSelectedSheet}_${statusName}.xls`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1370,28 +1516,32 @@
     window.listenToStorefrontSettings = function() { 
         db.collection('settings').doc('design').onSnapshot(doc => {
             if(doc.exists && doc.data().ticketBgUrl) { globalTicketBg = doc.data().ticketBgUrl; } else { globalTicketBg = ""; }
-            if(currentSelectedSheet && currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') window.renderTable(document.getElementById('search-input').value.trim());
+            if(currentSelectedSheet && currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') {
+                const inp = document.getElementById('search-input');
+                window.renderTable(inp ? inp.value.trim() : "");
+            }
         });
         db.collection('settings').doc('storefront').onSnapshot(doc => { 
             const data = doc.exists ? doc.data() : {}; const activeDraw = data.activeDraw || "ยังไม่ได้ตั้งค่า"; 
-            document.getElementById('active-storefront-label').innerText = `🟢 หน้าร้าน: ${activeDraw}`; 
+            const elASL = document.getElementById('active-storefront-label'); if(elASL) elASL.innerText = `🟢 หน้าร้าน: ${activeDraw}`; 
             isSalesOpen = data.isSalesOpen !== false; const btn = document.getElementById('btn-toggle-sales');
-            if (isSalesOpen) { btn.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🛒 สถานะขาย: เปิด"; } 
-            else { btn.className = "bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🚫 สถานะขาย: ปิด"; }
-            
+            if(btn) {
+                if (isSalesOpen) { btn.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🛒 สถานะขาย: เปิด"; } 
+                else { btn.className = "bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition"; btn.innerText = "🚫 สถานะขาย: ปิด"; }
+            }
             if(data.adminSound) {
                 adminSoundUrl = data.adminSound;
-                document.getElementById('adminSoundSelect').value = adminSoundUrl;
+                const elS = document.getElementById('adminSoundSelect'); if (elS) elS.value = adminSoundUrl;
             }
         }); 
         
         db.collection('settings').doc('menu_banners').onSnapshot(doc => {
             if(doc.exists) {
                 let d = doc.data();
-                if(d.mascot) { document.getElementById('mbMascotPreview').src = d.mascot; document.getElementById('mbMascotPreview').classList.remove('hidden'); tempMascot = d.mascot; }
-                if(d.top10) { document.getElementById('mbTop10Preview').src = d.top10; document.getElementById('mbTop10Preview').classList.remove('hidden'); tempTop10 = d.top10; }
-                if(d.extra) { document.getElementById('mbExtraPreview').src = d.extra; document.getElementById('mbExtraPreview').classList.remove('hidden'); tempExtra = d.extra; }
-                if(d.winBanner) { document.getElementById('mbWinBannerPreview').src = d.winBanner; document.getElementById('mbWinBannerPreview').classList.remove('hidden'); tempWinBanner = d.winBanner; }
+                if(d.mascot) { const el = document.getElementById('mbMascotPreview'); if(el){ el.src = d.mascot; el.classList.remove('hidden'); tempMascot = d.mascot; } }
+                if(d.top10) { const el = document.getElementById('mbTop10Preview'); if(el){ el.src = d.top10; el.classList.remove('hidden'); tempTop10 = d.top10; } }
+                if(d.extra) { const el = document.getElementById('mbExtraPreview'); if(el){ el.src = d.extra; el.classList.remove('hidden'); tempExtra = d.extra; } }
+                if(d.winBanner) { const el = document.getElementById('mbWinBannerPreview'); if(el){ el.src = d.winBanner; el.classList.remove('hidden'); tempWinBanner = d.winBanner; } }
             }
         });
     };
@@ -1402,7 +1552,7 @@
         else if(type === 'ticket') { fileInput = document.getElementById('ticketBgImageFile'); previewImg = document.getElementById('ticketPreview'); } 
         else { fileInput = document.getElementById(type+'File'); previewImg = document.getElementById(type+'Preview'); }
         
-        if (fileInput.files && fileInput.files[0]) { 
+        if (fileInput && fileInput.files && fileInput.files[0] && previewImg) { 
             const base64 = await window.resizeImage(fileInput.files[0], 800, 800, 0.8); 
             if(type === 'logo') tempLogoBase64 = base64; 
             else if(type === 'ticket') tempTicketBgBase64 = base64; 
@@ -1417,7 +1567,7 @@
     window.previewMenuBanner = async function(type) {
         let input = document.getElementById(type === 'winBanner' ? 'winningBannerFile' : `mb${type.charAt(0).toUpperCase() + type.slice(1)}File`);
         let preview = document.getElementById(type === 'winBanner' ? 'mbWinBannerPreview' : `mb${type.charAt(0).toUpperCase() + type.slice(1)}Preview`);
-        if(input.files && input.files[0]) {
+        if(input && input.files && input.files[0] && preview) {
             let base64 = await window.resizeImage(input.files[0], 800, 1200, 0.85); 
             if(type === 'mascot') tempMascot = base64;
             if(type === 'top10') tempTop10 = base64;
@@ -1429,42 +1579,41 @@
 
     window.listenToVisitorCount = function() {
         db.collection('settings').doc('analytics').onSnapshot(doc => {
-            if(doc.exists) {
-                const data = doc.data();
-                document.getElementById('sum-visitors').innerText = (data.pageViews || 0).toLocaleString('th-TH');
-                document.getElementById('stat-unique').innerText = (data.uniqueVisitors || 0).toLocaleString('th-TH');
-                document.getElementById('stat-mobile').innerText = (data.mobileViews || 0).toLocaleString('th-TH') + ' ครั้ง';
-                document.getElementById('stat-desktop').innerText = (data.desktopViews || 0).toLocaleString('th-TH') + ' ครั้ง';
-                document.getElementById('stat-total').innerText = (data.pageViews || 0).toLocaleString('th-TH');
-            } else {
-                document.getElementById('sum-visitors').innerText = '0';
-            }
+            const data = doc.exists ? doc.data() : {};
+            const elV = document.getElementById('sum-visitors'); if (elV) elV.innerText = (data.pageViews || 0).toLocaleString('th-TH');
+            const elU = document.getElementById('stat-unique'); if (elU) elU.innerText = (data.uniqueVisitors || 0).toLocaleString('th-TH');
+            const elM = document.getElementById('stat-mobile'); if (elM) elM.innerText = (data.mobileViews || 0).toLocaleString('th-TH') + ' ครั้ง';
+            const elD = document.getElementById('stat-desktop'); if (elD) elD.innerText = (data.desktopViews || 0).toLocaleString('th-TH') + ' ครั้ง';
+            const elT = document.getElementById('stat-total'); if (elT) elT.innerText = (data.pageViews || 0).toLocaleString('th-TH');
         });
     };
 
     window.listenToRealtimeVisitors = function() {
         const oneMinuteAgo = Date.now() - 60000;
         db.collection('active_visitors').where('lastActive', '>', oneMinuteAgo).onSnapshot(snap => {
-            document.getElementById('sum-realtime').innerText = snap.size;
-            document.getElementById('stat-realtime').innerText = snap.size;
+            const elSR = document.getElementById('sum-realtime'); if(elSR) elSR.innerText = snap.size;
+            const elSTR = document.getElementById('stat-realtime'); if(elSTR) elSTR.innerText = snap.size;
             const userList = document.getElementById('realtime-user-list');
-            userList.innerHTML = '';
-            if(snap.empty) {
-                userList.innerHTML = '<tr><td class="text-center py-4 text-slate-400">ยังไม่มีผู้ใช้งานขณะนี้</td></tr>';
-            } else {
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    const icon = d.device === 'Mobile' ? '<i class="fa-solid fa-mobile-screen-button text-cyan-500"></i> มือถือ' : '<i class="fa-solid fa-desktop text-indigo-400"></i> คอมฯ';
-                    const ip = d.ip || 'ไม่ทราบ IP';
-                    const time = new Date(d.lastActive).toLocaleTimeString('th-TH');
-                    userList.innerHTML += `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="py-2 px-4 font-mono font-bold text-slate-700">${ip}</td><td class="py-2 px-4 text-slate-600">${icon}</td><td class="py-2 px-4 text-right text-slate-400 text-[9px]">ล่าสุด: ${time}</td></tr>`;
-                });
+            if(userList) {
+                userList.innerHTML = '';
+                if(snap.empty) {
+                    userList.innerHTML = '<tr><td class="text-center py-4 text-slate-400">ยังไม่มีผู้ใช้งานขณะนี้</td></tr>';
+                } else {
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        const icon = d.device === 'Mobile' ? '<i class="fa-solid fa-mobile-screen-button text-cyan-500"></i> มือถือ' : '<i class="fa-solid fa-desktop text-indigo-400"></i> คอมฯ';
+                        const ip = d.ip || 'ไม่ทราบ IP';
+                        const time = new Date(d.lastActive).toLocaleTimeString('th-TH');
+                        userList.innerHTML += `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="py-2 px-4 font-mono font-bold text-slate-700">${ip}</td><td class="py-2 px-4 text-slate-600">${icon}</td><td class="py-2 px-4 text-right text-slate-400 text-[9px]">ล่าสุด: ${time}</td></tr>`;
+                    });
+                }
             }
         });
     };
 
     window.loadAdminChatList = function(snap) {
         const listDiv = document.getElementById('admin-chat-list');
+        if(!listDiv) return;
         listDiv.innerHTML = '';
         if(!snap || snap.empty) {
             listDiv.innerHTML = '<div class="p-8 text-center text-slate-400 font-bold"><i class="fa-regular fa-comment-dots text-4xl mb-2 text-slate-300"></i><br>ไม่มีลูกค้ารอคุยด้วยตอนนี้</div>';
@@ -1498,7 +1647,7 @@
 
     window.openAdminChatRoom = function(userId, userName, userImage) {
         currentChatUserId = userId;
-        document.getElementById('admin-chat-name').innerHTML = `<i class="fa-solid fa-comments text-purple-500"></i> สนทนากับ: ${userName || 'ลูกค้า'}`;
+        const elName = document.getElementById('admin-chat-name'); if(elName) elName.innerHTML = `<i class="fa-solid fa-comments text-purple-500"></i> สนทนากับ: ${userName || 'ลูกค้า'}`;
         document.getElementById('btn-close-chat').classList.remove('hidden');
         document.getElementById('admin-chat-input-area').classList.remove('hidden');
         document.getElementById('admin-chat-input-area').classList.add('flex');
@@ -1508,6 +1657,7 @@
         if(currentChatUnsub) currentChatUnsub();
         
         const messagesDiv = document.getElementById('admin-chat-messages');
+        if(!messagesDiv) return;
         messagesDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-10">กำลังโหลดข้อความ...</div>';
 
         currentChatUnsub = db.collection('chats').doc(userId).collection('messages').orderBy('timestamp').onSnapshot(snap => {
@@ -1552,6 +1702,7 @@
 
     window.sendAdminMessage = function() {
         const input = document.getElementById('admin-chat-input');
+        if(!input) return;
         const text = input.value.trim();
         if(!text || !currentChatUserId) return;
         
@@ -1568,7 +1719,7 @@
     window.sendChatImage = async function() {
         if (!currentChatUserId) return;
         const fileInput = document.getElementById('admin-chat-image-input');
-        if (!fileInput.files.length) return;
+        if (!fileInput || !fileInput.files.length) return;
         
         Swal.fire({title: 'กำลังส่งรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
         
@@ -1604,11 +1755,11 @@
         }).then(r => {
             if(r.isConfirmed) {
                 db.collection('chats').doc(currentChatUserId).update({ status: 'closed' }).then(() => {
-                    document.getElementById('admin-chat-name').innerHTML = `<i class="fa-solid fa-comments text-purple-500"></i> เลือกแชทเพื่อสนทนา`;
+                    const elName = document.getElementById('admin-chat-name'); if(elName) elName.innerHTML = `<i class="fa-solid fa-comments text-purple-500"></i> เลือกแชทเพื่อสนทนา`;
                     document.getElementById('btn-close-chat').classList.add('hidden');
                     document.getElementById('admin-chat-input-area').classList.add('hidden');
                     document.getElementById('admin-chat-input-area').classList.remove('flex');
-                    document.getElementById('admin-chat-messages').innerHTML = '<div class="text-center text-slate-400 text-sm mt-20 font-bold"><i class="fa-solid fa-hand-pointer text-4xl mb-3 block text-slate-300"></i> กรุณาเลือกรายการสนทนาจากเมนูด้านซ้าย</div>';
+                    const msgDiv = document.getElementById('admin-chat-messages'); if(msgDiv) msgDiv.innerHTML = '<div class="text-center text-slate-400 text-sm mt-20 font-bold"><i class="fa-solid fa-hand-pointer text-4xl mb-3 block text-slate-300"></i> กรุณาเลือกรายการสนทนาจากเมนูด้านซ้าย</div>';
                     if(currentChatUnsub) currentChatUnsub();
                     currentChatUserId = null;
                 });
@@ -1634,7 +1785,7 @@
     window.openDesignModal = function() {
         tempLogoBase64 = ""; tempTicketBgBase64 = ""; tempSlide1 = ""; tempSlide2 = ""; tempSlide3 = ""; 
         tempMascot = ""; tempTop10 = ""; tempExtra = ""; tempWinBanner = "";
-        document.getElementById('designForm').reset();
+        const frm = document.getElementById('designForm'); if(frm) frm.reset();
         
         ;['logo','ticket','slide1','slide2','slide3','mbMascot','mbTop10','mbExtra','mbWinBanner'].forEach(id => { 
             let el = document.getElementById(id+'Preview');
@@ -1644,27 +1795,33 @@
         db.collection('settings').doc('storefront').get().then(doc => {
             if(doc.exists) {
                 const d = doc.data();
-                if(d.storeName) document.getElementById('storeNameInput').value = d.storeName;
-                if(d.countdownTitle) document.getElementById('countdownTitleInput').value = d.countdownTitle; if(d.countdownTitleSize) document.getElementById('countdownTitleSize').value = d.countdownTitleSize; if(d.countdownTitleColor) document.getElementById('countdownTitleColor').value = d.countdownTitleColor; if(d.countdownTarget) document.getElementById('countdownInput').value = d.countdownTarget;
-                if(d.announcementText) document.getElementById('announcementInput').value = d.announcementText; if(d.searchHeaderHTML) document.getElementById('searchHeaderInput').value = d.searchHeaderHTML; if(d.searchPlaceholder) document.getElementById('searchPlaceholderInput').value = d.searchPlaceholder; if(d.gridHeaderHTML) document.getElementById('gridHeaderInput').value = d.gridHeaderHTML;
-                if(d.logoUrl) { document.getElementById('logoPreview').src = d.logoUrl; document.getElementById('logoPreview').classList.remove('hidden'); tempLogoBase64 = d.logoUrl; }
-                if(d.ticketBgUrl) { document.getElementById('ticketPreview').src = d.ticketBgUrl; document.getElementById('ticketPreview').classList.remove('hidden'); tempTicketBgBase64 = d.ticketBgUrl; }
-                if(d.slide1) { document.getElementById('slide1Preview').src = d.slide1; document.getElementById('slide1Preview').classList.remove('hidden'); tempSlide1 = d.slide1; }
-                if(d.slide2) { document.getElementById('slide2Preview').src = d.slide2; document.getElementById('slide2Preview').classList.remove('hidden'); tempSlide2 = d.slide2; }
-                if(d.slide3) { document.getElementById('slide3Preview').src = d.slide3; document.getElementById('slide3Preview').classList.remove('hidden'); tempSlide3 = d.slide3; }
-                if(d.adminSound) document.getElementById('adminSoundSelect').value = d.adminSound;
+                if(d.storeName) { const e = document.getElementById('storeNameInput'); if(e) e.value = d.storeName; }
+                if(d.countdownTitle) { const e = document.getElementById('countdownTitleInput'); if(e) e.value = d.countdownTitle; } 
+                if(d.countdownTitleSize) { const e = document.getElementById('countdownTitleSize'); if(e) e.value = d.countdownTitleSize; } 
+                if(d.countdownTitleColor) { const e = document.getElementById('countdownTitleColor'); if(e) e.value = d.countdownTitleColor; } 
+                if(d.countdownTarget) { const e = document.getElementById('countdownInput'); if(e) e.value = d.countdownTarget; }
+                if(d.announcementText) { const e = document.getElementById('announcementInput'); if(e) e.value = d.announcementText; } 
+                if(d.searchHeaderHTML) { const e = document.getElementById('searchHeaderInput'); if(e) e.value = d.searchHeaderHTML; } 
+                if(d.searchPlaceholder) { const e = document.getElementById('searchPlaceholderInput'); if(e) e.value = d.searchPlaceholder; } 
+                if(d.gridHeaderHTML) { const e = document.getElementById('gridHeaderInput'); if(e) e.value = d.gridHeaderHTML; }
+                
+                if(d.logoUrl) { const e = document.getElementById('logoPreview'); if(e){ e.src = d.logoUrl; e.classList.remove('hidden'); tempLogoBase64 = d.logoUrl; } }
+                if(d.ticketBgUrl) { const e = document.getElementById('ticketPreview'); if(e){ e.src = d.ticketBgUrl; e.classList.remove('hidden'); tempTicketBgBase64 = d.ticketBgUrl; } }
+                if(d.slide1) { const e = document.getElementById('slide1Preview'); if(e){ e.src = d.slide1; e.classList.remove('hidden'); tempSlide1 = d.slide1; } }
+                if(d.slide2) { const e = document.getElementById('slide2Preview'); if(e){ e.src = d.slide2; e.classList.remove('hidden'); tempSlide2 = d.slide2; } }
+                if(d.slide3) { const e = document.getElementById('slide3Preview'); if(e){ e.src = d.slide3; e.classList.remove('hidden'); tempSlide3 = d.slide3; } }
+                if(d.adminSound) { const e = document.getElementById('adminSoundSelect'); if(e) e.value = d.adminSound; }
             }
             db.collection('settings').doc('menu_banners').get().then(mbDoc => {
                 if(mbDoc.exists) {
                     let m = mbDoc.data();
-                    if(m.mascot) { document.getElementById('mbMascotPreview').src = m.mascot; document.getElementById('mbMascotPreview').classList.remove('hidden'); tempMascot = m.mascot; }
-                    if(m.top10) { document.getElementById('mbTop10Preview').src = m.top10; document.getElementById('mbTop10Preview').classList.remove('hidden'); tempTop10 = m.top10; }
-                    if(m.extra) { document.getElementById('mbExtraPreview').src = m.extra; document.getElementById('mbExtraPreview').classList.remove('hidden'); tempExtra = m.extra; }
-                    if(m.winBanner) { document.getElementById('mbWinBannerPreview').src = m.winBanner; document.getElementById('mbWinBannerPreview').classList.remove('hidden'); tempWinBanner = m.winBanner; }
+                    if(m.mascot) { const e = document.getElementById('mbMascotPreview'); if(e){ e.src = m.mascot; e.classList.remove('hidden'); tempMascot = m.mascot; } }
+                    if(m.top10) { const e = document.getElementById('mbTop10Preview'); if(e){ e.src = m.top10; e.classList.remove('hidden'); tempTop10 = m.top10; } }
+                    if(m.extra) { const e = document.getElementById('mbExtraPreview'); if(e){ e.src = m.extra; e.classList.remove('hidden'); tempExtra = m.extra; } }
+                    if(m.winBanner) { const e = document.getElementById('mbWinBannerPreview'); if(e){ e.src = m.winBanner; e.classList.remove('hidden'); tempWinBanner = m.winBanner; } }
                 }
                 const modal = document.getElementById('designModal');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
+                if(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
             });
         });
     };
@@ -1673,9 +1830,8 @@
         if(slideId === 'slide1') tempSlide1 = ""; 
         if(slideId === 'slide2') tempSlide2 = ""; 
         if(slideId === 'slide3') tempSlide3 = ""; 
-        document.getElementById(slideId + 'File').value = ""; 
-        document.getElementById(slideId + 'Preview').src = ""; 
-        document.getElementById(slideId + 'Preview').classList.add('hidden'); 
+        const fileEl = document.getElementById(slideId + 'File'); if(fileEl) fileEl.value = ""; 
+        const prevEl = document.getElementById(slideId + 'Preview'); if(prevEl){ prevEl.src = ""; prevEl.classList.add('hidden'); }
     };
 
     window.closeDesignModal = function() { 
@@ -1702,17 +1858,16 @@
     };
 
     window.openFlashSaleModal = function() { 
-        document.getElementById('flashSaleForm').reset(); 
+        const frm = document.getElementById('flashSaleForm'); if(frm) frm.reset(); 
         db.collection('settings').doc('flashsale').get().then(doc => { 
             if(doc.exists) { 
                 const d = doc.data(); 
-                document.getElementById('fsTitleInput').value = d.title || ""; 
-                document.getElementById('fsEndTimeInput').value = d.endTime || ""; 
-                document.getElementById('fsStatus').value = d.isActive ? "true" : "false"; 
+                const elTitle = document.getElementById('fsTitleInput'); if(elTitle) elTitle.value = d.title || ""; 
+                const elEnd = document.getElementById('fsEndTimeInput'); if(elEnd) elEnd.value = d.endTime || ""; 
+                const elStatus = document.getElementById('fsStatus'); if(elStatus) elStatus.value = d.isActive ? "true" : "false"; 
             } 
             const modal = document.getElementById('flashSaleModal');
-            modal.classList.remove('hidden'); 
-            modal.classList.add('flex');
+            if(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
         }); 
     };
     
@@ -1736,8 +1891,8 @@
             else if (k === 'chats') { btn.className = (k===t) ? "tab-btn text-purple-900 bg-purple-200 border border-purple-400 shadow-inner relative ml-2 font-bold" : "tab-btn text-purple-700 bg-purple-100/50 hover:bg-purple-100 border border-purple-200 relative ml-2 font-bold transition"; }
             else { btn.className = (k===t) ? "tab-btn tab-active relative" : "tab-btn text-slate-600 hover:bg-white relative"; } 
         }); 
-        document.getElementById('tab-crm').className = (t === 'crm') ? "tab-btn text-white bg-indigo-600 font-bold ml-2 shadow-inner relative" : "tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative"; 
-        document.getElementById('tab-withdraw').className = (t === 'withdraw') ? "tab-btn text-white bg-rose-600 font-bold ml-1 relative shadow-inner" : "tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative";
+        const tabCrm = document.getElementById('tab-crm'); if(tabCrm) tabCrm.className = (t === 'crm') ? "tab-btn text-white bg-indigo-600 font-bold ml-2 shadow-inner relative" : "tab-btn text-white bg-indigo-600/80 hover:bg-indigo-600 font-bold ml-2 relative"; 
+        const tabWith = document.getElementById('tab-withdraw'); if(tabWith) tabWith.className = (t === 'withdraw') ? "tab-btn text-white bg-rose-600 font-bold ml-1 relative shadow-inner" : "tab-btn text-white bg-rose-600/80 hover:bg-rose-600 font-bold ml-1 relative";
         
         const tableContainer = document.getElementById('main-table-container');
         const chatContainer = document.getElementById('chat-container');
@@ -1763,9 +1918,10 @@
                 window.loadWithdrawalsCRM(); 
             } else { 
                 document.getElementById('sort-selector').style.display = 'block';
-                document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">No.</th><th class="py-4 px-4 text-center">สลากดิจิทัล</th><th class="py-4 px-6">ชื่อกรรมสิทธิ์ผู้ซื้อ</th><th class="py-4 px-4 text-center">จำนวน</th><th class="py-4 px-6 text-right">ยอดชำระ</th><th class="py-4 px-4 text-center">สถานะ</th><th class="py-4 px-4 text-center">แผงควบคุม</th></tr>`; 
-                document.getElementById('search-input').placeholder = "🔍 ค้นหาเลขสลาก หรือ รหัสออเดอร์..."; 
-                document.getElementById('search-input').value = ""; 
+                const mainThead = document.getElementById('main-thead');
+                if (mainThead) mainThead.innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">No.</th><th class="py-4 px-4 text-center">สลากดิจิทัล</th><th class="py-4 px-6">ชื่อกรรมสิทธิ์ผู้ซื้อ</th><th class="py-4 px-4 text-center">จำนวน</th><th class="py-4 px-6 text-right">ยอดชำระ</th><th class="py-4 px-4 text-center">สถานะ</th><th class="py-4 px-4 text-center">แผงควบคุม</th></tr>`; 
+                const searchInp = document.getElementById('search-input');
+                if (searchInp) { searchInp.placeholder = "🔍 ค้นหาเลขสลาก หรือ รหัสออเดอร์..."; searchInp.value = ""; }
                 window.renderTable(); 
             }
         }
@@ -1773,20 +1929,27 @@
 
     window.filterData = function() { 
         if (currentTab === 'crm' || currentTab === 'withdraw') { 
-            const text = document.getElementById('search-input').value.trim().toLowerCase(); 
+            const inp = document.getElementById('search-input');
+            const text = inp ? inp.value.trim().toLowerCase() : ""; 
             const rows = document.querySelectorAll('#table-body tr'); 
             rows.forEach(row => { 
                 if(row.innerText.toLowerCase().includes(text)) row.style.display = ''; 
                 else row.style.display = 'none'; 
             }); 
         } else { 
-            window.renderTable(document.getElementById('search-input').value.trim()); 
+            const inp = document.getElementById('search-input');
+            window.renderTable(inp ? inp.value.trim() : ""); 
         } 
     };
 
     window.loadWithdrawalsCRM = function() {
-      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อ หรือ รหัสออเดอร์..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดข้อมูลการถอน...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
-      document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4">วันที่แจ้งถอน</th><th class="py-4 px-6">ข้อมูลสลาก / งวด</th><th class="py-4 px-4">ยอดรับสุทธิ (หัก 2%)</th><th class="py-4 px-6">ข้อมูลบัญชีธนาคาร</th><th class="py-4 px-4 text-center">สถานะ</th><th class="py-4 px-4 text-center">จัดการ</th></tr>`;
+      const searchInp = document.getElementById('search-input');
+      if (searchInp) { searchInp.placeholder = "🔍 ค้นหาชื่อ หรือ รหัสออเดอร์..."; searchInp.value = ""; }
+      const body = document.getElementById('table-body'); if(!body) return;
+      body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดข้อมูลการถอน...</td></tr>'; 
+      const noData = document.getElementById('no-data'); if(noData) noData.classList.add('hidden');
+      const mainThead = document.getElementById('main-thead');
+      if (mainThead) mainThead.innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4">วันที่แจ้งถอน</th><th class="py-4 px-6">ข้อมูลสลาก / งวด</th><th class="py-4 px-4">ยอดรับสุทธิ (หัก 2%)</th><th class="py-4 px-6">ข้อมูลบัญชีธนาคาร</th><th class="py-4 px-4 text-center">สถานะ</th><th class="py-4 px-4 text-center">จัดการ</th></tr>`;
       db.collection('withdrawals').orderBy('createdAt', 'desc').onSnapshot(snap => {
         body.innerHTML = ''; if(snap.empty) { body.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-rose-500">ยังไม่มีรายการแจ้งถอนเงิน</td></tr>'; return; }
         snap.forEach(doc => {
@@ -1802,8 +1965,13 @@
     window.deleteWithdrawal = function(docId) { Swal.fire({ title: 'ยืนยันการลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ลบทิ้ง' }).then((result) => { if (result.isConfirmed) { db.collection('withdrawals').doc(docId).delete().then(() => { Swal.fire('ลบสำเร็จ!', 'ข้อมูลถูกลบแล้ว', 'success'); }); } }); };
 
     window.loadCustomerCRM = function() {
-      document.getElementById('search-input').placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร..."; document.getElementById('search-input').value = ""; const body = document.getElementById('table-body'); body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>'; document.getElementById('no-data').classList.add('hidden');
-      document.getElementById('main-thead').innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">โปรไฟล์</th><th class="py-4 px-6">ชื่อ (LINE)</th><th class="py-4 px-4">เบอร์ติดต่อ</th><th class="py-4 px-6">ข้อมูลบัญชี / 🪙 Coin</th><th class="py-4 px-4 text-center">อัปเดตล่าสุด</th><th class="py-4 px-4 text-center">จัดการ</th></tr>`;
+      const searchInp = document.getElementById('search-input');
+      if(searchInp) { searchInp.placeholder = "🔍 ค้นหาชื่อลูกค้า หรือ เบอร์โทร..."; searchInp.value = ""; }
+      const body = document.getElementById('table-body'); if(!body) return;
+      body.innerHTML = '<tr><td colspan="6" class="text-center py-10 font-bold text-gray-500">กำลังโหลดฐานข้อมูลลูกค้า...</td></tr>'; 
+      const noData = document.getElementById('no-data'); if(noData) noData.classList.add('hidden');
+      const mainThead = document.getElementById('main-thead');
+      if(mainThead) mainThead.innerHTML = `<tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider"><th class="py-4 px-4 text-center">โปรไฟล์</th><th class="py-4 px-6">ชื่อ (LINE)</th><th class="py-4 px-4">เบอร์ติดต่อ</th><th class="py-4 px-6">ข้อมูลบัญชี / 🪙 Coin</th><th class="py-4 px-4 text-center">อัปเดตล่าสุด</th><th class="py-4 px-4 text-center">จัดการ</th></tr>`;
       db.collection('users').get().then(snap => {
         body.innerHTML = ''; if(snap.empty) { body.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-rose-500">ยังไม่มีข้อมูลลูกค้าในระบบ</td></tr>'; return; }
         snap.forEach(doc => {
@@ -1843,71 +2011,84 @@
 
     window.toggleFlashSalePrice = function() {
         const isFs = document.getElementById('formIsFlashSale').checked;
-        document.getElementById('fsPriceDiv').style.display = isFs ? 'block' : 'none';
-        if(!isFs) document.getElementById('formFsPrice').value = '';
+        const elDiv = document.getElementById('fsPriceDiv'); if(elDiv) elDiv.style.display = isFs ? 'block' : 'none';
+        if(!isFs) { const elP = document.getElementById('formFsPrice'); if(elP) elP.value = ''; }
     };
 
     window.editRow = function(item) { 
         const modal = document.getElementById('formModal');
-        modal.classList.remove('hidden'); 
-        modal.classList.add('flex');
+        if(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
         
-        document.getElementById('modalTitle').innerText = "📝 จัดการข้อมูลสลากออเดอร์"; 
-        document.getElementById('formRowIndex').value = item.id; 
-        document.getElementById('formNumberInput').value = String(item.number).padStart(6, '0'); 
-        document.getElementById('formQty').value = item.quantity; 
-        document.getElementById('formBuyerName').value = item.name === "-" ? "" : item.name; 
-        document.getElementById('formStatus').value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); 
-        document.getElementById('formIsFlashSale').checked = item.isFlashSale === true; 
+        const elTitle = document.getElementById('modalTitle'); if(elTitle) elTitle.innerText = "📝 จัดการข้อมูลสลากออเดอร์"; 
+        const elIdx = document.getElementById('formRowIndex'); if(elIdx) elIdx.value = item.id; 
+        const elNum = document.getElementById('formNumberInput'); if(elNum) elNum.value = String(item.number).padStart(6, '0'); 
+        const elQty = document.getElementById('formQty'); if(elQty) elQty.value = item.quantity; 
+        const elName = document.getElementById('formBuyerName'); if(elName) elName.value = item.name === "-" ? "" : item.name; 
+        const elStatus = document.getElementById('formStatus'); if(elStatus) elStatus.value = item.status === 'รอตรวจสอบสลิป' ? 'รอตรวจสอบสลิป' : (item.status === 'ชำระแล้ว' ? 'ชำระแล้ว' : 'ยังไม่ชำระ'); 
+        const elFS = document.getElementById('formIsFlashSale'); if(elFS) elFS.checked = item.isFlashSale === true; 
         
         window.toggleFlashSalePrice();
-        document.getElementById('formFsPrice').value = item.flashSalePrice || '';
-        document.getElementById('adminSlipFile').value = ""; 
+        const elPrice = document.getElementById('formFsPrice'); if(elPrice) elPrice.value = item.flashSalePrice || '';
+        const elFile = document.getElementById('adminSlipFile'); if(elFile) elFile.value = ""; 
 
         let coinUsedHTML = '';
         if(item.discountCoins && item.discountCoins > 0) {
             coinUsedHTML = `<div class="bg-yellow-100 border border-yellow-300 p-2 rounded-lg text-yellow-800 text-xs font-bold mb-3">⚠️ ลูกค้ารายนี้ใช้ "🪙 Coin" เป็นส่วนลดไป: -฿${item.discountCoins}</div>`;
         }
 
-        if(item.slip) { 
-            document.getElementById('slip-display').innerHTML = `${coinUsedHTML}<img id="adminSlipImg" src="${item.slip}" alt="Slip" class="w-full max-w-[200px] mx-auto rounded-lg shadow-sm border border-slate-300 cursor-pointer hover:opacity-90" onclick="window.open(this.src, '_blank')">`;
-            document.getElementById('slip-display').classList.remove('hidden'); 
-        } else { 
-            document.getElementById('slip-display').innerHTML = coinUsedHTML;
-            if(coinUsedHTML !== '') document.getElementById('slip-display').classList.remove('hidden');
-            else document.getElementById('slip-display').classList.add('hidden');
-        } 
+        const slipDisp = document.getElementById('slip-display');
+        if(slipDisp) {
+            if(item.slip) { 
+                slipDisp.innerHTML = `${coinUsedHTML}<img id="adminSlipImg" src="${item.slip}" alt="Slip" class="w-full max-w-[200px] mx-auto rounded-lg shadow-sm border border-slate-300 cursor-pointer hover:opacity-90" onclick="window.open(this.src, '_blank')">`;
+                slipDisp.classList.remove('hidden'); 
+            } else { 
+                slipDisp.innerHTML = coinUsedHTML;
+                if(coinUsedHTML !== '') slipDisp.classList.remove('hidden');
+                else slipDisp.classList.add('hidden');
+            }
+        }
         window.calculateAmount(); 
     };
 
     window.submitForm = async function(e) { 
         e.preventDefault(); 
-        const id = document.getElementById('formRowIndex').value; 
+        const elIdx = document.getElementById('formRowIndex');
+        const id = elIdx ? elIdx.value : ""; 
         
-        const rawNumbers = document.getElementById('formNumberInput').value.trim().split(/[\s,]+/);
+        const elNum = document.getElementById('formNumberInput');
+        const rawNumbers = elNum ? elNum.value.trim().split(/[\s,]+/) : [];
         const validNumbers = rawNumbers.filter(n => /^\d{6}$/.test(n));
 
         if(validNumbers.length === 0) {
             return Swal.fire('ข้อมูลไม่ถูกต้อง', 'กรุณากรอกเลข 6 หลักให้ถูกต้อง (เช่น 123456)', 'warning');
         }
 
-        const qty = document.getElementById('formQty').value; 
-        let name = document.getElementById('formBuyerName').value.trim(); 
-        let statusUI = document.getElementById('formStatus').value; 
+        const elQty = document.getElementById('formQty');
+        const qty = elQty ? elQty.value : "1"; 
+        
+        const elBuyer = document.getElementById('formBuyerName');
+        let name = elBuyer ? elBuyer.value.trim() : ""; 
+        
+        const elStatus = document.getElementById('formStatus');
+        let statusUI = elStatus ? elStatus.value : "ยังไม่ชำระ"; 
+        
         let finalStatus = "available"; 
         if(name === "") { name = "-"; } else { if(statusUI === "ชำระแล้ว") finalStatus = "sold"; else if(statusUI === "รอตรวจสอบสลิป") finalStatus = "รอตรวจสอบสลิป"; else finalStatus = "reserve"; }
-        const isFs = document.getElementById('formIsFlashSale').checked;
         
+        const elFS = document.getElementById('formIsFlashSale');
+        const isFs = elFS ? elFS.checked : false;
+        
+        const elPrice = document.getElementById('formFsPrice');
         const payload = { 
             quantity: qty, amount: qty * 100, name: name, status: finalStatus, draw: currentSelectedSheet, 
             isFlashSale: isFs,
-            flashSalePrice: isFs ? document.getElementById('formFsPrice').value : null,
+            flashSalePrice: isFs && elPrice ? elPrice.value : null,
             updatedAt: Date.now() 
         }; 
         if (finalStatus === "available") { payload.userId = null; payload.expiresAt = null; payload.slip = null; payload.discountCoins = null; } 
         
         const slipFile = document.getElementById('adminSlipFile'); 
-        if (slipFile.files && slipFile.files[0]) { 
+        if (slipFile && slipFile.files && slipFile.files[0]) { 
             Swal.fire({title: 'กำลังอัปโหลด...', allowOutsideClick: false, didOpen: () => Swal.showLoading()}); 
             payload.slip = await window.resizeImage(slipFile.files[0], 800, 800, 0.7); 
         } else {
@@ -1931,9 +2112,16 @@
         } 
     };
 
-    window.calculateAmount = function() { let q = parseInt(document.getElementById('formQty').value); if (isNaN(q) || q < 1) q = 1; document.getElementById('formAmount').value = (q * 100).toLocaleString(); };
+    window.calculateAmount = function() { 
+        const elQ = document.getElementById('formQty');
+        let q = elQ ? parseInt(elQ.value) : 1; 
+        if (isNaN(q) || q < 1) q = 1; 
+        const elAmt = document.getElementById('formAmount');
+        if(elAmt) elAmt.value = (q * 100).toLocaleString(); 
+    };
     
     window.autoFormatNumbers = function(inputEl, chunkLength) {
+        if(!inputEl) return;
         let raw = inputEl.value.replace(/\D/g, ''); 
         let formatted = '';
         if(raw.length > 0) {
@@ -1946,20 +2134,63 @@
 
     window.openModal = function() { 
         const modal = document.getElementById('formModal');
-        modal.classList.remove('hidden'); 
-        modal.classList.add('flex');
-        document.getElementById('lotteryForm').reset(); 
-        document.getElementById('formRowIndex').value = ""; 
-        document.getElementById('modalTitle').innerText = "➕ ลงทะเบียนสลาก"; 
-        document.getElementById('slip-display').classList.add('hidden'); 
-        document.getElementById('fsPriceDiv').style.display = 'none'; 
+        if(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+        const frm = document.getElementById('lotteryForm'); if(frm) frm.reset(); 
+        const elIdx = document.getElementById('formRowIndex'); if(elIdx) elIdx.value = ""; 
+        const elTitle = document.getElementById('modalTitle'); if(elTitle) elTitle.innerText = "➕ ลงทะเบียนสลาก"; 
+        const elDisp = document.getElementById('slip-display'); if(elDisp) elDisp.classList.add('hidden'); 
+        const elDiv = document.getElementById('fsPriceDiv'); if(elDiv) elDiv.style.display = 'none'; 
         window.calculateAmount(); 
     };
     
     window.closeModal = function() { 
+        window.stopAddScanner();
         const modal = document.getElementById('formModal');
-        modal.classList.add('hidden'); 
-        modal.classList.remove('flex');
+        if(modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    };
+
+    let addScanner = null;
+    window.startAddScanner = function() {
+        const rc = document.getElementById('add-reader-container');
+        if(rc) rc.classList.remove('hidden');
+        if (!addScanner) {
+            addScanner = new Html5Qrcode("add-reader");
+        }
+        
+        addScanner.start(
+            { facingMode: "environment" }, 
+            { fps: 10, qrbox: { width: 250, height: 100 }, aspectRatio: 1.0 },
+            (decodedText) => {
+                let numMatches = decodedText.match(/\d{6}/);
+                if(numMatches) {
+                    window.playNotificationSound("https://actions.google.com/sounds/v1/alarms/ding.ogg");
+                    window.stopAddScanner();
+                    let inputEl = document.getElementById('formNumberInput');
+                    if(inputEl) {
+                        let currentVal = inputEl.value.trim();
+                        inputEl.value = currentVal ? currentVal + " " + numMatches[0] : numMatches[0];
+                        window.autoFormatNumbers(inputEl, 6);
+                    }
+                }
+            },
+            (errorMessage) => { /* ไม่แสดง Error ระหว่างแสกน */ }
+        ).catch((err) => {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเปิดกล้องได้', 'error');
+            const rc = document.getElementById('add-reader-container');
+            if(rc) rc.classList.add('hidden');
+        });
+    };
+
+    window.stopAddScanner = function() {
+        if(addScanner && addScanner.isScanning) {
+            addScanner.stop().then(() => {
+                const rc = document.getElementById('add-reader-container');
+                if(rc) rc.classList.add('hidden');
+            }).catch(err => console.log(err));
+        } else {
+            const rc = document.getElementById('add-reader-container');
+            if(rc) rc.classList.add('hidden');
+        }
     };
     
     window.clearTicket = function(id) { Swal.fire({ text: "ดึงเลขนี้กลับเป็นสถานะว่างบนแผงใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonText: "คืนค่าแผงว่าง", confirmButtonColor: '#e11d48' }).then(r => { if(r.isConfirmed) { db.collection('lotteries').doc(id).update({ name: "-", status: "available", userId: null, slip: "", note: "", email: "", expiresAt: null, isFlashSale: false, flashSalePrice: null, discountCoins: null, updatedAt: Date.now() }); } }); };
@@ -1971,27 +2202,25 @@
         db.collection('winning_results').doc(currentSelectedSheet).get().then(doc => { 
             if(doc.exists) { 
                 const data = doc.data(); 
-                document.getElementById('win_prize1').value = data.prize1 || ""; 
-                document.getElementById('win_last2').value = data.last2 || ""; 
-                document.getElementById('win_front3').value = (data.front3 || []).join(' '); 
-                document.getElementById('win_last3').value = (data.last3 || []).join(' '); 
-                document.getElementById('win_prize2').value = (data.prize2 || []).join(' '); 
-                document.getElementById('win_prize3').value = (data.prize3 || []).join(' '); 
-                document.getElementById('win_prize4').value = (data.prize4 || []).join(' '); 
-                document.getElementById('win_prize5').value = (data.prize5 || []).join(' '); 
+                const elP1 = document.getElementById('win_prize1'); if(elP1) elP1.value = data.prize1 || ""; 
+                const elL2 = document.getElementById('win_last2'); if(elL2) elL2.value = data.last2 || ""; 
+                const elF3 = document.getElementById('win_front3'); if(elF3) elF3.value = (data.front3 || []).join(' '); 
+                const elL3 = document.getElementById('win_last3'); if(elL3) elL3.value = (data.last3 || []).join(' '); 
+                const elP2 = document.getElementById('win_prize2'); if(elP2) elP2.value = (data.prize2 || []).join(' '); 
+                const elP3 = document.getElementById('win_prize3'); if(elP3) elP3.value = (data.prize3 || []).join(' '); 
+                const elP4 = document.getElementById('win_prize4'); if(elP4) elP4.value = (data.prize4 || []).join(' '); 
+                const elP5 = document.getElementById('win_prize5'); if(elP5) elP5.value = (data.prize5 || []).join(' '); 
             } else { 
-                document.getElementById('winningForm').reset(); 
+                const frm = document.getElementById('winningForm'); if(frm) frm.reset(); 
             } 
             const modal = document.getElementById('winningModal');
-            modal.classList.remove('hidden'); 
-            modal.classList.add('flex');
+            if(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
         });
     };
     
     window.closeWinningModal = function() { 
         const modal = document.getElementById('winningModal');
-        modal.classList.add('hidden'); 
-        modal.classList.remove('flex');
+        if(modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
     };
     
     window.parseNumberString = function(str) { return str.split(/[\s,]+/).filter(item => item.trim() !== ""); };
@@ -1999,48 +2228,46 @@
 
     window.openPromoModal = function() { 
         tempPromoImageBase64 = ""; 
-        document.getElementById('promoImageFile').value = ""; 
+        const f = document.getElementById('promoImageFile'); if(f) f.value = ""; 
         db.collection('settings').doc('promotion').get().then(doc => { 
             if(doc.exists) { 
-                document.getElementById('promoStatus').value = doc.data().isActive ? "true" : "false"; 
+                const elS = document.getElementById('promoStatus'); if(elS) elS.value = doc.data().isActive ? "true" : "false"; 
                 if(doc.data().imageUrl) { 
-                    document.getElementById('promoPreview').src = doc.data().imageUrl; 
-                    document.getElementById('promoPreview').classList.remove('hidden'); 
-                    document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); 
-                    document.getElementById('btn-remove-promo').classList.remove('hidden'); 
+                    const elPrev = document.getElementById('promoPreview'); if(elPrev) { elPrev.src = doc.data().imageUrl; elPrev.classList.remove('hidden'); }
+                    const elPH = document.getElementById('promoPreviewPlaceholder'); if(elPH) elPH.classList.add('hidden'); 
+                    const elBtn = document.getElementById('btn-remove-promo'); if(elBtn) elBtn.classList.remove('hidden'); 
                     tempPromoImageBase64 = doc.data().imageUrl; 
                 } else { 
-                    document.getElementById('promoPreview').classList.add('hidden'); 
-                    document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); 
-                    document.getElementById('btn-remove-promo').classList.add('hidden'); 
+                    const elPrev = document.getElementById('promoPreview'); if(elPrev) elPrev.classList.add('hidden'); 
+                    const elPH = document.getElementById('promoPreviewPlaceholder'); if(elPH) elPH.classList.remove('hidden'); 
+                    const elBtn = document.getElementById('btn-remove-promo'); if(elBtn) elBtn.classList.add('hidden'); 
                 } 
             } 
             const modal = document.getElementById('promoModal');
-            modal.classList.remove('hidden'); 
-            modal.classList.add('flex');
+            if(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
         }); 
     };
     
-    window.previewPromoImage = async function() { const fileInput = document.getElementById('promoImageFile'); if (fileInput.files && fileInput.files[0]) { tempPromoImageBase64 = await window.resizeImage(fileInput.files[0], 800, 800, 0.75); document.getElementById('promoPreview').src = tempPromoImageBase64; document.getElementById('promoPreview').classList.remove('hidden'); document.getElementById('promoPreviewPlaceholder').classList.add('hidden'); document.getElementById('btn-remove-promo').classList.remove('hidden'); } };
-    window.removePromoImage = function() { tempPromoImageBase64 = ""; document.getElementById('promoImageFile').value = ""; document.getElementById('promoPreview').src = ""; document.getElementById('promoPreview').classList.add('hidden'); document.getElementById('promoPreviewPlaceholder').classList.remove('hidden'); document.getElementById('btn-remove-promo').classList.add('hidden'); };
+    window.previewPromoImage = async function() { const fileInput = document.getElementById('promoImageFile'); if (fileInput && fileInput.files && fileInput.files[0]) { tempPromoImageBase64 = await window.resizeImage(fileInput.files[0], 800, 800, 0.75); const elPrev = document.getElementById('promoPreview'); if(elPrev) { elPrev.src = tempPromoImageBase64; elPrev.classList.remove('hidden'); } const elPH = document.getElementById('promoPreviewPlaceholder'); if(elPH) elPH.classList.add('hidden'); const elBtn = document.getElementById('btn-remove-promo'); if(elBtn) elBtn.classList.remove('hidden'); } };
+    window.removePromoImage = function() { tempPromoImageBase64 = ""; const f = document.getElementById('promoImageFile'); if(f) f.value = ""; const elPrev = document.getElementById('promoPreview'); if(elPrev){ elPrev.src = ""; elPrev.classList.add('hidden'); } const elPH = document.getElementById('promoPreviewPlaceholder'); if(elPH) elPH.classList.remove('hidden'); const elBtn = document.getElementById('btn-remove-promo'); if(elBtn) elBtn.classList.add('hidden'); };
     window.closePromoModal = function() { 
         const modal = document.getElementById('promoModal');
-        modal.classList.add('hidden'); 
-        modal.classList.remove('flex');
+        if(modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
     };
     
-    window.savePromotion = async function(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); const payload = { imageUrl: tempPromoImageBase64, isActive: document.getElementById('promoStatus').value === "true" }; try { await db.collection('settings').doc('promotion').set(payload); Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' }); window.closePromoModal(); } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); } };
+    window.savePromotion = async function(e) { e.preventDefault(); Swal.fire({ title: 'กำลังบันทึกโปรโมชัน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }}); const elS = document.getElementById('promoStatus'); const payload = { imageUrl: tempPromoImageBase64, isActive: elS ? elS.value === "true" : false }; try { await db.collection('settings').doc('promotion').set(payload); Swal.fire({ title: 'บันทึกโปรโมชันสำเร็จ', icon: 'success', confirmButtonColor: '#c026d3' }); window.closePromoModal(); } catch (error) { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึก', 'error'); } };
 
     window.loadInitialData = function() {
       db.collection('draws').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
-        const sel = document.getElementById('sheet-selector'); sel.innerHTML = "";
+        const sel = document.getElementById('sheet-selector'); 
+        if(sel) sel.innerHTML = "";
         if(snapshot.empty) { db.collection('draws').add({ name: "งวดปัจจุบัน", createdAt: new Date() }); return; }
-        snapshot.forEach(doc => { const opt = document.createElement('option'); opt.value = doc.data().name; opt.innerText = doc.data().name; sel.appendChild(opt); });
-        db.collection('settings').doc('storefront').get().then(doc => { if(doc.exists && doc.data().activeDraw) { currentSelectedSheet = doc.data().activeDraw; sel.value = currentSelectedSheet; } else { currentSelectedSheet = sel.value; } window.onSheetChange(); });
+        snapshot.forEach(doc => { const opt = document.createElement('option'); opt.value = doc.data().name; opt.innerText = doc.data().name; if(sel) sel.appendChild(opt); });
+        db.collection('settings').doc('storefront').get().then(doc => { if(doc.exists && doc.data().activeDraw) { currentSelectedSheet = doc.data().activeDraw; if(sel) sel.value = currentSelectedSheet; } else { currentSelectedSheet = sel ? sel.value : ""; } window.onSheetChange(); });
       });
     };
 
-    window.onSheetChange = function() { currentSelectedSheet = document.getElementById('sheet-selector').value; if (currentTab === 'crm' || currentTab === 'withdraw' || currentTab === 'chats') window.switchTab('all'); document.getElementById('search-input').value = ""; db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => { currentWinData = doc.exists ? doc.data() : null; window.loadLotteryDataFromServer(currentSelectedSheet); }); };
+    window.onSheetChange = function() { const sel = document.getElementById('sheet-selector'); currentSelectedSheet = sel ? sel.value : ""; if (currentTab === 'crm' || currentTab === 'withdraw' || currentTab === 'chats') window.switchTab('all'); const inp = document.getElementById('search-input'); if(inp) inp.value = ""; db.collection('winning_results').doc(currentSelectedSheet).onSnapshot(doc => { currentWinData = doc.exists ? doc.data() : null; window.loadLotteryDataFromServer(currentSelectedSheet); }); };
 
     window.checkWinningPrize = function(ticketNumber, qty, winData) {
         if (!winData) return { won: false, total: 0, labels: [] };
@@ -2061,7 +2288,8 @@
       if(unsubListener) unsubListener(); if(!drawName) return;
       unsubListener = db.collection('lotteries').where('draw', '==', drawName).onSnapshot(snapshot => {
           allTicketsList = []; let totalBuyers = 0, sumTotal = 0, sumPaid = 0, sumUnpaid = 0; 
-          let cEmpty = 0, cPaid = 0, cUnpaid = 0, cWinners = 0, cFlashSale = 0, cPendingSlip = 0; 
+          let sumReserved = 0, sumPending = 0;
+          let cEmpty = 0, cPaid = 0, cUnpaid = 0, cWinners = 0, cFlashSale = 0, cPendingSlip = 0, cReserved = 0; 
           let stockQty = 0; let soldQty = 0;
 
           snapshot.forEach(doc => {
@@ -2083,10 +2311,21 @@
                     cPaid++; 
                     sumPaid += price;
                     if(ticket.prizeInfo && ticket.prizeInfo.won) cWinners++; 
+                } else if(ticket.status === "จอง") {
+                    cReserved++; 
+                    sumReserved += price;
+                    cUnpaid++;
+                    sumUnpaid += price;
+                } else if(ticket.status === "รอตรวจสอบสลิป") {
+                    cPendingSlip++; 
+                    sumPending += price;
+                    cUnpaid++;
+                    sumUnpaid += price;
                 } else {
                     cUnpaid++; 
                     sumUnpaid += price;
-                    if (ticket.status === "รอตรวจสอบสลิป") cPendingSlip++; 
+                    cReserved++; 
+                    sumReserved += price;
                 }
             }
             if(ticket.isFlashSale) cFlashSale++;
@@ -2094,23 +2333,31 @@
           currentCounts['all'] = allTicketsList.length; currentCounts['empty'] = cEmpty; currentCounts['paid'] = cPaid; currentCounts['unpaid'] = cUnpaid; currentCounts['pending_slip'] = cPendingSlip; currentCounts['winners'] = cWinners; currentCounts['flashsale'] = cFlashSale;
           ;['all','empty','paid','unpaid','pending_slip','winners','flashsale'].forEach(k => window.updateTabBadge(k));
           
-          document.getElementById('sum-buyers').innerText = totalBuyers + ' ท่าน'; 
-          document.getElementById('sum-stock').innerText = stockQty.toLocaleString('th-TH') + ' ใบ'; 
-          document.getElementById('sum-sold-qty').innerText = soldQty.toLocaleString('th-TH') + ' ใบ'; 
-          document.getElementById('sum-total').innerText = '฿' + sumTotal.toLocaleString('th-TH'); 
-          document.getElementById('sum-paid').innerText = '฿' + sumPaid.toLocaleString('th-TH'); 
-          document.getElementById('sum-unpaid').innerText = '฿' + sumUnpaid.toLocaleString('th-TH');
+          const elBuyers = document.getElementById('sum-buyers'); if(elBuyers) elBuyers.innerText = totalBuyers + ' ท่าน'; 
+          const elStock = document.getElementById('sum-stock'); if(elStock) elStock.innerText = stockQty.toLocaleString('th-TH') + ' ใบ'; 
+          const elSold = document.getElementById('sum-sold-qty'); if(elSold) elSold.innerText = soldQty.toLocaleString('th-TH') + ' ใบ'; 
+          const elTotal = document.getElementById('sum-total'); if(elTotal) elTotal.innerText = '฿' + sumTotal.toLocaleString('th-TH'); 
+          const elPaid = document.getElementById('sum-paid'); if(elPaid) elPaid.innerText = '฿' + sumPaid.toLocaleString('th-TH'); 
+          const elUnpaid = document.getElementById('sum-unpaid'); if(elUnpaid) elUnpaid.innerText = '฿' + sumUnpaid.toLocaleString('th-TH');
+          const elReserved = document.getElementById('sum-reserved'); if(elReserved) elReserved.innerText = '฿' + sumReserved.toLocaleString('th-TH');
+          const elPending = document.getElementById('sum-pending'); if(elPending) elPending.innerText = '฿' + sumPending.toLocaleString('th-TH');
           
-          if(currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') window.renderTable(document.getElementById('search-input').value.trim());
+          if(currentTab !== 'crm' && currentTab !== 'withdraw' && currentTab !== 'chats') {
+              const inp = document.getElementById('search-input');
+              window.renderTable(inp ? inp.value.trim() : "");
+          }
         }, error => { console.error("Error:", error); });
     };
 
     window.renderTable = function(filterText = '') {
-      const body = document.getElementById('table-body'); body.innerHTML = ''; let list = allTicketsList;
+      const body = document.getElementById('table-body'); 
+      if(!body) return;
+      body.innerHTML = ''; let list = allTicketsList;
       if(currentTab === 'empty') list = list.filter(x => x.name === "-" || x.name === ""); else if(currentTab === 'paid') list = list.filter(x => x.status === "ชำระแล้ว"); else if(currentTab === 'unpaid') list = list.filter(x => x.status !== "ชำระแล้ว" && x.name !== "-" && x.name !== ""); else if(currentTab === 'pending_slip') list = list.filter(x => x.status === "รอตรวจสอบสลิป"); else if(currentTab === 'winners') list = list.filter(x => x.prizeInfo && x.prizeInfo.won === true && x.status === "ชำระแล้ว"); else if(currentTab === 'flashsale') list = list.filter(x => x.isFlashSale === true);
       if (filterText) { const text = filterText.toLowerCase(); list = list.filter(item => String(item.number || "").includes(text) || String(item.name || "").toLowerCase().includes(text) || String(item.id || "").toLowerCase().includes(text)); }
       
-      const sortVal = document.getElementById('sort-selector') ? document.getElementById('sort-selector').value : 'updated_desc';
+      const sortSel = document.getElementById('sort-selector');
+      const sortVal = sortSel ? sortSel.value : 'updated_desc';
       list.sort((a, b) => {
           if (sortVal === 'updated_desc') return (b.updatedAt || 0) - (a.updatedAt || 0);
           
@@ -2206,7 +2453,8 @@
         tr.innerHTML = `<td class="py-3 px-4 text-center text-slate-400 font-mono text-xs">${displayCounter++}</td><td class="py-1 px-2 text-center">${ticketHtml}</td><td class="py-3 px-6 font-bold text-slate-800 text-sm">${isFree ? '<span class="text-slate-400 font-normal italic">ยังไม่มีผู้ถือครอง</span>' : item.name}</td><td class="py-3 px-4 text-center font-bold text-slate-600">${item.quantity}</td><td class="py-3 px-6 text-right font-black text-rose-600 text-base">${showAmountStr}</td><td class="py-3 px-4 text-center">${statusBadge}</td><td class="py-3 px-4 text-center">${action}</td>`;
         body.appendChild(tr);
       });
-      document.getElementById('no-data').className = hasRows ? "hidden" : "block";
+      const elNoData = document.getElementById('no-data');
+      if (elNoData) elNoData.className = hasRows ? "hidden" : "block";
     };
   </script>
 </body>
